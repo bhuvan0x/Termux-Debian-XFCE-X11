@@ -13,7 +13,7 @@ proot-distro login debian -- /bin/bash -lc '
   apt-get update
   apt-get full-upgrade -y
   apt-get install -y \
-    xfce4 xfce4-terminal thunar mousepad \
+    xfce4 xfce4-terminal thunar mousepad xinput \
     dbus-x11 x11-xserver-utils \
     adwaita-icon-theme fonts-dejavu fonts-noto-core \
     ca-certificates curl wget git nano vim less sudo \
@@ -25,8 +25,8 @@ proot-distro login debian -- /bin/bash -lc '
   rm -rf /var/lib/apt/lists/*
 '
 
-# Install the optional desktop bundle and create the regular desktop user.
 bash "$SCRIPT_DIR/install-apps.sh"
+bash "$SCRIPT_DIR/install-printing.sh"
 
-echo "Debian + XFCE + desktop apps installation complete."
+echo "Debian + XFCE + desktop apps + printing support installation complete."
 echo "Open Termux:X11, then run: bash scripts/start-desktop.sh"
