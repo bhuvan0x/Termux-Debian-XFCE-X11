@@ -34,7 +34,7 @@ apt-get install -y \
   xfce4-screenshooter xfce4-taskmanager \
   htop ncdu \
   pavucontrol pulseaudio-utils \
-  xdg-utils gvfs gvfs-backends \
+  xdg-utils gvfs gvfs-backends xinput \
   fonts-noto-color-emoji
 
 # Desktop polish packages vary between Debian releases. Install only those
