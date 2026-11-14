@@ -7,82 +7,119 @@ Install these Android apps from compatible sources. Termux and its add-ons must 
 - Termux: https://github.com/termux/termux-app
 - Termux:X11: https://github.com/termux/termux-x11
 - Termux:Widget: https://github.com/termux/termux-widget
+- Termux:API: https://github.com/termux/termux-api
 
-Install Termux:X11 and Termux:Widget from the same release family/source as Termux. Open each app once after installation.
+Install Termux:X11, Termux:Widget and Termux:API from the same release family/signing source as Termux. Open each Android add-on once after installation.
 
 ## 2. Clone the repository
 
-```bash
+~~~bash
 pkg update && pkg upgrade -y
 pkg install -y git
 git clone https://github.com/bhuvan0x/Termux-Debian-X11.git
 cd Termux-Debian-X11
 chmod +x scripts/*.sh
-```
+~~~
 
 ## 3. Prepare Termux and create widget shortcuts
 
-```bash
+~~~bash
 bash scripts/setup-termux.sh
-```
+~~~
 
-This updates Termux, installs the X11 repository, proot-distro, PulseAudio and Termux:X11 packages. It also creates Termux:Widget scripts in `~/.shortcuts` and `~/.shortcuts/tasks`.
+This installs the Termux:X11 client, PulseAudio, proot-distro and the Termux:API command-line package (including termux-usb). It also creates launchers under ~/.shortcuts and background tasks under ~/.shortcuts/tasks.
 
 If Termux:Widget is installed later, or you move the repository, regenerate its shortcuts:
 
-```bash
+~~~bash
 bash scripts/install-termux-widget.sh
-```
+~~~
 
-Then long-press the Android home screen, open **Widgets**, find **Termux:Widget**, and add it. The launcher shortcuts include Start Debian X11, Stop Debian X11, Restart Debian X11 and Debian Shell. Background tasks include Update Debian packages and Refresh Debian desktop.
+Then long-press the Android home screen, open **Widgets**, find **Termux:Widget**, and add it. Controls include Start/Stop/Restart Debian X11, Debian Shell, Check USB devices and Start/Stop CUPS printing.
 
-## 4. Install Debian, XFCE and applications
+## 4. Install Debian, XFCE, applications and printing
 
-```bash
+~~~bash
 bash scripts/install-debian.sh
-```
+~~~
 
-This installs the Debian rootfs, XFCE and the default app bundle. The app installer creates a non-root desktop user named `prime`, application launchers in `/home/prime/Desktop`, a dark SVG wallpaper, and an XFCE autostart helper.
+This installs Debian, XFCE, everyday GUI applications, CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user prime, launchers under /home/prime/Desktop and the PrimeBook dark desktop styling.
 
 For an existing Debian installation, run:
 
-```bash
+~~~bash
 bash scripts/install-apps.sh
-```
+bash scripts/install-printing.sh
+~~~
 
 Optional office suite (large download and memory footprint):
 
-```bash
+~~~bash
 bash scripts/install-apps.sh --office
-```
+~~~
 
-## 5. Start the desktop
+**Epson driver note:** ESC/P-R supports Epson models that implement that print language; Gutenprint supports its own finite model list. Neither is a universal driver for every Epson printer. Check the exact model in USB-AND-PRINTING.md.
+
+## 5. Check USB devices and X11 input
+
+With a USB OTG device attached:
+
+~~~bash
+bash scripts/check-usb.sh
+~~~
+
+The script lists devices Android exposes to Termux:API, checks Debian's USB view, and (when X11 is running) lists XInput devices using xinput list.
+
+To request Android permission for a listed USB device:
+
+~~~bash
+bash scripts/check-usb.sh --request /dev/bus/usb/001/002
+~~~
+
+Replace the example path with the exact path printed by termux-usb -l.
+
+Android handles normal USB keyboards/mice as input devices and Termux:X11 receives the resulting input events. Raw USB access is different: PRoot does not automatically receive arbitrary Android USB device nodes or the USB file descriptor. The permission prompt does not guarantee that Linux printer/scanner backends can operate the USB device. See USB-AND-PRINTING.md.
+
+## 6. Start the desktop and CUPS
 
 Open the Termux:X11 Android app once. Then, from the repository directory:
 
-```bash
+~~~bash
 bash scripts/start-desktop.sh
-```
+~~~
 
-The launcher starts the X11 server, attempts to bring the Android X11 viewer to the foreground, starts localhost-only PulseAudio forwarding, and launches XFCE as the unprivileged `prime` account.
+The launcher starts X11, localhost-only PulseAudio forwarding, CUPS (if installed) and XFCE as unprivileged user prime.
 
-The XFCE first-login helper applies the available dark theme and icon theme, a custom PrimeBook wallpaper, larger desktop icons, and a slim bottom panel. Optional Debian theme and panel plugins are installed only if available in the configured repositories.
+Open CUPS in the Debian browser:
 
-## 6. Stop and update
+~~~text
+http://127.0.0.1:631
+~~~
 
-```bash
+Before administering printers, set a password for the prime desktop account from Termux:
+
+~~~bash
+proot-distro login debian -- passwd prime
+~~~
+
+In CUPS, use **Administration → Add Printer**. A printer on Wi-Fi/Ethernet is recommended for PRoot; add it by IPP/IPPS or its network address.
+
+## 7. Stop and update
+
+~~~bash
 bash scripts/stop-desktop.sh
+bash scripts/stop-printing.sh
 bash scripts/update-debian.sh
-```
+~~~
 
-## 7. Optional developer tools
+## 8. Optional developer tools
 
 Inside Debian:
 
-```bash
+~~~bash
 apt install -y neovim tmux clang cmake ninja-build gdb \
   nodejs npm default-jdk golang rustc cargo
-```
+~~~
 
 Install only the toolchains you use; large language runtimes and IDEs can consume substantial storage and RAM.
 
@@ -91,5 +128,6 @@ Install only the toolchains you use; large language runtimes and IDEs can consum
 - This is Debian userspace under PRoot, not a virtual machine or a second kernel.
 - Android remains the host OS and controls hardware, kernel features, power management and background process lifetime.
 - systemd services, kernel modules, Docker-style nested containers and some low-level networking or hardware features are not expected to work like a conventional Linux PC.
-- Firefox and VLC run under the non-root `prime` account. Do not start the graphical session as root.
-- Performance depends on the PrimeBook's available RAM, thermal limits, Android build and Termux:X11 version.
+- Firefox and VLC run under the non-root prime account. Do not start XFCE as root.
+- USB HID input can be forwarded by Android to the foreground X11 app, but generic USB printer/scanner passthrough is not provided by PRoot.
+- Performance depends on the PrimeBook's RAM, thermal limits, Android build and Termux:X11 version.
