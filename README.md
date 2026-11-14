@@ -99,7 +99,7 @@ This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
 The default Debian installation includes CUPS and Debian's ARM64 Epson ESC/P-R package, which matches the L3110's ESC/P-R print language. It also includes SANE's epson2 scanner backend; SANE lists the L3110 (USB ID 04b8:1142) as Complete. The L3110 is USB-only, with no built-in Wi-Fi/Ethernet. Direct USB use inside PRoot still depends on Android exposing the raw USB device; otherwise use a separate Linux USB print/scan server. See docs/USB-AND-PRINTING.md.
 
-Run bash scripts/check-usb.sh (a diagnostic/maintenance command) to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For printer/scanner use, Wi-Fi/Ethernet is the recommended route. See [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
+Run bash scripts/check-usb.sh (an occasional diagnostic command) to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For the L3110's USB printer/scanner limitations, see [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
 
 ## Repository layout
 
@@ -145,7 +145,6 @@ bash scripts/install-termux-widget.sh
 bash scripts/update-debian.sh
 bash scripts/diagnose.sh
 bash scripts/check-usb.sh
-bash scripts/start-printing.sh
 ```
 
 ## Disclaimer
