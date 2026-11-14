@@ -55,7 +55,7 @@ if command -v proot-distro >/dev/null 2>&1; then
   echo
   echo "== Input devices visible through the active X11 display =="
   if pgrep -f 'termux.x11' >/dev/null 2>&1; then
-    proot-distro login debian -- /usr/bin/env DISPLAY=:0 -- /bin/bash -lc '
+    proot-distro login debian -- /usr/bin/env DISPLAY=:0 /bin/bash -lc '
       if command -v xinput >/dev/null 2>&1; then xinput list || true
       else echo "xinput is not installed. Run scripts/install-apps.sh."; fi
     ' || true
