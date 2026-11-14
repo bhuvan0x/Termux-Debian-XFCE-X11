@@ -6,22 +6,21 @@ Usage:
   bash scripts/check-usb.sh
   bash scripts/check-usb.sh --request /dev/bus/usb/001/002
 
-Lists USB devices visible to Android. --request asks Android for permission
-to access one device through Termux:API. It does not create generic USB
-passthrough into Debian/PRoot.
+Lists Android-visible USB devices. --request asks Android for permission
+but does not create generic USB passthrough into Debian/PRoot.
 EOF
 }
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then usage; exit 0; fi
 if ! command -v termux-usb >/dev/null 2>&1; then
-  echo "termux-usb is missing. Install its Termux client package with: pkg install termux-api"
-  echo "Also install the separate Termux:API Android add-on from the same signing source:"
+  echo "termux-usb missing. Run: pkg install termux-api"
+  echo "Install the separate Termux:API Android add-on from the same signing source:"
   echo "https://github.com/termux/termux-api"
   exit 1
 fi
 
 echo "== USB devices detected by Android / Termux:API =="
 DEVICE_LIST="$(termux-usb -l)" || {
-  echo "USB listing failed. Check that the Termux:API Android add-on is installed and opened once."
+  echo "USB listing failed. Check the Termux:API add-on and USB OTG connection."
   exit 1
 }
 printf '%s\n' "$DEVICE_LIST"
@@ -29,30 +28,54 @@ printf '%s\n' "$DEVICE_LIST"
 if [ "${1:-}" = "--request" ]; then
   [ "$#" -eq 2 ] || { usage >&2; exit 2; }
   echo
-  echo "Requesting Android USB permission for: $2"
+  echo "Requesting Android permission for: $2"
   termux-usb -r "$2"
-elif [ "$#" -gt 0 ]; then usage >&2; exit 2; fi
+elif [ "$#" -gt 0 ]; then
+  usage >&2
+  exit 2
+fi
 
 echo
-echo "== Debian / PRoot USB visibility =="
+echo "== USB bus visibility inside Debian / PRoot =="
 if command -v proot-distro >/dev/null 2>&1; then
   proot-distro login debian -- /bin/bash -lc '
     if command -v lsusb >/dev/null 2>&1; then lsusb || true
     else echo "usbutils not installed; run scripts/install-printing.sh."; fi
+    if [ -d /dev/bus/usb ]; then
+      echo "/dev/bus/usb exists in this Debian view."
+    else
+      echo "/dev/bus/usb is not exposed to this Debian PRoot environment."
+    fi
   ' || true
-else echo "proot-distro is not installed."; fi
+
+  echo
+  echo "== Input devices visible through the active X11 display =="
+  if pgrep -f 'termux.x11' >/dev/null 2>&1; then
+    proot-distro login debian -- /usr/bin/env DISPLAY=:0 -- /bin/bash -lc '
+      if command -v xinput >/dev/null 2>&1; then xinput list || true
+      else echo "xinput is not installed. Run scripts/install-apps.sh."; fi
+    ' || true
+  else
+    echo "X11 does not appear to be running. Open Termux:X11 and start the desktop, then retry."
+  fi
+else
+  echo "proot-distro is not installed."
+fi
 
 cat <<'EOF'
 
-Important:
-- Android/Termux:API can enumerate USB devices and grant an app a file
-  descriptor after user approval. It does not expose arbitrary USB devices
-  directly as /dev/bus/usb nodes to every Linux process.
-- This check confirms Android detection; it does not prove that CUPS, scanners
-  or arbitrary Debian USB drivers can operate the device.
-- USB keyboards/mice are normally handled by Android input and delivered to
-  the foreground X11 app. USB storage must be mounted/authorized by Android
-  and exposed through shared storage.
-- For an Epson printer, Wi-Fi/Ethernet printing through CUPS is the reliable
-  route in this PRoot setup. See docs/USB-AND-PRINTING.md.
+How to interpret this:
+- Android USB detection confirms Android can see the attached device.
+- USB keyboards/mice/HID devices normally enter through Android's input stack;
+  Termux:X11 can receive mapped input events when its window has focus.
+  XInput above lists devices exposed by the running X server.
+- Android termux-usb can pass a USB file descriptor to a specially written
+  Termux program. It does not expose arbitrary USB devices as normal
+  /dev/bus/usb nodes inside Debian/PRoot.
+- A permission grant is not proof that CUPS, SANE or a Debian USB driver can
+  operate the device.
+- USB storage is normally mounted/authorized by Android and accessed through
+  shared storage, not mounted directly by Debian.
+- Network/Wi-Fi is the practical printing/scanning route in this PRoot setup.
+  See docs/USB-AND-PRINTING.md.
 EOF
