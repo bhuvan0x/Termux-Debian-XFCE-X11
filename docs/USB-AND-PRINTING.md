@@ -74,12 +74,13 @@ Do not expect the L3110 itself to join Wi-Fi. Epson's spec distinguishes the L31
 
 ## Install or re-run support
 
-Fresh repository installations add this stack automatically. To add it to an existing Debian installation:
+Fresh repository installations add this stack automatically. To add it to an existing Debian installation, run this one-time setup command:
 
 ~~~bash
 bash scripts/install-printing.sh
-bash scripts/start-printing.sh
 ~~~
+
+After installation, use the normal daily command bash scripts/start-all.sh; CUPS starts with the desktop.
 
 Open CUPS in the Debian browser:
 
@@ -98,5 +99,7 @@ The installer adds `prime` to CUPS/scanner groups where those groups exist.
 ## Stop CUPS
 
 ~~~bash
-bash scripts/stop-printing.sh
+bash scripts/stop-all.sh
 ~~~
+
+Stop All also shuts down XFCE, Termux:X11 and PulseAudio.
