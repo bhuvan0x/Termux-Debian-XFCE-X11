@@ -7,7 +7,7 @@ command -v termux-x11 >/dev/null || { echo "Termux:X11 package is missing; run s
 export DISPLAY=:0
 export PULSE_SERVER=tcp:127.0.0.1
 
-# Start the localhost-only PulseAudio TCP endpoint for Debian GUI apps.
+# Start PulseAudio in Termux and expose it only on localhost for Debian apps.
 if command -v pulseaudio >/dev/null 2>&1; then
   pulseaudio --start --exit-idle-time=-1 >/dev/null 2>&1 || true
   if command -v pactl >/dev/null 2>&1; then
@@ -20,8 +20,7 @@ if ! pgrep -f 'termux.x11' >/dev/null 2>&1; then
   sleep 2
 fi
 
-# Ensure an unprivileged desktop account exists. VLC and browsers should not
-# be run as root; install-apps.sh also creates this account and its shortcuts.
+# Make sure the unprivileged desktop account exists even on older installations.
 proot-distro login debian -- /bin/bash -lc '
   if ! id prime >/dev/null 2>&1; then
     useradd --create-home --shell /bin/bash prime
@@ -29,7 +28,7 @@ proot-distro login debian -- /bin/bash -lc '
   install -d -m 0700 -o prime -g prime /tmp/runtime-prime
 '
 
-# Run the entire XFCE session as the normal user, not root.
+# Browser and VLC sessions must not run as root.
 proot-distro login debian --shared-tmp --user prime -- /bin/bash -lc '
   export DISPLAY=:0
   export PULSE_SERVER=tcp:127.0.0.1
@@ -38,7 +37,7 @@ proot-distro login debian --shared-tmp --user prime -- /bin/bash -lc '
   chmod 700 "$XDG_RUNTIME_DIR"
 
   if pgrep -x xfce4-session >/dev/null 2>&1; then
-    echo "An XFCE session already appears to be running. Stop it first with scripts/stop-desktop.sh."
+    echo "An XFCE session already appears to be running. Stop it first."
     exit 1
   fi
 
