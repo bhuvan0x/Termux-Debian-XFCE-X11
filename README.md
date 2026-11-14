@@ -107,12 +107,13 @@ Run bash scripts/check-usb.sh to list Android-visible USB devices and inspect X1
 
 ## Repository layout
 
-```text
+~~~text
 Termux-Debian-X11/
 ├── README.md
 ├── docs/
 │   ├── INSTALLATION.md
-│   └── TROUBLESHOOTING.md
+│   ├── TROUBLESHOOTING.md
+│   └── USB-AND-PRINTING.md
 └── scripts/
     ├── setup-termux.sh
     ├── install-debian.sh
@@ -121,13 +122,12 @@ Termux-Debian-X11/
     ├── install-printing.sh
     ├── start-printing.sh
     ├── stop-printing.sh
-    └── check-usb.sh
+    ├── check-usb.sh
     ├── start-desktop.sh
     ├── stop-desktop.sh
     ├── update-debian.sh
     └── diagnose.sh
-```
-
+~~~
 ## Performance and compatibility
 
 - The target is ARM64 Android hardware; Debian package availability depends on the configured Debian release and repositories.
