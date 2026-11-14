@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-# Stop only the XFCE processes belonging to the dedicated Debian desktop user.
+# Stop XFCE components by exact process name. This also clears an older
+# root-owned session created by previous versions of this project.
 proot-distro login debian -- /bin/bash -lc '
-  pkill -TERM -u prime -x xfce4-session 2>/dev/null || true
-  pkill -TERM -u prime -x xfwm4 2>/dev/null || true
-  pkill -TERM -u prime -x xfce4-panel 2>/dev/null || true
-  pkill -TERM -u prime -x xfdesktop 2>/dev/null || true
+  for process in xfce4-session xfwm4 xfce4-panel xfdesktop; do
+    pkill -TERM -x "$process" 2>/dev/null || true
+  done
 '
 
 echo "XFCE stop signal sent. Close the Termux:X11 app when finished."
