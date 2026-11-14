@@ -48,7 +48,7 @@ This is a PRoot/Android boundary, not necessarily a driver problem. termux-usb c
 
 ## CUPS admin page does not load
 
-- Run bash scripts/start-printing.sh.
+- Run bash scripts/start-all.sh (CUPS starts with the workstation).
 - Open http://127.0.0.1:631 inside the Debian browser.
 - Inspect /var/log/cups/error_log inside Debian.
 - Confirm CUPS is listening and the daemon survived in PRoot.
@@ -65,7 +65,7 @@ Then authenticate to CUPS as prime.
 
 ## Firefox or VLC refuses to start as root
 
-The graphical session must run as the unprivileged Debian account prime. Use bash scripts/start-desktop.sh; do not start XFCE as root.
+The graphical session must run as the unprivileged Debian account prime. Use bash scripts/start-all.sh; do not start XFCE as root.
 
 ## Desktop shortcuts do not appear
 
@@ -73,7 +73,7 @@ Run bash scripts/install-apps.sh and restart XFCE. Launchers are stored in /home
 
 ## Dark theme or wallpaper did not apply
 
-Stop XFCE and start it again. The first-login helper runs after the XFCE session initializes. If an optional theme package was unavailable, the helper falls back to Adwaita.
+Run bash scripts/stop-all.sh and then bash scripts/start-all.sh. The first-login helper runs after the XFCE session initializes. If an optional theme package was unavailable, the helper falls back to Adwaita.
 
 ## Audio does not work
 
