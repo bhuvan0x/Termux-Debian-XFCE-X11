@@ -35,7 +35,7 @@ If Termux:Widget is installed later, or you move the repository, regenerate its 
 bash scripts/install-termux-widget.sh
 ~~~
 
-Then long-press the Android home screen, open **Widgets**, find **Termux:Widget**, and add it. Controls include Start/Stop/Restart Debian X11, Debian Shell, Check USB devices and Start/Stop CUPS printing.
+Then long-press the Android home screen, open **Widgets**, find **Termux:Widget**, and add it. The widget has exactly two everyday controls: **Start All** and **Stop All**.
 
 ## 4. Install Debian, XFCE, applications and printing
 
@@ -82,13 +82,13 @@ Android handles normal USB keyboards/mice as input devices and Termux:X11 receiv
 
 ## 6. Start the desktop and CUPS
 
-Open the Termux:X11 Android app once. Then, from the repository directory:
+Open the Termux:X11 Android app once after installing it. From the repository directory, use the single start command:
 
 ~~~bash
-bash scripts/start-desktop.sh
+bash scripts/start-all.sh
 ~~~
 
-The launcher starts X11, localhost-only PulseAudio forwarding, CUPS (if installed) and XFCE as unprivileged user prime.
+This starts Termux:X11, localhost-only PulseAudio forwarding, CUPS (if installed) and XFCE as unprivileged user prime. You do not need to start the desktop and printer services separately.
 
 Open CUPS in the Debian browser:
 
@@ -107,10 +107,11 @@ In CUPS, use **Administration → Add Printer**. A printer on Wi-Fi/Ethernet is 
 ## 7. Stop and update
 
 ~~~bash
-bash scripts/stop-desktop.sh
-bash scripts/stop-printing.sh
+bash scripts/stop-all.sh
 bash scripts/update-debian.sh
 ~~~
+
+Stop All shuts down XFCE, CUPS, the Termux:X11 server and PulseAudio together.
 
 ## 8. Optional developer tools
 
