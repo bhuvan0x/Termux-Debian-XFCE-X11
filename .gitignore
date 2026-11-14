@@ -1,0 +1,6 @@
+# Local runtime state
+*.log
+*.pid
+*.sock
+.DS_Store
+Thumbs.db
