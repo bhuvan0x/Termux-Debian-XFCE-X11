@@ -16,45 +16,77 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Debian userspace through `proot-distro`; no device root required.
 - XFCE desktop with a lightweight, dark appearance, custom wallpaper, larger desktop icons and a slim bottom panel.
 - Firefox ESR, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
-- Clickable launchers on the Debian desktop.
+- Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
-- Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down.
+- Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down, including the Android X11 viewer.
+- Short Termux terminal commands: `start-all` and `stop-all`.
+- Repository-local Git configuration ignores executable-bit-only changes on Android, avoiding recurring pull conflicts.
 - Widget background tasks for Debian updates and desktop app refresh.
 - CUPS printing with Epson ESC/P-R and Gutenprint driver packages for supported models.
 - Android USB detection/permission diagnostics plus X11 input-device inspection.
-- Optional LibreOffice and optional XFCE theme/panel plugins.
 
 ## Quick installation
 
-Install Termux, Termux:X11, Termux:Widget and the separate Termux:API Android add-on from compatible sources/signing families. Termux:API's command-line package is installed by setup-termux.sh. Then in Termux:
+Install Termux, Termux:X11, Termux:Widget and the separate Termux:API Android add-on from compatible sources/signing families. Termux:API's command-line package is installed by setup-termux.sh.
+
+This repository is private. Authenticate with GitHub CLI before cloning:
 
 ```bash
 pkg update && pkg upgrade -y
-pkg install -y git
-git clone https://github.com/bhuvan0x/Termux-Debian-X11.git
+pkg install -y git gh
+gh auth login
+gh auth setup-git
+gh repo clone bhuvan0x/Termux-Debian-X11
 cd Termux-Debian-X11
-chmod +x scripts/*.sh
 
 bash scripts/setup-termux.sh
 bash scripts/install-debian.sh
 ```
 
-Open the Termux:X11 Android app, then launch the desktop:
+Open the Termux:X11 Android app once, then launch the desktop:
 
 ```bash
-bash scripts/start-all.sh
+start-all
 ```
 
 ## Daily controls
 
-After the initial setup, use only these two commands:
+After initial setup, use either the short Termux commands:
 
-~~~bash
+```bash
+start-all
+stop-all
+```
+
+or the explicit script paths:
+
+```bash
 bash scripts/start-all.sh
 bash scripts/stop-all.sh
-~~~
+```
 
-Start All launches Termux:X11, PulseAudio, CUPS (when installed) and XFCE. Stop All shuts down XFCE, CUPS, the Termux:X11 server/viewer and PulseAudio.
+Start All launches Termux:X11, PulseAudio, CUPS (when installed) and XFCE. It waits for the Termux PulseAudio server, loads the localhost-only TCP bridge once if missing, and checks that Debian can connect. Stop All shuts down XFCE, CUPS, the Termux:X11 Android viewer and server, and PulseAudio.
+
+The Start All terminal remains occupied while XFCE runs. Use a second Termux session, the `stop-all` command, or the Stop All widget to shut it down.
+
+## Git sync on Android
+
+The setup script applies this repository-local setting:
+
+```bash
+git config core.filemode false
+```
+
+Android/Termux filesystems can report executable-bit changes differently from GitHub. This setting prevents mode-only changes from blocking `git pull`, while normal file-content changes remain visible. Do not run `chmod +x scripts/*.sh` after every pull; scripts are invoked with `bash`.
+
+Update the project with:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+```
+
+If an earlier local mode-only change is already blocking the first pull, inspect it with `git diff --summary`. If the output contains only `mode change 100644 => 100755` entries, use `git restore scripts/*.sh` once, pull, and then run `git config core.filemode false`. Do not use `git reset --hard` to solve this.
 
 ## Termux:Widget controls
 
@@ -63,7 +95,7 @@ The setup creates scripts in `~/.shortcuts/` and `~/.shortcuts/tasks/`.
 | Home-screen shortcut | Action |
 |---|---|
 | **Start All** | Starts X11, audio, CUPS and XFCE |
-| **Stop All** | Stops the complete workstation stack |
+| **Stop All** | Stops XFCE, CUPS, X11 viewer/server and audio |
 
 Background tasks:
 
@@ -106,15 +138,43 @@ bash scripts/install-apps.sh --office
 
 This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
+## Visual Studio Code (optional)
+
+The project includes an ARM64-only installer for the official stable Debian package:
+
+```bash
+bash scripts/install-vscode.sh
+```
+
+Run it from Termux. It downloads the official `linux-deb-arm64` package, verifies the package architecture, installs it inside Debian, and creates a per-user XFCE launcher for `prime` using:
+
+```text
+--no-sandbox --disable-gpu
+```
+
+These options are a PRoot compatibility workaround. `--no-sandbox` weakens Chromium's normal renderer isolation; use this only in the trusted local PRoot desktop, not as a general Linux desktop recommendation. The launcher override is stored under `/home/prime/.local/share/applications` and does not modify the package-owned desktop files. The VS Code keyring prompt is separate from installation; credential storage may need GNOME Keyring configuration later.
+
+Do not install an `amd64` VS Code package on this ARM64 Debian environment.
+
+## Debian sudo access
+
+The desktop user `prime` is unprivileged by default. If PRoot's selected-user session does not inherit supplemental group membership correctly, the installation can use a dedicated sudoers drop-in instead of relying only on the `sudo` group:
+
+```bash
+proot-distro login debian -- bash -lc 'printf "%s\\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
+```
+
+This requires running from Termux, which enters Debian as root. It grants `prime` password-authenticated sudo access. Never store a plaintext password in this repository.
+
 ## Epson printing and USB devices
 
 The default Debian installation includes CUPS and Debian's ARM64 Epson ESC/P-R package, which matches the L3110's ESC/P-R print language. It also includes SANE's epson2 scanner backend; SANE lists the L3110 (USB ID 04b8:1142) as Complete. The L3110 is USB-only, with no built-in Wi-Fi/Ethernet. Direct USB use inside PRoot still depends on Android exposing the raw USB device; otherwise use a separate Linux USB print/scan server. See docs/USB-AND-PRINTING.md.
 
-Run bash scripts/check-usb.sh (an occasional diagnostic command) to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For the L3110's USB printer/scanner limitations, see [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
+Run `bash scripts/check-usb.sh` (an occasional diagnostic command) to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For the L3110's USB printer/scanner limitations, see [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
 
 ## Repository layout
 
-~~~text
+```text
 Termux-Debian-X11/
 ├── README.md
 ├── docs/
@@ -125,6 +185,7 @@ Termux-Debian-X11/
     ├── setup-termux.sh
     ├── install-debian.sh
     ├── install-apps.sh
+    ├── install-vscode.sh
     ├── install-termux-widget.sh
     ├── install-printing.sh
     ├── start-printing.sh
@@ -136,7 +197,8 @@ Termux-Debian-X11/
     ├── stop-desktop.sh
     ├── update-debian.sh
     └── diagnose.sh
-~~~
+```
+
 ## Performance and compatibility
 
 - The target is ARM64 Android hardware; Debian package availability depends on the configured Debian release and repositories.
@@ -149,8 +211,9 @@ Termux-Debian-X11/
 ## Useful commands
 
 ```bash
-bash scripts/start-all.sh
-bash scripts/stop-all.sh
+start-all
+stop-all
+bash scripts/install-vscode.sh
 bash scripts/install-apps.sh
 bash scripts/install-termux-widget.sh
 bash scripts/update-debian.sh
@@ -160,7 +223,7 @@ bash scripts/check-usb.sh
 
 ## Disclaimer
 
-Unofficial community setup. Debian, Termux, Termux:X11 and Termux:Widget are maintained by their respective projects. Review scripts before running them. No root access is required.
+Unofficial community setup. Debian, Termux, Termux:X11 and Termux:Widget are maintained by their respective projects. Review scripts before running them. No root access is required on Android; Debian root is provided by PRoot.
 
 ---
 
