@@ -18,7 +18,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Firefox ESR, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
 - Clickable launchers on the Debian desktop.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
-- Termux:Widget launchers to start, stop, restart the desktop or open Debian shell.
+- Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down.
 - Widget background tasks for Debian updates and desktop app refresh.
 - CUPS printing with Epson ESC/P-R and Gutenprint driver packages for supported models.
 - Android USB detection/permission diagnostics plus X11 input-device inspection.
@@ -42,7 +42,7 @@ bash scripts/install-debian.sh
 Open the Termux:X11 Android app, then launch the desktop:
 
 ```bash
-bash scripts/start-desktop.sh
+bash scripts/start-all.sh
 ```
 
 ## Termux:Widget controls
@@ -51,12 +51,8 @@ The setup creates scripts in `~/.shortcuts/` and `~/.shortcuts/tasks/`.
 
 | Home-screen shortcut | Action |
 |---|---|
-| Start Debian X11 | Starts Termux:X11 and XFCE |
-| Stop Debian X11 | Stops the XFCE session |
-| Restart Debian X11 | Stops and starts the desktop |
-| Debian Shell | Opens Debian as user `prime` |
-| Check USB devices | Lists Android USB devices and X11 input devices |
-| Start/Stop CUPS printing | Controls the Debian print service |
+| **Start All** | Starts X11, audio, CUPS and XFCE |
+| **Stop All** | Stops the complete workstation stack |
 
 Background tasks:
 
@@ -103,7 +99,7 @@ This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
 The default Debian installation includes CUPS and Debian's ARM64 Epson ESC/P-R package, which matches the L3110's ESC/P-R print language. It also includes SANE's epson2 scanner backend; SANE lists the L3110 (USB ID 04b8:1142) as Complete. The L3110 is USB-only, with no built-in Wi-Fi/Ethernet. Direct USB use inside PRoot still depends on Android exposing the raw USB device; otherwise use a separate Linux USB print/scan server. See docs/USB-AND-PRINTING.md.
 
-Run bash scripts/check-usb.sh to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For printer/scanner use, Wi-Fi/Ethernet is the recommended route. See [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
+Run bash scripts/check-usb.sh (a diagnostic/maintenance command) to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For printer/scanner use, Wi-Fi/Ethernet is the recommended route. See [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
 
 ## Repository layout
 
@@ -123,6 +119,8 @@ Termux-Debian-X11/
     ├── start-printing.sh
     ├── stop-printing.sh
     ├── check-usb.sh
+    ├── start-all.sh
+    ├── stop-all.sh
     ├── start-desktop.sh
     ├── stop-desktop.sh
     ├── update-debian.sh
@@ -141,7 +139,7 @@ Termux-Debian-X11/
 
 ```bash
 bash scripts/start-desktop.sh
-bash scripts/stop-desktop.sh
+bash scripts/stop-all.sh
 bash scripts/install-apps.sh
 bash scripts/install-termux-widget.sh
 bash scripts/update-debian.sh
