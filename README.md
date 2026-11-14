@@ -20,7 +20,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - A dedicated unprivileged `prime` desktop account for GUI apps.
 - Termux:Widget launchers to start, stop, restart the desktop or open Debian shell.
 - Widget background tasks for Debian updates and desktop app refresh.
-- Optional LibreOffice and optional XFCE theme/panel plugins.
+- CUPS printing with Epson ESC/P-R and Gutenprint driver packages for supported models.\n- Android USB detection/permission diagnostics plus X11 input-device inspection.\n- Optional LibreOffice and optional XFCE theme/panel plugins.
 
 ## Quick installation
 
@@ -93,7 +93,7 @@ bash scripts/install-apps.sh --office
 
 This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
-## Repository layout
+## Epson printing and USB devices\n\nThe default Debian installation includes CUPS, Epson ESC/P-R for compatible models, and Gutenprint for its supported printer list. Manage printers at http://127.0.0.1:631 after starting the desktop. No single driver supports every Epson model; confirm your exact model.\n\nRun bash scripts/check-usb.sh to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For printer/scanner use, Wi-Fi/Ethernet is the recommended route. See [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).\n\n## Repository layout
 
 ```text
 Termux-Debian-X11/
