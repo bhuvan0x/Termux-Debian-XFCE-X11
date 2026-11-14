@@ -35,7 +35,8 @@ apt-get install -y \
   htop ncdu \
   pavucontrol pulseaudio-utils \
   xdg-utils gvfs gvfs-backends xinput \
-  fonts-noto-color-emoji
+  fonts-noto-color-emoji \
+  sudo
 
 # Desktop polish packages vary between Debian releases. Install only those
 # actually available in the configured repositories.
@@ -65,6 +66,13 @@ fi
 if ! id prime >/dev/null 2>&1; then
   useradd --create-home --shell /bin/bash prime
 fi
+# Use an explicit password-authenticated sudoers rule for prime. In PRoot,
+# supplemental group membership may not be reflected in selected-user sessions.
+install -d -m 0755 /etc/sudoers.d
+printf '%s\\n' 'prime ALL=(ALL:ALL) ALL' > /etc/sudoers.d/prime
+chown root:root /etc/sudoers.d/prime
+chmod 0440 /etc/sudoers.d/prime
+visudo -c
 PRIME_HOME="$(getent passwd prime | cut -d: -f6)"
 [ -n "$PRIME_HOME" ] && [ -d "$PRIME_HOME" ] || { echo "Could not resolve prime home." >&2; exit 1; }
 
