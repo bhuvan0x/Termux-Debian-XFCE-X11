@@ -15,6 +15,31 @@ pkg install -y x11-repo
 pkg update -y
 pkg install -y proot-distro pulseaudio termux-x11-nightly termux-api
 
+# Avoid recurring git pull failures caused only by Android/Termux executable
+# bit differences. Content modifications are still detected normally.
+if command -v git >/dev/null 2>&1 && [ -d "$REPO_DIR/.git" ]; then
+  git -C "$REPO_DIR" config core.filemode false
+  echo "Configured repository-local Git core.filemode=false."
+fi
+
+# Provide short terminal commands as well as the two Termux:Widget buttons.
+for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh"; do
+  name="${spec%%:*}"
+  script="${spec#*:}"
+  cat > "$PREFIX/bin/$name" <<EOF
+#!/data/data/com.termux/files/usr/bin/bash
+set -Eeuo pipefail
+REPO_DIR=$REPO_DIR
+if [ ! -f "\$REPO_DIR/$script" ]; then
+  echo "Missing workstation script: \$REPO_DIR/$script" >&2
+  exit 1
+fi
+exec bash "\$REPO_DIR/$script"
+EOF
+  chmod 700 "$PREFIX/bin/$name"
+done
+hash -r 2>/dev/null || true
+
 # Exactly two daily controls in the Termux:Widget shortcuts folder.
 SHORTCUTS_DIR="$HOME/.shortcuts"
 TASKS_DIR="$SHORTCUTS_DIR/tasks"
@@ -66,6 +91,10 @@ EOF
   chmod 700 "$TASKS_DIR/$name"
 done
 
+echo
+echo "Created Termux terminal commands:"
+echo "  start-all"
+echo "  stop-all"
 echo "Created exactly two daily controls in $SHORTCUTS_DIR:"
 echo "  Start All"
 echo "  Stop All"
