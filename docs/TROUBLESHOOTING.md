@@ -2,31 +2,52 @@
 
 ## Termux:X11 shows a black screen
 
-- Open the Termux:X11 Android app before starting XFCE.
+- Open the Termux:X11 Android app once before starting XFCE.
 - Confirm the Termux package is installed: `pkg list-installed | grep termux-x11`.
 - Confirm the display is `:0`: `echo "$DISPLAY"`.
-- Run `./scripts/diagnose.sh` and inspect errors from the launcher.
-- Force-stop and reopen the Termux:X11 app, then retry the desktop launcher.
+- Run `bash scripts/diagnose.sh` and inspect the launcher output.
+- Force-stop and reopen the Termux:X11 app, then retry.
 
 ## `termux-x11` command not found
 
-Run `./scripts/setup-termux.sh`. If the package cannot be found, verify that `x11-repo` is enabled and refresh package indexes with `pkg update`.
+Run `bash scripts/setup-termux.sh`. Confirm `x11-repo` is enabled and refresh packages with `pkg update`.
 
-## Android kills the desktop in the background
+## Termux:Widget is empty or does not show shortcuts
 
-Remove battery restrictions for Termux and Termux:X11 in Android settings where available. Keep the device cool and connected to power for long sessions. Android vendors may still terminate background processes.
+1. Install the separate Termux:Widget Android add-on from the same source/signing family as Termux.
+2. Run `bash scripts/install-termux-widget.sh` from the repository directory.
+3. Confirm executable scripts exist in `~/.shortcuts/` and `~/.shortcuts/tasks/`.
+4. Remove and re-add the Termux:Widget home-screen widget if it has cached an old list.
 
-## XFCE says another session is running
+Official add-on: https://github.com/termux/termux-widget
 
-Close the existing desktop session cleanly using `./scripts/stop-desktop.sh`. Avoid deleting lock files or killing every process blindly. If it persists, inspect processes with `pgrep -af 'xfce|Xorg|termux.x11'`.
+## Widget shortcut cannot find the repository
+
+The widget scripts store the repository's absolute path when generated. If you move or rename the clone, run `bash scripts/install-termux-widget.sh` again.
+
+## Firefox or VLC refuses to start as root
+
+The graphical session must run as the unprivileged Debian account `prime`. Use `bash scripts/start-desktop.sh`; do not start XFCE as root.
+
+## Desktop shortcuts do not appear
+
+Run `bash scripts/install-apps.sh` and restart XFCE. Launchers are stored in `/home/prime/Desktop`.
+
+## Dark theme or wallpaper did not apply
+
+Log out of XFCE, stop the session with `bash scripts/stop-desktop.sh`, and start it again. The first-login helper runs after the XFCE session initializes. If an optional theme package was unavailable, the helper falls back to Adwaita.
 
 ## Audio does not work
 
-Audio forwarding depends on the Termux PulseAudio service and Android permissions. Start it in Termux with `pulseaudio --start`, then restart the Linux application. Audio support can vary by device and Android version.
+Audio forwarding depends on Termux PulseAudio and Android permissions. Start it in Termux with `pulseaudio --start`, then restart the desktop. Audio support varies by device and Android build.
+
+## Android kills the desktop in the background
+
+Remove battery restrictions for Termux and Termux:X11 where Android permits. Keep the device cool and connected to power for long sessions. Android vendors may still terminate background processes.
 
 ## Debian package errors
 
-Inside Debian, run:
+Inside Debian:
 
 ```bash
 apt-get update
@@ -41,16 +62,7 @@ If the rootfs is corrupted, back up important files before considering a reinsta
 From the repository directory:
 
 ```bash
-./scripts/diagnose.sh
+bash scripts/diagnose.sh
 ```
 
-When asking for help, include the full command output, Android version, device model, Termux source, and whether the Termux:X11 app opens successfully. Redact usernames or paths if they contain private information.
-
-
-## Firefox or VLC refuses to start as root
-
-The project now starts XFCE as the unprivileged Debian account `prime`. Do not launch Firefox or VLC from a root desktop. If you upgraded an older setup, stop the old session and restart using `bash scripts/start-desktop.sh`.
-
-## Desktop shortcuts do not appear
-
-Run `bash scripts/install-apps.sh` from the repository directory, then log out of XFCE and restart the desktop. Shortcuts are installed under `/home/prime/Desktop`.
+When asking for help, include full command output, Android version, device model, Termux source, and whether Termux:X11 opens successfully. Redact private paths or usernames.
