@@ -7,7 +7,7 @@ command -v termux-x11 >/dev/null || { echo "Termux:X11 package is missing; run s
 export DISPLAY=:0
 export PULSE_SERVER=tcp:127.0.0.1
 
-# Start PulseAudio in Termux and expose it only on localhost for Debian apps.
+# Start PulseAudio and expose it only to localhost for Debian applications.
 if command -v pulseaudio >/dev/null 2>&1; then
   pulseaudio --start --exit-idle-time=-1 >/dev/null 2>&1 || true
   if command -v pactl >/dev/null 2>&1; then
@@ -20,7 +20,11 @@ if ! pgrep -f 'termux.x11' >/dev/null 2>&1; then
   sleep 2
 fi
 
-# Make sure the unprivileged desktop account exists even on older installations.
+# Bring the Android X11 viewer to the foreground when its activity is available.
+if command -v am >/dev/null 2>&1; then
+  am start -n com.termux.x11/.MainActivity >/dev/null 2>&1 || true
+fi
+
 proot-distro login debian -- /bin/bash -lc '
   if ! id prime >/dev/null 2>&1; then
     useradd --create-home --shell /bin/bash prime
@@ -28,11 +32,12 @@ proot-distro login debian -- /bin/bash -lc '
   install -d -m 0700 -o prime -g prime /tmp/runtime-prime
 '
 
-# Browser and VLC sessions must not run as root.
+# XFCE, browsers and VLC run as the unprivileged desktop account.
 proot-distro login debian --shared-tmp --user prime -- /bin/bash -lc '
   export DISPLAY=:0
   export PULSE_SERVER=tcp:127.0.0.1
   export XDG_RUNTIME_DIR=/tmp/runtime-prime
+  export XDG_SESSION_TYPE=x11
   mkdir -p "$XDG_RUNTIME_DIR"
   chmod 700 "$XDG_RUNTIME_DIR"
 
