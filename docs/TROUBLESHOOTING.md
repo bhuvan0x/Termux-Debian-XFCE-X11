@@ -45,3 +45,12 @@ From the repository directory:
 ```
 
 When asking for help, include the full command output, Android version, device model, Termux source, and whether the Termux:X11 app opens successfully. Redact usernames or paths if they contain private information.
+
+
+## Firefox or VLC refuses to start as root
+
+The project now starts XFCE as the unprivileged Debian account `prime`. Do not launch Firefox or VLC from a root desktop. If you upgraded an older setup, stop the old session and restart using `bash scripts/start-desktop.sh`.
+
+## Desktop shortcuts do not appear
+
+Run `bash scripts/install-apps.sh` from the repository directory, then log out of XFCE and restart the desktop. Shortcuts are installed under `/home/prime/Desktop`.
