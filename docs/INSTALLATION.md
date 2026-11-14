@@ -58,7 +58,7 @@ Optional office suite (large download and memory footprint):
 bash scripts/install-apps.sh --office
 ~~~
 
-**Epson driver note:** ESC/P-R supports Epson models that implement that print language; Gutenprint supports its own finite model list. Neither is a universal driver for every Epson printer. Check the exact model in USB-AND-PRINTING.md.
+**Your L3110:** the printer uses ESC/P-R, and SANE lists its scanner (USB ID 04b8:1142) as fully supported by the epson2 backend. The L3110 has USB 2.0 only; it does not have built-in Wi-Fi/Ethernet. Direct operation still requires USB visibility through Android/PRoot. Details are in USB-AND-PRINTING.md.
 
 ## 5. Check USB devices and X11 input
 
