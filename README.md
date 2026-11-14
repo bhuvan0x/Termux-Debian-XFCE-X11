@@ -138,7 +138,7 @@ Termux-Debian-X11/
 ## Useful commands
 
 ```bash
-bash scripts/start-desktop.sh
+bash scripts/start-all.sh
 bash scripts/stop-all.sh
 bash scripts/install-apps.sh
 bash scripts/install-termux-widget.sh
