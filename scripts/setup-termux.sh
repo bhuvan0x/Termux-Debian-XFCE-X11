@@ -15,13 +15,19 @@ pkg install -y x11-repo
 pkg update -y
 pkg install -y proot-distro pulseaudio termux-x11-nightly termux-api
 
-# Termux:Widget reads executable launchers from ~/.shortcuts and background
-# tasks from ~/.shortcuts/tasks. Android add-on APKs must be installed separately.
+# Termux:Widget only exposes the two daily controls plus diagnostics/shell.
 SHORTCUTS_DIR="$HOME/.shortcuts"
 TASKS_DIR="$SHORTCUTS_DIR/tasks"
 mkdir -p "$SHORTCUTS_DIR" "$TASKS_DIR"
 chmod 700 "$SHORTCUTS_DIR" "$TASKS_DIR"
 printf -v REPO_Q '%q' "$REPO_DIR"
+
+# Remove obsolete per-service launchers created by earlier repo versions.
+rm -f "$SHORTCUTS_DIR/Start Debian X11" \
+  "$SHORTCUTS_DIR/Stop Debian X11" \
+  "$SHORTCUTS_DIR/Restart Debian X11" \
+  "$SHORTCUTS_DIR/Start CUPS printing" \
+  "$SHORTCUTS_DIR/Stop CUPS printing"
 
 write_shortcut() {
   local name="$1"
@@ -35,21 +41,9 @@ EOF
   chmod 700 "$SHORTCUTS_DIR/$name"
 }
 
-write_shortcut "Start Debian X11" "scripts/start-desktop.sh"
-write_shortcut "Stop Debian X11" "scripts/stop-desktop.sh"
+write_shortcut "Start All" "scripts/start-all.sh"
+write_shortcut "Stop All" "scripts/stop-all.sh"
 write_shortcut "Check USB devices" "scripts/check-usb.sh"
-write_shortcut "Start CUPS printing" "scripts/start-printing.sh"
-write_shortcut "Stop CUPS printing" "scripts/stop-printing.sh"
-
-cat > "$SHORTCUTS_DIR/Restart Debian X11" <<EOF
-#!/data/data/com.termux/files/usr/bin/bash
-set -Eeuo pipefail
-REPO_DIR=$REPO_Q
-bash "\$REPO_DIR/scripts/stop-desktop.sh"
-sleep 2
-exec bash "\$REPO_DIR/scripts/start-desktop.sh"
-EOF
-chmod 700 "$SHORTCUTS_DIR/Restart Debian X11"
 
 cat > "$SHORTCUTS_DIR/Debian Shell" <<'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
@@ -88,16 +82,12 @@ Termux host packages installed:
   - Termux:X11 client
   - Termux:API command-line client (termux-usb)
 
-Install the separate Termux:API Android add-on from the same signing family as Termux:
+Install the separate Termux:API Android add-on and Termux:Widget APK
+from sources signed compatibly with Termux:
   https://github.com/termux/termux-api
-
-Install/open Termux:X11 from a compatible source.
-Termux:Widget shortcuts are created in ~/.shortcuts and ~/.shortcuts/tasks.
-
-Install the separate Termux:Widget Android add-on from the same signing family:
   https://github.com/termux/termux-widget
 
-Next:
-  bash scripts/install-debian.sh
-  bash scripts/start-desktop.sh
+Everyday workstation controls:
+  bash scripts/start-all.sh
+  bash scripts/stop-all.sh
 EOF
