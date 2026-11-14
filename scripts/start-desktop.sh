@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 command -v proot-distro >/dev/null || { echo "proot-distro is missing; run setup first." >&2; exit 1; }
 command -v termux-x11 >/dev/null || { echo "Termux:X11 package is missing; run setup first." >&2; exit 1; }
@@ -7,7 +8,6 @@ command -v termux-x11 >/dev/null || { echo "Termux:X11 package is missing; run s
 export DISPLAY=:0
 export PULSE_SERVER=tcp:127.0.0.1
 
-# Start PulseAudio and expose it only to localhost for Debian applications.
 if command -v pulseaudio >/dev/null 2>&1; then
   pulseaudio --start --exit-idle-time=-1 >/dev/null 2>&1 || true
   if command -v pactl >/dev/null 2>&1; then
@@ -20,7 +20,6 @@ if ! pgrep -f 'termux.x11' >/dev/null 2>&1; then
   sleep 2
 fi
 
-# Bring the Android X11 viewer to the foreground when its activity is available.
 if command -v am >/dev/null 2>&1; then
   am start -n com.termux.x11/.MainActivity >/dev/null 2>&1 || true
 fi
@@ -32,7 +31,11 @@ proot-distro login debian -- /bin/bash -lc '
   install -d -m 0700 -o prime -g prime /tmp/runtime-prime
 '
 
-# XFCE, browsers and VLC run as the unprivileged desktop account.
+# Start CUPS if the printing stack has been installed.
+if proot-distro login debian -- test -x /usr/sbin/cupsd >/dev/null 2>&1; then
+  bash "$SCRIPT_DIR/start-printing.sh" || echo "Warning: CUPS did not start; see docs/USB-AND-PRINTING.md."
+fi
+
 proot-distro login debian --shared-tmp --user prime -- /bin/bash -lc '
   export DISPLAY=:0
   export PULSE_SERVER=tcp:127.0.0.1
