@@ -30,10 +30,3 @@ bash "$SCRIPT_DIR/install-apps.sh"
 
 echo "Debian + XFCE + desktop apps installation complete."
 echo "Open Termux:X11, then run: bash scripts/start-desktop.sh"
-
-
-# Install the recommended GUI applications and create /home/prime/Desktop shortcuts.
-bash "$SCRIPT_DIR/install-apps.sh"
-
-echo "Debian + XFCE + desktop apps installation complete."
-echo "Open Termux:X11, then run: bash scripts/start-desktop.sh"
