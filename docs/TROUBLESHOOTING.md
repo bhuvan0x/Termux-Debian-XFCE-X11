@@ -77,7 +77,7 @@ Run bash scripts/stop-all.sh and then bash scripts/start-all.sh. The first-login
 
 ## Audio does not work
 
-Audio forwarding depends on Termux PulseAudio and Android permissions. Start it in Termux with pulseaudio --start, then restart the desktop.
+Audio forwarding depends on Termux PulseAudio and Android permissions. Run bash scripts/stop-all.sh, then bash scripts/start-all.sh to restart the complete audio and desktop stack.
 
 ## Android kills the desktop in the background
 
