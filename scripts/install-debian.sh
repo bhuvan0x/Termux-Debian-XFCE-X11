@@ -29,4 +29,4 @@ bash "$SCRIPT_DIR/install-apps.sh"
 bash "$SCRIPT_DIR/install-printing.sh"
 
 echo "Debian + XFCE + desktop apps + printing support installation complete."
-echo "Open Termux:X11, then run: bash scripts/start-desktop.sh"
+echo "Open Termux:X11 once, then run: start-all (or bash scripts/start-all.sh)"
