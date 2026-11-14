@@ -102,7 +102,7 @@ Before administering printers, set a password for the prime desktop account from
 proot-distro login debian -- passwd prime
 ~~~
 
-In CUPS, use **Administration → Add Printer**. A printer on Wi-Fi/Ethernet is recommended for PRoot; add it by IPP/IPPS or its network address.
+In CUPS, use **Administration → Add Printer**. For the L3110, direct USB printing works only if Android exposes the raw USB device to PRoot. The L3110 itself has no Wi-Fi/Ethernet. If PRoot cannot access USB, connect the printer to a separate Linux host and share that host's CUPS queue over IPP.
 
 ## 7. Stop and update
 
