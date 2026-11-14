@@ -16,7 +16,7 @@ Turn an Android phone, tablet, or Chromebook into a portable Linux workstation w
 - **Debian** — a real Debian userspace inside proot, without rooting Android.
 - **XFCE** — a lightweight, familiar desktop environment.
 - **Termux:X11** — native X server integration for Android.
-- **Useful desktop tools** — terminal, file manager, archive tools, text editor, and system utilities.
+- **Desktop applications** — Firefox ESR, VLC, MPV, Geany, PDF/image viewers, archive manager, calculator, and system tools.\n- **XFCE home-screen shortcuts** — clickable launchers in the Debian desktop for the installed applications.
 - **Lifecycle scripts** — install, start, stop, update, and diagnose your environment.
 - **Re-runnable setup** — scripts are designed to be safe to run again.
 
@@ -88,7 +88,7 @@ Termux-Debian-X11/
     └── TROUBLESHOOTING.md
 ```
 
-## Useful commands inside Debian
+## Desktop applications\n\nThe default app bundle is installed automatically by `scripts/install-debian.sh`. For an existing Debian setup, run:\n\n```bash\nbash scripts/install-apps.sh\n```\n\nIncludes Firefox ESR, VLC, MPV, FFmpeg, Geany, Thunar, Mousepad, Ristretto, Atril, Xarchiver, Galculator, task manager, screenshot tool, and audio settings. Use `bash scripts/install-apps.sh --office` to add LibreOffice Writer and Calc (larger download). Apps appear as clickable shortcuts on the XFCE desktop. The graphical session runs as the unprivileged `prime` account.\n\n## Useful commands inside Debian
 
 ```bash
 apt update
