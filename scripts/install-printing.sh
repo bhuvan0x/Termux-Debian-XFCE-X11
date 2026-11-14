@@ -12,6 +12,7 @@ if apt-cache show simple-scan >/dev/null 2>&1; then apt-get install -y simple-sc
 if ! id prime >/dev/null 2>&1; then useradd --create-home --shell /bin/bash prime; fi
 getent group lpadmin >/dev/null 2>&1 && usermod -aG lpadmin prime || true
 getent group lp >/dev/null 2>&1 && usermod -aG lp prime || true
+getent group scanner >/dev/null 2>&1 && usermod -aG scanner prime || true
 
 PRIME_HOME="$(getent passwd prime | cut -d: -f6)"
 DESKTOP_DIR="$PRIME_HOME/Desktop"
@@ -51,7 +52,7 @@ rm -rf /var/lib/apt/lists/*
 echo
 echo "Printing stack installed."
 echo "Epson ESC/P-R and Gutenprint print drivers are installed. L3110 uses ESC/P-R."
-echo "SANE scanner support is installed; L3110 is listed for the epson2 backend (USB ID 04b8:1142)."
+echo "SANE scanner support is installed; L3110 is listed as complete for epson2 (USB ID 04b8:1142)."
 echo "Check scanner visibility with: proot-distro login debian -- scanimage -L"
 echo "CUPS admin: http://127.0.0.1:631"
 echo "Set a password for the desktop user before CUPS administration:"
