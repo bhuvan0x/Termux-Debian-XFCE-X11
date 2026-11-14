@@ -69,7 +69,7 @@ fi
 # Use an explicit password-authenticated sudoers rule for prime. In PRoot,
 # supplemental group membership may not be reflected in selected-user sessions.
 install -d -m 0755 /etc/sudoers.d
-printf '%s\\n' 'prime ALL=(ALL:ALL) ALL' > /etc/sudoers.d/prime
+printf '%s\n' 'prime ALL=(ALL:ALL) ALL' > /etc/sudoers.d/prime
 chown root:root /etc/sudoers.d/prime
 chmod 0440 /etc/sudoers.d/prime
 visudo -c
