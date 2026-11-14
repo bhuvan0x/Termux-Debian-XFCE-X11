@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
-
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 command -v proot-distro >/dev/null || { echo "Run ./scripts/setup-termux.sh first." >&2; exit 1; }
 
@@ -26,7 +25,7 @@ proot-distro login debian -- /bin/bash -lc '
   rm -rf /var/lib/apt/lists/*
 '
 
-# The app bundle creates the normal (non-root) desktop account and shortcuts.
+# Install the optional desktop bundle and create the regular desktop user.
 bash "$SCRIPT_DIR/install-apps.sh"
 
 echo "Debian + XFCE + desktop apps installation complete."
