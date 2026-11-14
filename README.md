@@ -80,6 +80,7 @@ Termux-Debian-X11/
 ├── scripts/
 │   ├── setup-termux.sh       # Termux packages and X11 repository
 │   ├── install-debian.sh     # Debian + XFCE desktop installation
+│   ├── install-apps.sh       # GUI applications + desktop shortcuts
 │   ├── start-desktop.sh      # Start X11 and XFCE
 │   ├── stop-desktop.sh       # Stop the desktop session
 │   ├── update-debian.sh      # Update Debian packages
