@@ -38,12 +38,13 @@ Run bash scripts/setup-termux.sh. Confirm x11-repo is enabled and refresh packag
 
 This is a PRoot/Android boundary, not necessarily a driver problem. termux-usb can request Android access and pass a file descriptor to a specially written Termux program, but does not expose every device as a normal /dev/bus/usb node for CUPS/SANE. Prefer network printing/scanning. Full detail: USB-AND-PRINTING.md.
 
-## Epson printer is not listed or will not print
+## Epson L3110 printer or scanner is not detected
 
-- Confirm the exact printer model and whether it supports ESC/P-R.
-- Try a matching Gutenprint model if ESC/P-R is not correct.
-- For a Wi-Fi/Ethernet printer, add it in CUPS by IPP/IPPS or IP address.
-- Do not assume the ESC/P-R package supports every Epson model.
+- The L3110 uses ESC/P-R for printing; Debian's printer-driver-escpr package is the matching driver family.
+- SANE lists the L3110 scanner as supported by epson2 (USB ID 04b8:1142).
+- Run bash scripts/check-usb.sh and inspect Android USB inventory, Debian /dev/bus/usb visibility, scanimage -L and XInput output.
+- The L3110 is USB-only. It has no built-in Wi-Fi/Ethernet, so a wireless printer procedure for an L3150 does not apply.
+- If Android can see the L3110 but PRoot cannot, this is USB passthrough, not the wrong driver. Use a separate Linux host as a CUPS/SANE server if direct USB passthrough cannot be made available.
 
 ## CUPS admin page does not load
 
