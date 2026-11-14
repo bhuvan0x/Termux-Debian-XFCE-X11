@@ -20,11 +20,13 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - A dedicated unprivileged `prime` desktop account for GUI apps.
 - Termux:Widget launchers to start, stop, restart the desktop or open Debian shell.
 - Widget background tasks for Debian updates and desktop app refresh.
-- CUPS printing with Epson ESC/P-R and Gutenprint driver packages for supported models.\n- Android USB detection/permission diagnostics plus X11 input-device inspection.\n- Optional LibreOffice and optional XFCE theme/panel plugins.
+- CUPS printing with Epson ESC/P-R and Gutenprint driver packages for supported models.
+- Android USB detection/permission diagnostics plus X11 input-device inspection.
+- Optional LibreOffice and optional XFCE theme/panel plugins.
 
 ## Quick installation
 
-Install Termux, Termux:X11 and Termux:Widget from compatible sources/signing families. Then in Termux:
+Install Termux, Termux:X11, Termux:Widget and the separate Termux:API Android add-on from compatible sources/signing families. Termux:API's command-line package is installed by setup-termux.sh. Then in Termux:
 
 ```bash
 pkg update && pkg upgrade -y
@@ -52,12 +54,12 @@ The setup creates scripts in `~/.shortcuts/` and `~/.shortcuts/tasks/`.
 | Start Debian X11 | Starts Termux:X11 and XFCE |
 | Stop Debian X11 | Stops the XFCE session |
 | Restart Debian X11 | Stops and starts the desktop |
-| Debian Shell | Opens Debian as user `prime` |
+| Debian Shell | Opens Debian as user `prime` |\n| Check USB devices | Lists Android USB devices and X11 input devices |\n| Start/Stop CUPS printing | Controls the Debian print service |
 
 Background tasks:
 
 - **Update Debian packages** — apt update, full-upgrade and autoremove.
-- **Refresh Debian desktop** — reruns the GUI app installer and desktop launchers.
+- **Refresh Debian desktop** — reruns the GUI app installer and desktop launchers.\n- **Check USB devices** — runs the USB and XInput diagnostics.\n- **Install printer support** — installs CUPS and the Epson/Gutenprint driver packages.
 
 Install the Termux:Widget Android add-on from the same source/signing family as Termux, then add its widget from Android's home-screen widget picker. If you install Widget after the setup, run:
 
@@ -93,7 +95,13 @@ bash scripts/install-apps.sh --office
 
 This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
-## Epson printing and USB devices\n\nThe default Debian installation includes CUPS, Epson ESC/P-R for compatible models, and Gutenprint for its supported printer list. Manage printers at http://127.0.0.1:631 after starting the desktop. No single driver supports every Epson model; confirm your exact model.\n\nRun bash scripts/check-usb.sh to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For printer/scanner use, Wi-Fi/Ethernet is the recommended route. See [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).\n\n## Repository layout
+## Epson printing and USB devices
+
+The default Debian installation includes CUPS, Epson ESC/P-R for compatible models, and Gutenprint for its supported printer list. Manage printers at http://127.0.0.1:631 after starting the desktop. No single driver supports every Epson model; confirm your exact model.
+
+Run bash scripts/check-usb.sh to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For printer/scanner use, Wi-Fi/Ethernet is the recommended route. See [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
+
+## Repository layout
 
 ```text
 Termux-Debian-X11/
