@@ -46,6 +46,10 @@ if command -v proot-distro >/dev/null 2>&1; then
     else
       echo "/dev/bus/usb is not exposed to this Debian PRoot environment."
     fi
+    echo
+    echo "SANE scanner discovery (L3110 USB ID: 04b8:1142; backend: epson2):"
+    if command -v scanimage >/dev/null 2>&1; then scanimage -L || true
+    else echo "scanimage missing; run scripts/install-printing.sh."; fi
   ' || true
 
   echo
@@ -76,6 +80,7 @@ How to interpret this:
   operate the device.
 - USB storage is normally mounted/authorized by Android and accessed through
   shared storage, not mounted directly by Debian.
-- Network/Wi-Fi is the practical printing/scanning route in this PRoot setup.
+- Epson L3110 is USB-only (no built-in network interface). A separate USB print
+  server/host is needed to share it over the network when PRoot cannot access USB.
   See docs/USB-AND-PRINTING.md.
 EOF
