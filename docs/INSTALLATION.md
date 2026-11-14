@@ -71,3 +71,22 @@ Install only what you need. Package availability and versions depend on the Debi
 - Android remains the host operating system and controls hardware, power management, and kernel features.
 - systemd services, kernel modules, Docker-style nested containers, and some low-level networking or hardware features are not expected to work normally.
 - GUI performance and memory use depend heavily on the Android device.
+
+
+## 7. Install the recommended desktop applications
+
+Fresh installations do this automatically through `install-debian.sh`. To add or repair the application bundle later:
+
+```bash
+bash scripts/install-apps.sh
+```
+
+The bundle includes Firefox ESR, VLC, MPV, FFmpeg, Geany, Thunar, Mousepad, image and PDF viewers, archive manager, calculator, task manager, screenshot utility, and audio settings. It creates launchers in the Debian desktop user's `~/Desktop` folder.
+
+Optional office suite (larger download and memory footprint):
+
+```bash
+bash scripts/install-apps.sh --office
+```
+
+The graphical session runs as the unprivileged Debian user `prime`, not root. This is important for VLC and browser security. Start it with `bash scripts/start-desktop.sh`.
