@@ -45,6 +45,17 @@ Open the Termux:X11 Android app, then launch the desktop:
 bash scripts/start-all.sh
 ```
 
+## Daily controls
+
+After the initial setup, use only these two commands:
+
+~~~bash
+bash scripts/start-all.sh
+bash scripts/stop-all.sh
+~~~
+
+Start All launches Termux:X11, PulseAudio, CUPS (when installed) and XFCE. Stop All shuts down XFCE, CUPS, the Termux:X11 server/viewer and PulseAudio.
+
 ## Termux:Widget controls
 
 The setup creates scripts in `~/.shortcuts/` and `~/.shortcuts/tasks/`.
