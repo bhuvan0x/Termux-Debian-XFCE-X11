@@ -54,12 +54,16 @@ The setup creates scripts in `~/.shortcuts/` and `~/.shortcuts/tasks/`.
 | Start Debian X11 | Starts Termux:X11 and XFCE |
 | Stop Debian X11 | Stops the XFCE session |
 | Restart Debian X11 | Stops and starts the desktop |
-| Debian Shell | Opens Debian as user `prime` |\n| Check USB devices | Lists Android USB devices and X11 input devices |\n| Start/Stop CUPS printing | Controls the Debian print service |
+| Debian Shell | Opens Debian as user `prime` |
+| Check USB devices | Lists Android USB devices and X11 input devices |
+| Start/Stop CUPS printing | Controls the Debian print service |
 
 Background tasks:
 
 - **Update Debian packages** — apt update, full-upgrade and autoremove.
-- **Refresh Debian desktop** — reruns the GUI app installer and desktop launchers.\n- **Check USB devices** — runs the USB and XInput diagnostics.\n- **Install printer support** — installs CUPS and the Epson/Gutenprint driver packages.
+- **Refresh Debian desktop** — reruns the GUI app installer and desktop launchers.
+- **Check USB devices** — runs the USB and XInput diagnostics.
+- **Install printer support** — installs CUPS and the Epson/Gutenprint driver packages.
 
 Install the Termux:Widget Android add-on from the same source/signing family as Termux, then add its widget from Android's home-screen widget picker. If you install Widget after the setup, run:
 
@@ -114,6 +118,10 @@ Termux-Debian-X11/
     ├── install-debian.sh
     ├── install-apps.sh
     ├── install-termux-widget.sh
+    ├── install-printing.sh
+    ├── start-printing.sh
+    ├── stop-printing.sh
+    └── check-usb.sh
     ├── start-desktop.sh
     ├── stop-desktop.sh
     ├── update-debian.sh
@@ -138,6 +146,8 @@ bash scripts/install-apps.sh
 bash scripts/install-termux-widget.sh
 bash scripts/update-debian.sh
 bash scripts/diagnose.sh
+bash scripts/check-usb.sh
+bash scripts/start-printing.sh
 ```
 
 ## Disclaimer
