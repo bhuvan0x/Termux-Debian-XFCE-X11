@@ -17,14 +17,17 @@ run_stop() {
 run_stop "XFCE desktop" "$SCRIPT_DIR/stop-desktop.sh"
 run_stop "CUPS printing" "$SCRIPT_DIR/stop-printing.sh"
 
-# Stop the Termux-side X11 server process.
-if command -v pkill >/dev/null 2>&1; then
-  pkill -TERM -x termux-x11 2>/dev/null || true
+# Close the Android Termux:X11 viewer using its documented stop action.
+# The viewer Activity and the Termux-side X server are separate processes.
+if command -v am >/dev/null 2>&1; then
+  echo "Closing Termux:X11 viewer..."
+  am broadcast -a com.termux.x11.ACTION_STOP -p com.termux.x11 >/dev/null 2>&1 || true
 fi
 
-# Close the Android X11 viewer activity too.
-if command -v am >/dev/null 2>&1; then
-  am force-stop com.termux.x11 >/dev/null 2>&1 || true
+# Stop the Termux-side X11 server. Match its command line rather than only
+# the process name because builds may expose different process comm values.
+if command -v pkill >/dev/null 2>&1; then
+  pkill -TERM -f '[t]ermux-x11' 2>/dev/null || true
 fi
 
 # Stop the PulseAudio instance started by the workstation.
@@ -37,4 +40,4 @@ if [ "$FAILED" -ne 0 ]; then
   exit 1
 fi
 
-echo "Stop All complete: XFCE, CUPS, Termux:X11 and PulseAudio shutdown requested."
+echo "Stop All complete: XFCE, CUPS, Termux:X11 viewer/server and PulseAudio shutdown requested."
