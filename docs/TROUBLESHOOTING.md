@@ -105,10 +105,10 @@ First check the actual Debian user identity and sudoers configuration from Termu
 proot-distro login debian -- bash -lc 'id prime; getent group sudo; grep -n "^%sudo" /etc/sudoers'
 ```
 
-PRoot selected-user sessions may not expose the supplemental sudo group as expected. If `prime` is still rejected, create a dedicated sudoers drop-in from Termux (which enters Debian as root):
+PRoot selected-user sessions may not expose the supplemental sudo group as expected. The repository's `install-apps.sh` now creates this explicit rule automatically. On an existing installation, rerun `bash scripts/install-apps.sh`; alternatively create the drop-in from Termux (which enters Debian as root):
 
 ```bash
-proot-distro login debian -- bash -lc 'printf "%s\\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
+proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
 ```
 
 Then fully stop and restart XFCE and test `sudo -v` in a new Debian terminal. The rule requires the `prime` password. Change it with `proot-distro login debian -- passwd prime`. Never put passwords in scripts or repository files.
