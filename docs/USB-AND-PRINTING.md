@@ -1,113 +1,102 @@
-# USB devices and Epson printing
+# Epson EcoTank L3110: USB printing and scanning
 
-## USB visibility has three layers
+## Confirmed model details
 
-1. **Android** enumerates devices connected in USB host/OTG mode and controls app permission.
-2. **Termux:API** can list USB devices and request Android permission. Its termux-usb command can pass a USB file descriptor to a specially written program.
-3. **Debian inside PRoot** is not automatically given access to Android's raw USB device nodes. A permission grant to Termux does not automatically pass the device into CUPS, SANE or every Linux application.
+The EcoTank L3110 is a USB 2.0 multifunction printer. Unlike the L3150, Epson's specification lists no built-in Wi-Fi or Ethernet for the L3110. It uses Epson ESC/P-R for printing. Sources:
 
-Run this from the repository directory in Termux:
+- Epson L3110 official product page: https://www.epson.co.in/For-Home/Printers/EcoTank-Printers/EcoTank-L3110-Multifunction-InkTank-Printer/p/C11CG87504
+- Epson L3110/L3150 specification table (the models have different connectivity): https://mediaserver.goepson.com/ImConvServlet/imconv/e8815d81fe9b79ad95ab6f79d819b53b9083bfc2/original?assetDescr=Epson+L3110+L3150.pdf
+
+SANE's supported-device list explicitly lists the **L3110 Series** with USB ID **04b8:1142**, status **Complete**, backend **epson2**. That is a model-specific scanner match, not a generic guess:
+
+- SANE supported devices: https://www.sane-project.org/sane-mfgs.html
+
+## Printing driver
+
+The Debian setup installs `printer-driver-escpr` and CUPS. This is the correct driver family for the L3110's ESC/P-R print language. Debian publishes an ARM64 build of `printer-driver-escpr`; do not install Epson's amd64 package on this ARM64 device.
+
+- Debian ARM64 ESC/P-R package: https://packages.debian.org/trixie/arm64/printer-driver-escpr
+- Epson L3110 specifications: https://mediaserver.goepson.com/ImConvServlet/imconv/8cfeb3a65688824f46aadec9c4bc312118f007b9/original?assetDescr=Epson%2520L3110%2520L3150.pdf
+
+The installer also includes Gutenprint as an additional set of printer drivers, but ESC/P-R is the primary match for this model.
+
+## Scanner driver
+
+The installer includes SANE's runtime and CLI tools, and Simple Scan when available in the Debian repository. The L3110 is supported by SANE's `epson2` backend. The scanner USB ID is `04b8:1142`.
+
+After installation, connect the printer's USB cable to the PrimeBook (using a data-capable OTG adapter/hub), then run in Debian:
+
+~~~bash
+scanimage -L
+~~~
+
+Expected device discovery should identify an Epson scanner. If it reports no scanners, that does not invalidate the SANE driver match: first check whether Android sees the device and whether PRoot can access the raw USB bus.
+
+For a scan test (once the scanner is actually visible):
+
+~~~bash
+scanimage --format=pnm > ~/scan-test.pnm
+~~~
+
+For a GUI, launch **Document Scanner** (Simple Scan) from the Debian desktop menu/shortcut when it is installed.
+
+## USB limitation on Android + PRoot
+
+There are separate layers:
+
+1. Android enumerates the L3110 over USB host/OTG and asks the user to grant an app permission.
+2. Termux:API's `termux-usb` can list devices and request permission. It can hand a USB file descriptor to a specially written Termux program.
+3. Debian in PRoot does not automatically get general access to Android's USB device nodes. Granting Termux permission does not automatically connect CUPS's USB backend or SANE's `epson2` backend to the printer/scanner.
+
+Run diagnostics in Termux:
 
 ~~~bash
 bash scripts/check-usb.sh
 ~~~
 
-To ask Android for permission for a listed USB device:
+That command reports Android's USB inventory, Debian's `/dev/bus/usb` visibility, SANE `scanimage -L`, and XInput devices (when X11 is running). To request Android permission, use the exact path reported by `termux-usb -l`:
 
 ~~~bash
 bash scripts/check-usb.sh --request /dev/bus/usb/001/002
 ~~~
 
-The path above is only an example. Use the exact path printed by the USB list. Android may display a permission dialog.
+The example device path is not literal; copy the path from your device output. A permission grant alone does not create PRoot passthrough.
 
-Install both parts of Termux:API:
+## Ways to use this L3110 with the PrimeBook
 
-- Termux command-line package: setup-termux.sh installs the termux-api package.
-- Separate Android add-on: https://github.com/termux/termux-api
+**Option A — direct USB inside Debian:** This is the desired simple workflow, but it only works if the Android/PRoot environment exposes a usable USB device node to CUPS/SANE. The repository now checks for that. It cannot force Android to expose the hardware.
 
-The Termux:API APK must be signed compatibly with the installed Termux app.
+**Option B — use a separate Linux host as a print/scan server:** Connect the L3110 by USB to a Raspberry Pi, Linux mini-PC, or another always-on computer. Run CUPS and SANE on that host, and share printing over IPP. For scanning, configure a SANE network frontend/backend or another scanner-sharing service on the host. This is not built into this repository, but it bypasses the PrimeBook's PRoot USB restriction.
 
-## USB keyboards, mice and HID devices
+**Option C — USB-over-network hardware:** A USB device server may share the USB device over the LAN, but check that it supports multifunction printer scanner interfaces and Linux clients; generic USB print servers sometimes support printing only, not scanning.
 
-Standard USB keyboards and mice connected in Android host/OTG mode are normally handled by Android's input stack. Termux:X11 can receive the mapped input events when its window has focus. This is different from giving Debian raw access to the USB device.
+Do not expect the L3110 itself to join Wi-Fi. Epson's spec distinguishes the L3110 (USB only) from L3150 (Wi-Fi).
 
-With the X11 desktop running, check:
+## Install or re-run support
 
-~~~bash
-bash scripts/check-usb.sh
-~~~
-
-Inspect the **Input devices visible through the active X11 display** section. It runs xinput list against display :0. Some physical devices may be represented by a virtual Termux:X11 input device instead of their own physical USB name. Test typing, pointer movement, right-click and scrolling in an XFCE application.
-
-Specialized hardware such as serial adapters, microcontrollers, SDRs, smart-card readers, capture cards, printers and scanners may require a device-specific Termux program that consumes the file descriptor passed by termux-usb -e. Generic Linux USB drivers inside PRoot cannot simply open the Android device path.
-
-## USB storage
-
-Plug the drive into Android, allow Android to mount it, and expose it through Termux shared storage if Debian needs its files. Do not expect to mount a raw block device from inside the PRoot environment.
-
-## Epson printer drivers included
-
-The default printing installer adds:
-
-- **CUPS** — print queues and printer management.
-- **printer-driver-escpr** — Epson ESC/P-R driver for Epson models that implement that print language.
-- **printer-driver-gutenprint** — additional CUPS drivers for many printer models, including some Epson devices.
-- **usbutils and sane-utils** — USB and scanner diagnostics. sane-airscan is installed when available for network scanner discovery.
-
-There is no single Linux driver guaranteed to work with every Epson printer. ESC/P-R is used by selected Epson inkjet models. Gutenprint also has a finite supported-model list. Check the exact model in the driver documentation or Epson support pages before assuming compatibility.
-
-Debian provides both driver packages for ARM64:
-
-- Debian ESC/P-R package: https://packages.debian.org/trixie/arm64/printer-driver-escpr
-- Debian Gutenprint package: https://packages.debian.org/trixie/arm64/printer-driver-gutenprint
-- Epson ESC/P-R manual: https://download.ebz.epson.net/man/linux/escpr.html
-
-## Install and start printing
-
-Fresh installations include printing support. For an existing Debian installation:
+Fresh repository installations add this stack automatically. To add it to an existing Debian installation:
 
 ~~~bash
 bash scripts/install-printing.sh
 bash scripts/start-printing.sh
 ~~~
 
-Open the CUPS administration page in the Debian browser:
+Open CUPS in the Debian browser:
 
 ~~~text
 http://127.0.0.1:631
 ~~~
 
-Before administering printers, set a password for the Debian desktop user from Termux:
+Set a password for the `prime` account in Termux before CUPS administration:
 
 ~~~bash
 proot-distro login debian -- passwd prime
 ~~~
 
-Then use CUPS **Administration → Add Printer**. The installer adds the prime user to the CUPS lpadmin group.
-
-## Recommended printer connection: Wi-Fi or Ethernet
-
-For this Android + PRoot configuration, connect the Epson printer to the same Wi-Fi/Ethernet network as the PrimeBook. Add it in CUPS by IPP/IPPS or its network address. This avoids the Android/PRoot raw USB device-node restriction.
-
-If the printer supports driverless IPP Everywhere or AirPrint, try that option first. Otherwise choose the detected ESC/P-R or Gutenprint model that exactly matches the printer.
-
-## Direct USB printing caveat
-
-The package installer includes USB-related CUPS drivers, but this does not make USB printing work automatically. PRoot cannot generally hand CUPS a raw Android USB device node. Termux:API can obtain a USB file descriptor for a custom program, but CUPS's normal USB backend is not wired to that descriptor by this project.
-
-Direct USB printing would require an Android-side USB bridge/backend designed for the exact printer protocol. This repository does not claim to implement that bridge.
+The installer adds `prime` to CUPS/scanner groups where those groups exist.
 
 ## Stop CUPS
 
 ~~~bash
 bash scripts/stop-printing.sh
 ~~~
-
-## Troubleshooting
-
-- **Android USB list is empty:** check USB OTG/host mode, cable, hub power and Android's USB permission prompt.
-- **termux-usb is missing:** run pkg install termux-api and install/open the separate Termux:API Android add-on.
-- **XInput does not show a physical device name:** Android may expose inputs through a virtual Termux:X11 device; test keyboard and mouse behavior in XFCE.
-- **CUPS page does not load:** run bash scripts/start-printing.sh and inspect /var/log/cups/error_log inside Debian.
-- **Printer not found on network:** confirm both devices are on the same LAN, try the printer's IP address and check that the router does not isolate wireless clients.
-- **Epson model is not listed:** supply the exact printer model and Debian release so the correct ESC/P-R, Gutenprint, Epson-specific or driverless route can be checked.
