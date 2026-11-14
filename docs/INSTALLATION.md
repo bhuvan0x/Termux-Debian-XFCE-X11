@@ -68,7 +68,7 @@ Then long-press the Android home screen, open **Widgets**, find **Termux:Widget*
 bash scripts/install-debian.sh
 ```
 
-This installs Debian, XFCE, everyday GUI applications, CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user `prime`, launchers under `/home/prime/Desktop` and the PrimeBook dark desktop styling.
+This installs Debian, XFCE, everyday GUI applications, CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user `prime`, a password-authenticated sudoers rule for `prime`, launchers under `/home/prime/Desktop` and the PrimeBook dark desktop styling.
 
 For an existing Debian installation, run:
 
@@ -87,10 +87,10 @@ bash scripts/install-apps.sh --office
 
 ## 5. Configure Debian sudo access if needed
 
-The desktop user `prime` is unprivileged. If `sudo` reports that `prime` is not in the sudoers file even after adding it to the `sudo` group, create a dedicated sudoers drop-in from Termux (Termux enters Debian as root):
+The desktop user `prime` is unprivileged. The app installer creates a dedicated password-authenticated sudoers drop-in. If `sudo` still reports that `prime` is not in the sudoers file, reapply the desktop app setup with `bash scripts/install-apps.sh`, or create the rule manually from Termux (Termux enters Debian as root):
 
 ```bash
-proot-distro login debian -- bash -lc 'printf "%s\\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
+proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
 ```
 
 The rule requires the `prime` password; it does not grant passwordless sudo. Set or change the Debian password without putting it in a script or repository:
