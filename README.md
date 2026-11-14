@@ -158,10 +158,10 @@ Do not install an `amd64` VS Code package on this ARM64 Debian environment.
 
 ## Debian sudo access
 
-The desktop user `prime` is unprivileged by default. If PRoot's selected-user session does not inherit supplemental group membership correctly, the installation can use a dedicated sudoers drop-in instead of relying only on the `sudo` group:
+The desktop user `prime` is unprivileged. `scripts/install-apps.sh` creates a dedicated, password-authenticated sudoers drop-in for `prime`; this avoids relying only on supplemental group membership in a PRoot selected-user session. To reapply it on an existing installation, rerun `bash scripts/install-apps.sh`.
 
 ```bash
-proot-distro login debian -- bash -lc 'printf "%s\\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
+proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
 ```
 
 This requires running from Termux, which enters Debian as root. It grants `prime` password-authenticated sudo access. Never store a plaintext password in this repository.
