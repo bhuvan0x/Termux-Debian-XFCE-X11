@@ -85,6 +85,16 @@ sudo gdebi /path/to/package.deb
 
 Check the package architecture first with `dpkg-deb -f /path/to/package.deb Architecture`. This device's Debian environment is ARM64; GDebi does not convert `amd64` packages to ARM64. For an existing installation, pull the repository update and rerun `bash scripts/install-apps.sh` to add GDebi.
 
+
+OpenCode Desktop is integrated automatically when `/opt/OpenCode/ai.opencode` is present. The installer creates an **OpenCode** XFCE menu and desktop shortcut that launches it in the background with Termux:X11-friendly Electron flags. Its diagnostic output is saved to `~/Downloads/opencode-desktop.log`.
+
+For future local Debian packages, use the `prime` user's Debian terminal:
+
+```bash
+primebook-install-deb ~/Downloads/package.deb
+```
+
+The helper refuses packages whose architecture is not `arm64` or `all`, installs through GDebi, and refreshes per-user launch overrides for detected Electron apps. This improves compatibility for common Electron/Chromium desktop packages, but it cannot guarantee that every ARM64 `.deb` will run: native libraries, kernel features, GPU requirements and app-specific dependencies still vary. Do not install `amd64` packages.
 For the graphical workflow, use **GDebi Package Installer** from the desktop or open a `.deb` file in Thunar with GDebi. The repository's launcher starts the GTK frontend with administrator privileges before installation, keeps a terminal window open to show diagnostic output, and appends the session to `/home/prime/Documents/gdebi-install.log`. This avoids relying on a PolicyKit elevation prompt inside PRoot. The desktop installer also adjusts the XFCE panel to the bottom edge with a larger taskbar area.
 
 Optional office suite (large download and memory footprint):
