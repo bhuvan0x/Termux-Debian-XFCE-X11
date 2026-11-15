@@ -3,6 +3,12 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 command -v proot-distro >/dev/null || { echo "Run ./scripts/setup-termux.sh first." >&2; exit 1; }
 
+PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
+if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
+  echo "Update Termux proot-distro to version 5.8.0 or newer first: pkg update && pkg upgrade -y" >&2
+  exit 2
+fi
+
 if ! proot-distro list | grep -qE '^  debian([[:space:]]|$)'; then
   proot-distro install debian
 fi
