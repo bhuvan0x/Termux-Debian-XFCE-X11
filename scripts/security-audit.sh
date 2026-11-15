@@ -85,6 +85,18 @@ else
   echo "CUPS is not installed."
 fi
 
+section "CLAMAV SCANNER"
+if command -v clamscan >/dev/null 2>&1; then
+  clamscan --version
+  if compgen -G '/var/lib/clamav/*.cvd' >/dev/null || compgen -G '/var/lib/clamav/*.cld' >/dev/null; then
+    stat -c '%y %n' /var/lib/clamav/*.cvd /var/lib/clamav/*.cld 2>/dev/null || true
+  else
+    echo "ClamAV signatures are missing; run freshclam in an isolated Debian root session."
+  fi
+else
+  echo "Optional ClamAV scanner is not installed."
+fi
+
 section "PACKAGE FILE INTEGRITY"
 if command -v debsums >/dev/null 2>&1; then
   echo "debsums reports changed/missing package-managed files below (empty output is expected):"
