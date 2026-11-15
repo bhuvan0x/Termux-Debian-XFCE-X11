@@ -48,7 +48,7 @@ Do not use `git reset --hard` for this.
 bash scripts/setup-termux.sh
 ```
 
-This installs the Termux:X11 client, PulseAudio, proot-distro and the Termux:API command-line package (including termux-usb). It also:
+This installs the Termux:X11 client, PulseAudio, proot-distro and the Termux:API command-line package (including termux-usb). The setup checks for PRoot-Distro 5.8.0 or newer because the workstation uses isolated sessions. It also:
 
 - Configures Git to ignore executable-bit-only changes in this clone.
 - Creates Termux terminal commands `start-all` and `stop-all` in `$PREFIX/bin`.
@@ -66,6 +66,8 @@ Then long-press the Android home screen, open **Widgets**, find **Termux:Widget*
 
 ```bash
 bash scripts/install-debian.sh
+bash scripts/harden-debian.sh
+bash scripts/security-audit.sh
 ```
 
 This installs Debian, XFCE, everyday GUI applications (including GDebi), CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user `prime`, a password-authenticated sudoers rule for `prime`, launchers under `/home/prime/Desktop` and the PrimeBook Neo desktop styling: Arc-Dark, Papirus icons, a custom orbital wallpaper, and an icon-first taskbar. The visual helper changes only per-user XFCE appearance settings; it preserves the existing panel items and does not modify Linux services or the X11/audio/CUPS startup workflow.
@@ -112,7 +114,7 @@ bash scripts/install-apps.sh --office
 The desktop user `prime` is unprivileged. The app installer creates a dedicated password-authenticated sudoers drop-in. If `sudo` still reports that `prime` is not in the sudoers file, reapply the desktop app setup with `bash scripts/install-apps.sh`, or create the rule manually from Termux (Termux enters Debian as root):
 
 ```bash
-proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
+proot-distro login --isolated debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
 ```
 
 The rule requires the `prime` password; it does not grant passwordless sudo. Set or change the Debian password without putting it in a script or repository:
@@ -211,6 +213,26 @@ Update Debian packages separately:
 ```bash
 bash scripts/update-debian.sh
 ```
+
+## 10. Security hardening
+
+Run from Termux:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+pkg update && pkg upgrade -y
+pkg install -y proot-distro
+bash scripts/security-check-termux.sh
+bash scripts/harden-debian.sh
+bash scripts/security-audit.sh
+```
+
+PRoot-Distro 5.8.0 or newer is required. The desktop runs with `--isolated --shared-x11`: the Debian session does not automatically receive Termux's home, app directories or Android shared storage; only the X11 socket is shared for the GUI. Any temporary file transfer should explicitly bind only the required directory.
+
+The hardening script installs `debsums`, enforces authenticated APT repositories, reduces sudo's timestamp and password-attempt defaults, and restricts CUPS to loopback with printer sharing disabled. It does not start SSH or other network daemons. Run `bash scripts/update-debian.sh` regularly; PRoot does not run systemd timers, so unattended-upgrades is not represented as active background protection.
+
+PRoot shares the Android kernel and app UID. It cannot provide a kernel firewall, AppArmor enforcement, kernel sysctl hardening, auditd or the isolation of a VM. Keep Android updated, use a strong device lock, install Termux add-ons from compatible trusted sources, keep Play Protect enabled, review app permissions and back up important files. Never store secrets in the repository. Electron launchers using `--no-sandbox` weaken renderer isolation; use only trusted packages and verify vendor hashes/signatures where available.
 
 ## Notes and limitations
 
