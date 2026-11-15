@@ -462,16 +462,10 @@ set_setting() {
 }
 set_panel_color() {
   local panel="$1"
-  local property="/panels/$panel/background-rgba"
-  if xfconf-query -c xfce4-panel -p "$property" >/dev/null 2>&1; then
-    xfconf-query -c xfce4-panel -p "$property" -a \
-      -t double -s 0.035 -t double -s 0.050 \
-      -t double -s 0.095 -t double -s 1.000 >/dev/null 2>&1 || true
-  else
-    xfconf-query -c xfce4-panel -p "$property" --create -a \
-      -t double -s 0.035 -t double -s 0.050 \
-      -t double -s 0.095 -t double -s 1.000 >/dev/null 2>&1 || true
-  fi
+  # Xfce stores panel background RGB as three uint16 values (0..65535).
+  xfconf-query -c xfce4-panel -p "/panels/$panel/background-color" --create -a \
+    -t uint -s 2300 -t uint -s 3300 -t uint -s 6200 >/dev/null 2>&1 || true
+  set_setting xfce4-panel "/panels/$panel/background-alpha" uint 96
 }
 
 # A crisp dark theme with high-contrast icons and readable typography.
@@ -514,9 +508,11 @@ set_panel_color panel-1
 
 # Detect existing panel plugins by their IDs. No item is added, removed or
 # reordered, so the existing launchers and taskbar remain intact.
-plugin_ids="$(xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids 2>/dev/null | awk '/^[[:space:]]*[0-9]+[[:space:]]*$/ {gsub(/[[:space:]]/,""); print}')"
-for id in $plugin_ids; do
-  plugin_type="$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$id" 2>/dev/null | tail -n 1 || true)"
+# Read the plugin IDs and their types directly from Xfconf. This works
+# across Xfce versions without assuming the serialized array display format.
+while read -r plugin_path plugin_type; do
+  [[ "$plugin_path" =~ ^/plugins/plugin-([0-9]+)$ ]] || continue
+  id="${BASH_REMATCH[1]}"
   case "$plugin_type" in
     applicationsmenu|whiskermenu)
       set_setting xfce4-panel "/plugins/plugin-$id/show-button-title" bool false
@@ -528,7 +524,7 @@ for id in $plugin_ids; do
       set_setting xfce4-panel "/plugins/plugin-$id/show-labels" bool false
       set_setting xfce4-panel "/plugins/plugin-$id/show-handle" bool false
       set_setting xfce4-panel "/plugins/plugin-$id/show-tooltips" bool true
-      set_setting xfce4-panel "/plugins/plugin-$id/grouping" uint 1
+      set_setting xfce4-panel "/plugins/plugin-$id/grouping" bool true
       ;;
     systray)
       set_setting xfce4-panel "/plugins/plugin-$id/icon-size" uint 22
@@ -540,7 +536,7 @@ for id in $plugin_ids; do
       set_setting xfce4-panel "/plugins/plugin-$id/tooltip-format" string "%A, %d %B %Y"
       ;;
   esac
-done
+done < <(xfconf-query -c xfce4-panel -lv 2>/dev/null || true)
 
 xfce4-panel -r >/dev/null 2>&1 || true
 xfdesktop --reload >/dev/null 2>&1 || true
