@@ -68,6 +68,7 @@ for spec in \
   "Security audit:scripts/security-audit.sh" \
   "Termux security check:scripts/security-check-termux.sh" \
   "Install ClamAV:scripts/install-clamav.sh" \
+  "Update ClamAV signatures:scripts/update-clamav.sh" \
   "Scan Debian Downloads:scripts/scan-files.sh"; do
   name="${spec%%:*}"
   script="${spec#*:}"
