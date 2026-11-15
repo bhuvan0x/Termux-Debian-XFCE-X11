@@ -1,6 +1,29 @@
 # Troubleshooting
 
-## Termux:X11 shows a black screen
+## PRoot-Distro is too old for isolated login
+
+The workstation requires PRoot-Distro 5.8.0 or newer. In Termux, update it before running the desktop:
+
+```bash
+pkg update
+pkg upgrade -y
+pkg install proot-distro
+bash scripts/security-check-termux.sh
+```
+
+Do not remove or reinstall the Debian rootfs to solve this version check. Update the Termux package first.
+
+## Security hardening and audit
+
+From Termux, run:
+
+```bash
+bash scripts/harden-debian.sh
+bash scripts/security-audit.sh
+```
+
+The audit reports update status, sudo configuration, listening sockets, CUPS binding, SSH server presence and package-file checksum discrepancies. It does not certify the Android device as secure. PRoot cannot enforce host kernel firewall rules, AppArmor, kernel sysctls, systemd timers or auditd.
+
 
 - Open the Termux:X11 Android app once before starting XFCE.
 - Confirm the Termux package is installed: `pkg list-installed | grep termux-x11`.
