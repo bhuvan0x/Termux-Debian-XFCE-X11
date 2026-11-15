@@ -65,7 +65,7 @@ if command -v am >/dev/null 2>&1; then
   am start -n com.termux.x11/.MainActivity >/dev/null 2>&1 || true
 fi
 
-proot-distro login debian -- /bin/bash -lc '
+proot-distro login --isolated debian -- /bin/bash -lc '
   if ! id prime >/dev/null 2>&1; then
     useradd --create-home --shell /bin/bash prime
   fi
@@ -73,11 +73,11 @@ proot-distro login debian -- /bin/bash -lc '
 '
 
 # Start CUPS if the printing stack has been installed.
-if proot-distro login debian -- test -x /usr/sbin/cupsd >/dev/null 2>&1; then
+if proot-distro login --isolated debian -- test -x /usr/sbin/cupsd >/dev/null 2>&1; then
   bash "$SCRIPT_DIR/start-printing.sh" || echo "Warning: CUPS did not start; see docs/USB-AND-PRINTING.md."
 fi
 
-proot-distro login debian --shared-tmp --user prime -- /bin/bash -lc '
+proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -lc '
   export DISPLAY=:0
   export PULSE_SERVER=tcp:127.0.0.1
   export XDG_RUNTIME_DIR=/tmp/runtime-prime
