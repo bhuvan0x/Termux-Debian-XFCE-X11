@@ -15,7 +15,14 @@ dpkg --print-architecture
 echo
 echo "===== EPSON ESC/P-R DRIVER ====="
 if dpkg-query -W -f='${Status} | version ${Version} | architecture ${Architecture}\n' printer-driver-escpr 2>/dev/null | grep -q '^install ok installed'; then
+  driver_version="$(dpkg-query -W -f='${Version}' printer-driver-escpr)"
   dpkg-query -W -f='${Status} | version ${Version} | architecture ${Architecture}\n' printer-driver-escpr
+  if dpkg --compare-versions "$driver_version" ge "1.8.8-1"; then
+    echo "PASS: this driver generation contains the Epson L3110 Series PPD."
+  else
+    echo "WARNING: driver is older than 1.8.8; the L3110 Series model entry is not included."
+    echo "Run bash scripts/install-printing.sh from Termux to update the driver."
+  fi
 else
   echo "NOT INSTALLED: run bash scripts/install-printing.sh from Termux."
 fi
