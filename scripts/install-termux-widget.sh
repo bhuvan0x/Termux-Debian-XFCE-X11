@@ -63,6 +63,21 @@ EOF
 chmod 700 "$TASKS_DIR/Update Debian packages"
 
 for spec in \
+  "Harden Debian:scripts/harden-debian.sh" \
+  "Security audit:scripts/security-audit.sh" \
+  "Termux security check:scripts/security-check-termux.sh"; do
+  name="${spec%%:*}"
+  script="${spec#*:}"
+  cat > "$TASKS_DIR/$name" <<EOF
+#!/data/data/com.termux/files/usr/bin/bash
+set -Eeuo pipefail
+REPO_DIR=$REPO_Q
+exec bash "\$REPO_DIR/$script"
+EOF
+  chmod 700 "$TASKS_DIR/$name"
+done
+
+for spec in \
   "Refresh Debian desktop:scripts/install-apps.sh" \
   "Check USB devices:scripts/check-usb.sh" \
   "Install printer support:scripts/install-printing.sh"; do
