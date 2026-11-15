@@ -28,6 +28,7 @@ echo "== Installing the lightweight desktop app bundle =="
 apt-get update
 apt-get install -y \
   firefox-esr \
+  gdebi \
   vlc mpv ffmpeg \
   geany \
   ristretto atril xarchiver galculator \
