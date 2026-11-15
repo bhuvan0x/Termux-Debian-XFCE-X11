@@ -77,7 +77,7 @@ bash scripts/install-apps.sh
 bash scripts/install-printing.sh
 ```
 
-The printing installer adds the Debian ARM64 Epson ESC/P-R driver and creates **Epson L3110 Series Setup** on the XFCE desktop and in the Applications menu. After `start-all`, open that shortcut to reach CUPS Administration and choose **Add Printer**. The shortcut configures the CUPS workflow; it does not bypass Android/PRoot USB restrictions.
+The printing installer adds the ARM64 ESC/P-R 1.8.8 package, which includes the exact L3110 Series PPD, and creates **Epson L3110 Series Setup** on the XFCE desktop and in the Applications menu. Debian 13's base 1.7.17 package does not include this model PPD, so the installer temporarily pins only `printer-driver-escpr` from Debian Forky, installs it, and removes the temporary apt source and pin. After `start-all`, open the shortcut to reach CUPS Administration and choose **Add Printer**. The shortcut configures the CUPS workflow; it does not bypass Android/PRoot USB restrictions.
 
 To install a local Debian package and let GDebi resolve its dependencies, use a Debian terminal as `prime`:
 
