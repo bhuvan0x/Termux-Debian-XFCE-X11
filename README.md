@@ -15,7 +15,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 
 - Debian userspace through `proot-distro`; no device root required.
 - XFCE desktop with a lightweight, dark appearance, custom wallpaper, larger desktop icons and a properly bottom-anchored panel with room for taskbar icons.
-- Firefox ESR, GDebi with a privileged diagnostic launcher and persistent install log, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
+- Firefox ESR, GDebi with a privileged diagnostic launcher, permanent OpenCode desktop launcher, and ARM64 `.deb` installation helper, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
 - Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
 - Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down, including the Android X11 viewer.
@@ -118,6 +118,8 @@ Official project: https://github.com/termux/termux-widget
 |---|---|
 | Firefox ESR | Web browser |
 | GDebi | Local Debian package installer; terminal output is visible and saved to `~/Documents/gdebi-install.log` |
+| OpenCode Desktop | Permanent XFCE launcher with PRoot-compatible Electron flags and log in `~/Downloads/opencode-desktop.log` |
+| ARM64 local package helper | `primebook-install-deb /path/to/package.deb` validates `arm64`/`all` packages and refreshes detected Electron launchers |
 | VLC / MPV | Video and audio |
 | FFmpeg | Media conversion |
 | Geany | Lightweight code editor |
