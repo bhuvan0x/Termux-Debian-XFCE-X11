@@ -13,7 +13,7 @@ SANE's supported-device list explicitly lists the **L3110 Series** with USB ID *
 
 ## Printing driver
 
-The Debian setup installs `printer-driver-escpr` and CUPS. This is the correct driver family for the L3110's ESC/P-R print language. Debian publishes an ARM64 build of `printer-driver-escpr`; do not install Epson's amd64 package on this ARM64 device.
+The Debian setup installs `printer-driver-escpr` and CUPS. This is the correct driver family for the L3110's ESC/P-R print language. Debian publishes a native ARM64 build of `printer-driver-escpr`; use it instead of Epson's Linux `amd64` download, which cannot run in this ARM64 Debian rootfs.
 
 - Debian ARM64 ESC/P-R package: https://packages.debian.org/trixie/arm64/printer-driver-escpr
 - Epson L3110 specifications: https://mediaserver.goepson.com/ImConvServlet/imconv/8cfeb3a65688824f46aadec9c4bc312118f007b9/original?assetDescr=Epson%2520L3110%2520L3150.pdf
@@ -80,12 +80,18 @@ Fresh repository installations add this stack automatically. To add it to an exi
 bash scripts/install-printing.sh
 ~~~
 
-After installation, use the normal daily command bash scripts/start-all.sh; CUPS starts with the desktop.
+After installation, use the normal daily command `start-all`; CUPS starts with the desktop. The installer creates **Epson L3110 Series Setup** on `/home/prime/Desktop` and in the XFCE Applications menu. Open it to reach the CUPS Administration page, then choose **Add Printer** and select the Epson L3110 Series driver when it appears.
 
-Open CUPS in the Debian browser:
+You can also open CUPS directly in the Debian browser:
 
 ~~~text
-http://127.0.0.1:631
+http://127.0.0.1:631/admin
+~~~
+
+To verify the driver package, model entries, CUPS state, USB visibility and scanner detection from Termux, run:
+
+~~~bash
+bash scripts/check-epson-l3110.sh
 ~~~
 
 Set a password for the `prime` account in Termux before CUPS administration:
