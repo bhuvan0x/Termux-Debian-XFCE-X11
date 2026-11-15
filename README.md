@@ -178,7 +178,7 @@ Run these from **Termux**, in this order, after pulling the latest repository:
 cd ~/Termux-Debian-X11
 git pull --ff-only
 pkg update && pkg upgrade -y
-pkg install -y proot-distro
+pkg install -y proot-distro iproute2
 bash scripts/security-check-termux.sh
 bash scripts/harden-debian.sh
 bash scripts/security-audit.sh
