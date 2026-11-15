@@ -55,10 +55,11 @@ EOF
 done
 
 # Keep maintenance actions in the optional Widget tasks list.
-cat > "$TASKS_DIR/Update Debian packages" <<'EOF'
+cat > "$TASKS_DIR/Update Debian packages" <<EOF
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
-exec proot-distro login debian -- /bin/bash -lc 'apt-get update && apt-get full-upgrade -y && apt-get autoremove -y && apt-get clean'
+REPO_DIR=$REPO_Q
+exec bash "\$REPO_DIR/scripts/update-debian.sh"
 EOF
 chmod 700 "$TASKS_DIR/Update Debian packages"
 
