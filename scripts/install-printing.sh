@@ -16,12 +16,60 @@ if [ "$DEBIAN_ARCH" != "arm64" ]; then
   exit 2
 fi
 
-echo "== Installing CUPS, Epson ESC/P-R, Gutenprint and scanner tools =="
+echo "== Installing CUPS, Gutenprint and scanner tools =="
 apt-get update
 apt-get install -y \
   cups cups-client cups-filters cups-ipp-utils \
-  printer-driver-escpr printer-driver-gutenprint \
-  usbutils libsane1 sane-utils xdg-utils
+  printer-driver-gutenprint usbutils libsane1 sane-utils xdg-utils
+
+# Debian 13/Trixie's 1.7.17 ESC/P-R package does not ship an L3110 PPD.
+# Debian's newer 1.8.8 ARM64 build does. Temporarily add Forky, pin only
+# printer-driver-escpr from that suite, then remove the temporary source.
+ESC_PRR_MIN_VERSION="1.8.8-1"
+installed_driver_version="$(dpkg-query -W -f='${Version}' printer-driver-escpr 2>/dev/null || true)"
+if [ -z "$installed_driver_version" ] || ! dpkg --compare-versions "$installed_driver_version" ge "$ESC_PRR_MIN_VERSION"; then
+  configured_candidate="$(apt-cache policy printer-driver-escpr 2>/dev/null | awk '/Candidate:/ {print $2; exit}')"
+  if [ -z "$configured_candidate" ] || ! dpkg --compare-versions "$configured_candidate" ge "$ESC_PRR_MIN_VERSION"; then
+    TEMP_SOURCE="/etc/apt/sources.list.d/primebook-escpr-forky.list"
+    TEMP_PREF="/etc/apt/preferences.d/primebook-escpr-forky"
+    cleanup_escpr_source() {
+      rm -f "$TEMP_SOURCE" "$TEMP_PREF"
+    }
+    trap cleanup_escpr_source EXIT
+
+    cat > "$TEMP_SOURCE" <<'SOURCE'
+deb https://deb.debian.org/debian forky main
+SOURCE
+    cat > "$TEMP_PREF" <<'PREFERENCE'
+Package: *
+Pin: release n=forky
+Pin-Priority: -1
+
+Package: printer-driver-escpr
+Pin: release n=forky
+Pin-Priority: 1001
+PREFERENCE
+
+    echo "== Fetching the model-aware ARM64 ESC/P-R driver from Debian Forky =="
+    apt-get update
+    candidate="$(apt-cache policy printer-driver-escpr | awk '/Candidate:/ {print $2; exit}')"
+    if [ -z "$candidate" ] || ! dpkg --compare-versions "$candidate" ge "$ESC_PRR_MIN_VERSION"; then
+      echo "ERROR: Debian did not offer ESC/P-R $ESC_PRR_MIN_VERSION or newer for ARM64." >&2
+      exit 1
+    fi
+    apt-get install -y printer-driver-escpr
+    cleanup_escpr_source
+    trap - EXIT
+  else
+    apt-get install -y printer-driver-escpr
+  fi
+fi
+
+DRIVER_VERSION="$(dpkg-query -W -f='${Version}' printer-driver-escpr)"
+if ! dpkg --compare-versions "$DRIVER_VERSION" ge "$ESC_PRR_MIN_VERSION"; then
+  echo "ERROR: ESC/P-R $DRIVER_VERSION is too old for the L3110 model PPD; expected $ESC_PRR_MIN_VERSION or newer." >&2
+  exit 1
+fi
 
 if apt-cache show simple-scan >/dev/null 2>&1; then
   apt-get install -y simple-scan
@@ -50,8 +98,7 @@ DESKTOP_DIR="$PRIME_HOME/Desktop"
 APP_DIR="$PRIME_HOME/.local/share/applications"
 install -d -m 0755 -o prime -g prime "$DESKTOP_DIR" "$APP_DIR"
 
-# Replace the generic CUPS desktop shortcut with a model-specific Epson setup
-# shortcut on both the XFCE desktop and the application menu.
+# Create an Epson-specific setup shortcut on both the XFCE desktop and menu.
 write_epson_shortcut() {
   local destination="$1"
   cat > "$destination" <<'DESKTOP'
@@ -98,13 +145,14 @@ DESKTOP
   chmod 0755 "$DESKTOP_DIR/simple-scan.desktop"
 fi
 
-apt-get clean
+# Remove temporary repository metadata. The next apt operation will use only
+# the Debian suites configured by the user for their own system.
 rm -rf /var/lib/apt/lists/*
+apt-get clean
 
-DRIVER_VERSION="$(dpkg-query -W -f='${Version}' printer-driver-escpr)"
 echo
 echo "Printing stack installed for Debian ARM64."
-echo "Epson ESC/P-R driver version: $DRIVER_VERSION"
+echo "Epson ESC/P-R driver version: $DRIVER_VERSION (L3110 model PPD included)."
 echo "Epson L3110 Series Setup shortcut created on the XFCE desktop and in the Applications menu."
 echo "After start-all, open that shortcut to reach CUPS Administration → Add Printer."
 echo "Scanner support: SANE epson2 backend; check visibility with: scanimage -L"
