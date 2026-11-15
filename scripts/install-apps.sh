@@ -628,76 +628,8 @@ fi
 chown -R prime:prime "$DESKTOP_DIR"
 chmod 0755 "$DESKTOP_DIR"/*.desktop
 
-# Create a branded dark SVG wallpaper without downloading external assets.
-install -d -m 0755 /usr/share/backgrounds/termux-debian-x11
-cat > /usr/share/backgrounds/termux-debian-x11/primebook-midnight.svg <<'WALLPAPER'
-<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
-<defs>
-<linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#080d1b"/><stop offset=".55" stop-color="#111b32"/><stop offset="1" stop-color="#111126"/></linearGradient>
-<radialGradient id="c"><stop stop-color="#00c6c8" stop-opacity=".28"/><stop offset="1" stop-color="#00c6c8" stop-opacity="0"/></radialGradient>
-<pattern id="g" width="72" height="72" patternUnits="userSpaceOnUse"><path d="M72 0H0V72" fill="none" stroke="#a9c9e7" stroke-opacity=".07"/></pattern>
-</defs>
-<rect width="1920" height="1080" fill="url(#b)"/><ellipse cx="1450" cy="300" rx="700" ry="520" fill="url(#c)"/><rect width="1920" height="1080" fill="url(#g)"/>
-<g fill="none" stroke="#55d4d0" stroke-opacity=".25" stroke-width="2"><circle cx="1450" cy="390" r="180"/><circle cx="1450" cy="390" r="250"/><circle cx="1450" cy="390" r="320"/><path d="M980 0L1920 940M1200 0L1920 720M1920 180L1020 1080M0 820L600 1080"/></g>
-<g fill="#d8f7f5" opacity=".4"><circle cx="1450" cy="390" r="4"/><circle cx="1220" cy="250" r="2"/><circle cx="1670" cy="540" r="2"/></g>
-</svg>
-WALLPAPER
-chmod 0644 /usr/share/backgrounds/termux-debian-x11/primebook-midnight.svg
+# PrimeBook Neo wallpaper and XFCE appearance helper are configured above.
 
-# Persistent first-login XFCE appearance settings. The autostart helper runs
-# as prime after the Xfconf session has started.
-install -d -m 0755 -o prime -g prime "$PRIME_HOME/.config/autostart"
-cat > /usr/local/bin/primebook-xfce-tune <<'TUNE'
-#!/bin/bash
-set -u
-sleep 5
-set_setting() {
-  xfconf-query -c "$1" -p "$2" --create -t "$3" -s "$4" >/dev/null 2>&1 || true
-}
-GTK_THEME=Adwaita
-[ -d /usr/share/themes/Arc-Dark ] && GTK_THEME=Arc-Dark
-ICON_THEME=Adwaita
-[ -d /usr/share/icons/Papirus-Dark ] && ICON_THEME=Papirus-Dark
-FONT="DejaVu Sans 10"
-fc-match Cantarell 2>/dev/null | grep -qi Cantarell && FONT="Cantarell 10"
-
-set_setting xsettings /Net/ThemeName string "$GTK_THEME"
-set_setting xsettings /Net/IconThemeName string "$ICON_THEME"
-set_setting xsettings /Net/FontName string "$FONT"
-set_setting xsettings /Gtk/FontName string "$FONT"
-set_setting xfwm4 /general/theme string "$GTK_THEME"
-set_setting xfwm4 /general/title_font string "DejaVu Sans Bold 10"
-set_setting xfwm4 /general/use_compositing bool false
-set_setting xfce4-desktop /desktop-icons/icon-size uint 48
-set_setting xfce4-desktop /backdrop/screen0/monitor0/workspace0/last-image string "/usr/share/backgrounds/termux-debian-x11/primebook-midnight.svg"
-set_setting xfce4-desktop /backdrop/screen0/monitor0/workspace0/image-style int 5
-# Anchor the panel to the full bottom edge and give tasklist buttons
-# enough vertical room so their icons do not get clipped/overlapped.
-set_setting xfce4-panel /panels/panel-1/position string "p=12;x=0;y=0"
-set_setting xfce4-panel /panels/panel-1/size uint 56
-set_setting xfce4-panel /panels/panel-1/length uint 100
-set_setting xfce4-panel /panels/panel-1/position-locked bool true
-set_setting xfce4-panel /panels/panel-1/autohide-behavior uint 0
-set_setting xfce4-panel /panels/panel-1/icon-size uint 30
-xfce4-panel -r >/dev/null 2>&1 || true
-xfdesktop --reload >/dev/null 2>&1 || true
-TUNE
-chmod 0755 /usr/local/bin/primebook-xfce-tune
-chown root:root /usr/local/bin/primebook-xfce-tune
-
-cat > "$PRIME_HOME/.config/autostart/primebook-xfce-tune.desktop" <<'AUTOSTART'
-[Desktop Entry]
-Type=Application
-Version=1.0
-Name=PrimeBook Desktop Polish
-Comment=Apply the lightweight dark theme, wallpaper and panel layout
-Exec=/usr/local/bin/primebook-xfce-tune
-OnlyShowIn=XFCE;
-X-GNOME-Autostart-enabled=true
-NoDisplay=true
-AUTOSTART
-chown prime:prime "$PRIME_HOME/.config/autostart/primebook-xfce-tune.desktop"
-chmod 0644 "$PRIME_HOME/.config/autostart/primebook-xfce-tune.desktop"
 
 apt-get clean
 rm -rf /var/lib/apt/lists/*
