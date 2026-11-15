@@ -21,14 +21,20 @@ fi
 apt-get update
 apt-get install -y clamav clamav-freshclam
 install -d -m 0755 -o clamav -g clamav /var/lib/clamav
-echo
-echo "ClamAV command-line scanner installed."
-echo "Updating virus signatures (initial download may be large)..."
-if pgrep -x freshclam >/dev/null 2>&1; then
-  echo "freshclam is already running; leaving the existing updater alone."
-else
-  freshclam --stdout --verbose
+# Keep the scanner on demand in PRoot: do not leave a background updater
+# running in a guest that has no reliable service manager.
+if command -v update-rc.d >/dev/null 2>&1; then
+  update-rc.d clamav-freshclam disable >/dev/null 2>&1 || true
 fi
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl disable --now clamav-freshclam.service >/dev/null 2>&1 || true
+fi
+pkill -TERM -x freshclam >/dev/null 2>&1 || true
+sleep 1
+echo
+echo "ClamAV command-line scanner installed; automatic updater service disabled."
+echo "Updating virus signatures (initial download may be large)..."
+freshclam --stdout --verbose
 echo
 clamscan --version
 echo "Use: bash scripts/scan-files.sh [absolute-Debian-path]"
