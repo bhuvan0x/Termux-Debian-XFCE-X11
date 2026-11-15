@@ -230,6 +230,15 @@ bash scripts/security-audit.sh
 
 PRoot-Distro 5.8.0 or newer is required. The desktop runs with `--isolated --shared-x11`: the Debian session does not automatically receive Termux's home, app directories or Android shared storage; only the X11 socket is shared for the GUI. Any temporary file transfer should explicitly bind only the required directory.
 
+For example, to expose only Android's Downloads folder to one temporary Debian session, run this in Termux:
+
+```bash
+termux-setup-storage
+proot-distro login --isolated --bind "$HOME/storage/shared/Download:/mnt/android-downloads" debian
+```
+
+The path is available at `/mnt/android-downloads` only in that session. It is not added to the normal XFCE desktop session.
+
 The hardening script installs `debsums`, enforces authenticated APT repositories, reduces sudo's timestamp and password-attempt defaults, and restricts CUPS to loopback with printer sharing disabled. It does not start SSH or other network daemons. Run `bash scripts/update-debian.sh` regularly; PRoot does not run systemd timers, so unattended-upgrades is not represented as active background protection.
 
 PRoot shares the Android kernel and app UID. It cannot provide a kernel firewall, AppArmor enforcement, kernel sysctl hardening, auditd or the isolation of a VM. Keep Android updated, use a strong device lock, install Termux add-ons from compatible trusted sources, keep Play Protect enabled, review app permissions and back up important files. Never store secrets in the repository. Electron launchers using `--no-sandbox` weaken renderer isolation; use only trusted packages and verify vendor hashes/signatures where available.
