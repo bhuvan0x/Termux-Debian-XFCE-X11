@@ -7,7 +7,7 @@ if ! proot-distro list | grep -qE '^  debian([[:space:]]|$)'; then
   proot-distro install debian
 fi
 
-proot-distro login debian -- /bin/bash -lc '
+proot-distro login --isolated debian -- /bin/bash -lc '
   set -e
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
