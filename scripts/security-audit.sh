@@ -5,8 +5,14 @@ if [ -z "${PREFIX:-}" ] || ! command -v proot-distro >/dev/null 2>&1; then
   echo "Run this audit from Termux." >&2
   exit 1
 fi
+RUN_INTEGRITY=0
+case "${1:-}" in
+  "") ;;
+  --integrity) RUN_INTEGRITY=1 ;;
+  *) echo "Usage: bash scripts/security-audit.sh [--integrity]" >&2; exit 2 ;;
+esac
 PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
-printf 'Termux proot-distro: %s\n' "${PD_VERSION:-missing}"
+printf 'Termux proot-distro: %s\\n' "${PD_VERSION:-missing}"
 if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
   echo "WARNING: update Termux packages; isolated login requires proot-distro >= 5.8.0."
   exit 2
@@ -50,7 +56,7 @@ fi
 
 echo
 echo "===== DEBIAN SECURITY AUDIT ====="
-proot-distro login --isolated debian -- /bin/bash -s <<'DEBIAN_AUDIT'
+proot-distro login --isolated debian -- /usr/bin/env "RUN_INTEGRITY=$RUN_INTEGRITY" /bin/bash -s <<'DEBIAN_AUDIT'
 set -u
 section() { printf '\n===== %s =====\n' "$1"; }
 section "OS AND KERNEL BOUNDARY"
@@ -99,15 +105,26 @@ fi
 
 section "CUPS NETWORK BINDING"
 if [ -f /etc/cups/cupsd.conf ]; then
-  grep -nE '^\s*(Listen|Port|Browsing|DefaultShared)\b' /etc/cups/cupsd.conf || true
-  if grep -E '^\s*(Port\s+|Listen\s+\*:|Listen\s+0\.0\.0\.0:|Listen\s+\[::\]:)' /etc/cups/cupsd.conf >/dev/null; then
+  grep -nE '^[[:space:]]*(Listen|Port|Browsing|DefaultShared)[[:space:]]' /etc/cups/cupsd.conf || true
+  if grep -E '^[[:space:]]*(Port[[:space:]]+|Listen[[:space:]]+\\*:|Listen[[:space:]]+0\\.0\\.0\\.0:|Listen[[:space:]]+\\[::\\]:)' /etc/cups/cupsd.conf >/dev/null; then
     echo "WARNING: CUPS may be listening beyond loopback. Run scripts/harden-debian.sh."
+  else
+    echo "PASS: no wildcard CUPS TCP listener found in cupsd.conf."
+  fi
+  if grep -E '^[[:space:]]*Browsing[[:space:]]+Yes([[:space:]]|$)' /etc/cups/cupsd.conf >/dev/null; then
+    echo "WARNING: CUPS browsing is enabled; run scripts/harden-debian.sh."
+  else
+    echo "PASS: CUPS browsing is disabled."
+  fi
+  if grep -E '^[[:space:]]*DefaultShared[[:space:]]+Yes([[:space:]]|$)' /etc/cups/cupsd.conf >/dev/null; then
+    echo "WARNING: CUPS printer sharing is enabled; run scripts/harden-debian.sh."
+  else
+    echo "PASS: CUPS printer sharing is disabled."
   fi
   cupsd -t 2>&1 || true
 else
   echo "CUPS is not installed."
 fi
-
 section "CLAMAV SCANNER"
 if command -v clamscan >/dev/null 2>&1; then
   clamscan --version
@@ -122,14 +139,18 @@ fi
 
 section "PACKAGE FILE INTEGRITY"
 if command -v debsums >/dev/null 2>&1; then
-  echo "Checking installed package files; this can take several minutes on the full Debian rootfs."
-  echo "Any reported paths indicate mismatches or missing package files:"
-  debsums -s 2>&1 | sed -n '1,100p' || true
-  echo "Package-file integrity scan finished (unless interrupted above)."
+  if [ "${RUN_INTEGRITY:-0}" = "1" ]; then
+    echo "Running full package-file integrity scan; this can take several minutes."
+    echo "Any reported paths indicate mismatches or missing package files:"
+    debsums -s 2>&1 | sed -n '1,100p' || true
+    echo "Package-file integrity scan finished."
+  else
+    echo "debsums is installed. Full scan skipped in quick audit mode."
+    echo "Run: bash scripts/security-audit.sh --integrity"
+  fi
 else
   echo "debsums is not installed; run scripts/harden-debian.sh."
 fi
-
 section "SSH KEY FILE PERMISSIONS"
 if [ -d /home/prime/.ssh ]; then
   stat -c '%a %U:%G %n' /home/prime/.ssh /home/prime/.ssh/* 2>/dev/null || true
