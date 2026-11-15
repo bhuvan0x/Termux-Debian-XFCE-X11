@@ -7,6 +7,8 @@ Run the optional installer from Termux to install ClamAV and refresh its signatu
 ```bash
 bash scripts/install-clamav.sh
 bash scripts/scan-files.sh
+# Optional Android Downloads scan (one-session bind)
+bash scripts/scan-files.sh --android-downloads
 ```
 
 If signature updates fail, check network connectivity and retry `freshclam` from an isolated Debian root session. Do not treat a scan without current signatures as a clean result.
