@@ -222,7 +222,7 @@ Run from Termux:
 cd ~/Termux-Debian-X11
 git pull --ff-only
 pkg update && pkg upgrade -y
-pkg install -y proot-distro
+pkg install -y proot-distro iproute2
 bash scripts/security-check-termux.sh
 bash scripts/harden-debian.sh
 bash scripts/security-audit.sh
@@ -239,7 +239,7 @@ proot-distro login --isolated --bind "$HOME/storage/shared/Download:/mnt/android
 
 The path is available at `/mnt/android-downloads` only in that session. It is not added to the normal XFCE desktop session.
 
-The hardening script installs `debsums`, enforces authenticated APT repositories, reduces sudo's timestamp and password-attempt defaults, and restricts CUPS to loopback with printer sharing disabled. It does not start SSH or other network daemons. Run `bash scripts/update-debian.sh` regularly; PRoot does not run systemd timers, so unattended-upgrades is not represented as active background protection.
+The hardening script installs `debsums`, enforces authenticated APT repositories, reduces sudo's timestamp and password-attempt defaults, and restricts CUPS to loopback with printer sharing disabled. The default audit is a quick review; run `bash scripts/security-audit.sh --integrity` to perform the longer full package-file checksum scan. It does not start SSH or other network daemons. Run `bash scripts/update-debian.sh` regularly; PRoot does not run systemd timers, so unattended-upgrades is not represented as active background protection.
 
 PRoot shares the Android kernel and app UID. It cannot provide a kernel firewall, AppArmor enforcement, kernel sysctl hardening, auditd or the isolation of a VM. Keep Android updated, use a strong device lock, install Termux add-ons from compatible trusted sources, keep Play Protect enabled, review app permissions and back up important files. Never store secrets in the repository. Electron launchers using `--no-sandbox` weaken renderer isolation; use only trusted packages and verify vendor hashes/signatures where available.
 
