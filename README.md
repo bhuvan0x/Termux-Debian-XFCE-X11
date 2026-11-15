@@ -22,7 +22,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Short Termux terminal commands: `start-all` and `stop-all`.
 - Repository-local Git configuration ignores executable-bit-only changes on Android, avoiding recurring pull conflicts.
 - Widget background tasks for Debian updates and desktop app refresh.
-- CUPS printing with Epson ESC/P-R and Gutenprint driver packages for supported models.
+- Epson L3110 support: Debian ARM64 ESC/P-R driver, CUPS, scanner tools, and a dedicated **Epson L3110 Series Setup** desktop/menu shortcut.
 - Android USB detection/permission diagnostics plus X11 input-device inspection.
 
 ## Quick installation
@@ -171,7 +171,19 @@ This requires running from Termux, which enters Debian as root. It grants `prime
 
 ## Epson printing and USB devices
 
-The default Debian installation includes CUPS and Debian's ARM64 Epson ESC/P-R package, which matches the L3110's ESC/P-R print language. It also includes SANE's epson2 scanner backend; SANE lists the L3110 (USB ID 04b8:1142) as Complete. The L3110 is USB-only, with no built-in Wi-Fi/Ethernet. Direct USB use inside PRoot still depends on Android exposing the raw USB device; otherwise use a separate Linux USB print/scan server. See docs/USB-AND-PRINTING.md.
+The default Debian installation includes CUPS and Debian's native ARM64 `printer-driver-escpr` package for Epson ESC/P-R printers, plus Gutenprint and SANE scanner support. The L3110 is USB-only, with no built-in Wi-Fi/Ethernet. After `start-all`, open **Epson L3110 Series Setup** from the XFCE desktop or Applications menu to reach CUPS Administration and add the printer. The driver can be installed even when the printer is unplugged; creating a working queue still requires CUPS to see the USB device. Android/PRoot does not automatically expose raw USB devices, so a separate Linux USB print/scan server may be needed. See docs/USB-AND-PRINTING.md.
+
+Reapply printer support on an existing Debian installation with:
+
+```bash
+bash scripts/install-printing.sh
+```
+
+Check the driver, CUPS queue and scanner visibility with:
+
+```bash
+bash scripts/check-epson-l3110.sh
+```
 
 Run `bash scripts/check-usb.sh` (an occasional diagnostic command) to list Android-visible USB devices and inspect X11 input devices. Termux:API can request Android USB permission, but PRoot does not automatically expose raw USB devices to Debian/CUPS. Standard USB keyboard/mouse input is normally mediated by Android and delivered to the foreground X11 window. For the L3110's USB printer/scanner limitations, see [docs/USB-AND-PRINTING.md](docs/USB-AND-PRINTING.md).
 
@@ -191,6 +203,7 @@ Termux-Debian-X11/
     ├── install-vscode.sh
     ├── install-termux-widget.sh
     ├── install-printing.sh
+    ├── check-epson-l3110.sh
     ├── start-printing.sh
     ├── stop-printing.sh
     ├── check-usb.sh
@@ -222,6 +235,7 @@ bash scripts/install-termux-widget.sh
 bash scripts/update-debian.sh
 bash scripts/diagnose.sh
 bash scripts/check-usb.sh
+bash scripts/check-epson-l3110.sh
 ```
 
 ## Disclaimer
