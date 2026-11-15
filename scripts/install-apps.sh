@@ -164,8 +164,17 @@ fi
 echo "Starting GDebi GTK with administrator privileges."
 echo "This bypasses the PolicyKit hand-off that can fail under PRoot."
 echo "Keep this terminal open while GDebi is running."
+DISPLAY_VALUE="${DISPLAY:-:0}"
+if [ -z "$DISPLAY_VALUE" ]; then
+  echo "ERROR: DISPLAY is not set. Open GDebi from the running XFCE desktop."
+  exit 1
+fi
+GUI_ENV=("DISPLAY=$DISPLAY_VALUE")
+if [ -n "${XAUTHORITY:-}" ] && [ -r "$XAUTHORITY" ]; then
+  GUI_ENV+=("XAUTHORITY=$XAUTHORITY")
+fi
 set +e
-sudo -E /usr/bin/gdebi-gtk "$@"
+sudo -H env "${GUI_ENV[@]}" /usr/bin/gdebi-gtk "$@"
 status=$?
 set -e
 echo
