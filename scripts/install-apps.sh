@@ -114,6 +114,110 @@ write_launcher xfce4-taskmanager.desktop "System Monitor" "Inspect processes and
 write_launcher xfce4-screenshooter.desktop "Screenshot" "Capture the desktop" xfce4-screenshooter applets-screenshooter "Utility;"
 write_launcher pavucontrol.desktop "Audio Settings" "Configure audio volume" pavucontrol multimedia-volume-control "AudioVideo;Settings;"
 
+# GDebi's normal Install action delegates privilege elevation to PolicyKit.
+# That hand-off can fail in a PRoot desktop without a normal polkit session.
+# Launch the GTK frontend from an interactive terminal with sudo already
+# authenticated, capture stdout/stderr live, and retain a persistent log.
+install -d -m 0755 /usr/local/bin
+cat > /usr/local/bin/primebook-gdebi-launcher <<'GDEBI_WRAPPER'
+#!/bin/bash
+set -u
+LOG_DIR="${HOME}/Documents"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/gdebi-install.log"
+touch "$LOG_FILE"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+echo
+echo "===== GDebi session: $(date -Is) ====="
+echo "Desktop user: $(id -un)"
+echo "Debian architecture: $(dpkg --print-architecture)"
+echo "Log file: $LOG_FILE"
+
+if [ ! -x /usr/bin/gdebi-gtk ]; then
+  echo "ERROR: /usr/bin/gdebi-gtk is missing. Reinstall the gdebi package."
+  exit 127
+fi
+if ! command -v sudo >/dev/null 2>&1; then
+  echo "ERROR: sudo is missing. Re-run the desktop app installer."
+  exit 127
+fi
+if [ "$#" -gt 0 ]; then
+  for package_file in "$@"; do
+    if [ -f "$package_file" ]; then
+      echo
+      echo "--- Package metadata: $package_file ---"
+      dpkg-deb -f "$package_file" Package Version Architecture 2>&1 || true
+    else
+      echo "NOTE: not a local file: $package_file"
+    fi
+  done
+fi
+
+echo
+echo "Requesting Debian administrator authentication..."
+if ! sudo -v; then
+  echo "ERROR: sudo authentication failed. No package was installed."
+  exit 1
+fi
+
+echo "Starting GDebi GTK with administrator privileges."
+echo "This bypasses the PolicyKit hand-off that can fail under PRoot."
+echo "Keep this terminal open while GDebi is running."
+set +e
+sudo -E /usr/bin/gdebi-gtk "$@"
+status=$?
+set -e
+echo
+echo "GDebi GTK exited with status: $status"
+echo "Any terminal output has been appended to: $LOG_FILE"
+echo "===== End GDebi session: $(date -Is) ====="
+exit "$status"
+GDEBI_WRAPPER
+chmod 0755 /usr/local/bin/primebook-gdebi-launcher
+chown root:root /usr/local/bin/primebook-gdebi-launcher
+
+# Override the system GDebi desktop entry for prime. Launching through
+# xfce4-terminal keeps the authentication prompt and install output visible.
+APP_DIR="$PRIME_HOME/.local/share/applications"
+install -d -m 0755 -o prime -g prime "$APP_DIR"
+cat > "$APP_DIR/gdebi.desktop" <<'GDEBI_DESKTOP'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=GDebi Package Installer
+GenericName=Package Installer
+Comment=Install Debian packages with a visible diagnostic log
+Exec=xfce4-terminal --disable-server --hold --title=GDebi-Install-Log --execute /usr/local/bin/primebook-gdebi-launcher %f
+Icon=application-x-deb
+Terminal=false
+Categories=System;PackageManager;
+MimeType=application/vnd.debian.binary-package;
+StartupNotify=false
+GDEBI_DESKTOP
+chown prime:prime "$APP_DIR/gdebi.desktop"
+chmod 0644 "$APP_DIR/gdebi.desktop"
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database "$APP_DIR" >/dev/null 2>&1 || true
+fi
+if command -v runuser >/dev/null 2>&1 && command -v xdg-mime >/dev/null 2>&1; then
+  runuser -u prime -- env HOME="$PRIME_HOME" xdg-mime default gdebi.desktop application/vnd.debian.binary-package || true
+fi
+cat > "$DESKTOP_DIR/GDebi Package Installer.desktop" <<'GDEBI_SHORTCUT'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=GDebi Package Installer
+Comment=Install Debian packages and view the live log
+Exec=xfce4-terminal --disable-server --hold --title=GDebi-Install-Log --execute /usr/local/bin/primebook-gdebi-launcher
+Icon=application-x-deb
+Terminal=false
+Categories=System;PackageManager;
+StartupNotify=false
+GDEBI_SHORTCUT
+chown prime:prime "$DESKTOP_DIR/GDebi Package Installer.desktop"
+chmod 0644 "$DESKTOP_DIR/GDebi Package Installer.desktop"
+
 if [ "$INSTALL_OFFICE" = "1" ]; then
   write_launcher libreoffice-writer.desktop "LibreOffice Writer" "Write documents" "libreoffice --writer" libreoffice-writer "Office;WordProcessor;"
   write_launcher libreoffice-calc.desktop "LibreOffice Calc" "Work with spreadsheets" "libreoffice --calc" libreoffice-calc "Office;Spreadsheet;"
@@ -165,12 +269,14 @@ set_setting xfwm4 /general/use_compositing bool false
 set_setting xfce4-desktop /desktop-icons/icon-size uint 48
 set_setting xfce4-desktop /backdrop/screen0/monitor0/workspace0/last-image string "/usr/share/backgrounds/termux-debian-x11/primebook-midnight.svg"
 set_setting xfce4-desktop /backdrop/screen0/monitor0/workspace0/image-style int 5
-set_setting xfce4-panel /panels/panel-1/position string "p=8;x=0;y=0"
-set_setting xfce4-panel /panels/panel-1/size uint 44
+# Anchor the panel to the full bottom edge and give tasklist buttons
+# enough vertical room so their icons do not get clipped/overlapped.
+set_setting xfce4-panel /panels/panel-1/position string "p=12;x=0;y=0"
+set_setting xfce4-panel /panels/panel-1/size uint 56
 set_setting xfce4-panel /panels/panel-1/length uint 100
 set_setting xfce4-panel /panels/panel-1/position-locked bool true
 set_setting xfce4-panel /panels/panel-1/autohide-behavior uint 0
-set_setting xfce4-panel /panels/panel-1/icon-size uint 24
+set_setting xfce4-panel /panels/panel-1/icon-size uint 30
 xfce4-panel -r >/dev/null 2>&1 || true
 xfdesktop --reload >/dev/null 2>&1 || true
 TUNE
@@ -198,5 +304,6 @@ echo "Desktop apps, shortcuts, wallpaper and XFCE polish installed for user prim
 DEBIAN_SCRIPT
 
 echo
-echo "Desktop application bundle and PrimeBook XFCE customization installed."
-echo "Restart the desktop to apply the theme and wallpaper."
+echo "Desktop apps, GDebi diagnostic launcher, and panel layout installed."
+echo "GDebi output is shown in a terminal and saved to /home/prime/Documents/gdebi-install.log."
+echo "Restart the desktop to apply the GDebi launcher and updated taskbar layout."
