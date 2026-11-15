@@ -15,6 +15,15 @@ pkg install -y x11-repo
 pkg update -y
 pkg install -y proot-distro pulseaudio termux-x11-nightly termux-api
 
+# PRoot-Distro 5.8.0 contains the major filesystem/input hardening baseline
+# used by this repository's isolated login workflow.
+PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
+if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
+  echo "ERROR: proot-distro $PD_VERSION is older than the required 5.8.0 baseline." >&2
+  echo "Update Termux packages with: pkg update && pkg upgrade -y" >&2
+  exit 2
+fi
+
 # Avoid recurring git pull failures caused only by Android/Termux executable
 # bit differences. Content modifications are still detected normally.
 if command -v git >/dev/null 2>&1 && [ -d "$REPO_DIR/.git" ]; then
