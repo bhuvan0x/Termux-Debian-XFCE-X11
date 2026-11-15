@@ -113,6 +113,48 @@ proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" >
 
 Then fully stop and restart XFCE and test `sudo -v` in a new Debian terminal. The rule requires the `prime` password. Change it with `proot-distro login debian -- passwd prime`. Never put passwords in scripts or repository files.
 
+## GDebi opens but clicking Install does nothing
+
+The normal GDebi GTK action can fail when its PolicyKit privilege hand-off is unavailable in a PRoot desktop. The repository app installer creates a per-user GDebi launcher that asks for the `prime` sudo password first, starts `gdebi-gtk` with administrator privileges, and keeps a terminal open to show errors.
+
+From Termux, update the repository and reapply the desktop setup:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/install-apps.sh
+```
+
+Stop and restart XFCE with `stop-all` then `start-all`. Launch **GDebi Package Installer** from the desktop or open the `.deb` file in Thunar using GDebi. Do not close the terminal window while the install is running.
+
+The diagnostic log is saved at:
+
+```text
+/home/prime/Documents/gdebi-install.log
+```
+
+To inspect it from a Debian terminal:
+
+```bash
+tail -n 100 ~/Documents/gdebi-install.log
+```
+
+The launcher also prints the selected package's architecture. On this ARM64 device, do not install a package marked `amd64`.
+
+## XFCE taskbar icons are clipped, overlapped or hidden
+
+The desktop setup now anchors panel 1 to the bottom screen edge (position `p=12`) and increases its height and icon size so the panel reserves its own screen area.
+
+Reapply the layout by updating the repository and rerunning:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/install-apps.sh
+```
+
+Then run `stop-all` and `start-all` so the XFCE session reloads the panel settings.
+
 ## Visual Studio Code package architecture is wrong
 
 This workstation targets ARM64. Check both Debian and the downloaded package:
