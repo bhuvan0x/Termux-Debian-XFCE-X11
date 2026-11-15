@@ -68,7 +68,7 @@ Then long-press the Android home screen, open **Widgets**, find **Termux:Widget*
 bash scripts/install-debian.sh
 ```
 
-This installs Debian, XFCE, everyday GUI applications (including GDebi), CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user `prime`, a password-authenticated sudoers rule for `prime`, launchers under `/home/prime/Desktop` and the PrimeBook dark desktop styling.
+This installs Debian, XFCE, everyday GUI applications (including GDebi), CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user `prime`, a password-authenticated sudoers rule for `prime`, launchers under `/home/prime/Desktop` and the PrimeBook Neo desktop styling: Arc-Dark, Papirus icons, a custom orbital wallpaper, and an icon-first taskbar. The visual helper changes only per-user XFCE appearance settings; it preserves the existing panel items and does not modify Linux services or the X11/audio/CUPS startup workflow.
 
 For an existing Debian installation, run:
 
