@@ -16,7 +16,7 @@ case "${1:-}" in
     ;;
 esac
 
-proot-distro login debian -- /usr/bin/env "INSTALL_OFFICE=$INSTALL_OFFICE" /bin/bash -s <<'DEBIAN_SCRIPT'
+proot-distro login --isolated debian -- /usr/bin/env "INSTALL_OFFICE=$INSTALL_OFFICE" /bin/bash -s <<'DEBIAN_SCRIPT'
 set -Eeuo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
