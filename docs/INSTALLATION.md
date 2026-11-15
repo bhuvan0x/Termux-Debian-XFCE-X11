@@ -77,6 +77,8 @@ bash scripts/install-apps.sh
 bash scripts/install-printing.sh
 ```
 
+The printing installer adds the Debian ARM64 Epson ESC/P-R driver and creates **Epson L3110 Series Setup** on the XFCE desktop and in the Applications menu. After `start-all`, open that shortcut to reach CUPS Administration and choose **Add Printer**. The shortcut configures the CUPS workflow; it does not bypass Android/PRoot USB restrictions.
+
 To install a local Debian package and let GDebi resolve its dependencies, use a Debian terminal as `prime`:
 
 ```bash
@@ -177,7 +179,9 @@ Before administering printers, set a password for the prime desktop account from
 proot-distro login debian -- passwd prime
 ```
 
-In CUPS, use **Administration → Add Printer**. For the L3110, direct USB printing works only if Android exposes the raw USB device to PRoot. The L3110 itself has no Wi-Fi/Ethernet. If PRoot cannot access USB, connect the printer to a separate Linux host and share that host's CUPS queue over IPP.
+You can open the same page from the **Epson L3110 Series Setup** desktop shortcut. In CUPS, use **Administration → Add Printer** and select the Epson L3110 Series driver when it appears in the model list. For the L3110, direct USB printing works only if Android exposes the raw USB device to PRoot. The L3110 itself has no Wi-Fi/Ethernet. If PRoot cannot access USB, connect the printer to a separate Linux host and share that host's CUPS queue over IPP.
+
+To inspect the installed driver and current hardware visibility from Termux, run `bash scripts/check-epson-l3110.sh`.
 
 ## 8. Install Visual Studio Code (optional)
 
