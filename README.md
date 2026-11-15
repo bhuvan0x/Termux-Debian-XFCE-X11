@@ -112,6 +112,7 @@ Background tasks:
 - **Security audit** — reviews host package versions, Debian packages, sudoers, listeners, CUPS and package-file checksums.
 - **Termux security check** — checks the Termux app environment and PRoot-Distro version.
 - **Install ClamAV** — installs the optional ARM64 antivirus CLI and updates signatures.
+- **Update ClamAV signatures** — manually refreshes its malware definitions.
 - **Scan Debian Downloads** — scans `/home/prime/Downloads` without deleting or quarantining files.
 
 Install the Termux:Widget Android add-on from the same source/signing family as Termux, then add its widget from Android's home-screen widget picker. If you install Widget after the setup, run:
@@ -201,6 +202,7 @@ Install ClamAV from the Debian ARM64 repository:
 
 ```bash
 bash scripts/install-clamav.sh
+bash scripts/update-clamav.sh
 bash scripts/scan-files.sh
 ```
 
@@ -266,6 +268,7 @@ Termux-Debian-X11/
     ├── security-audit.sh
     ├── security-check-termux.sh
     ├── install-clamav.sh
+    ├── update-clamav.sh
     └── scan-files.sh
 ```
 
@@ -291,6 +294,9 @@ bash scripts/diagnose.sh
 bash scripts/harden-debian.sh
 bash scripts/security-audit.sh
 bash scripts/security-check-termux.sh
+bash scripts/install-clamav.sh
+bash scripts/update-clamav.sh
+bash scripts/scan-files.sh
 bash scripts/check-usb.sh
 bash scripts/check-epson-l3110.sh
 ```
