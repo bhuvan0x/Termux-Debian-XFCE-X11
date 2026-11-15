@@ -89,7 +89,9 @@ chmod 700 "$TASKS_DIR/Update Debian packages"
 for spec in \
   "Harden Debian:scripts/harden-debian.sh" \
   "Security audit:scripts/security-audit.sh" \
-  "Termux security check:scripts/security-check-termux.sh"; do
+  "Termux security check:scripts/security-check-termux.sh" \
+  "Install ClamAV:scripts/install-clamav.sh" \
+  "Scan Debian Downloads:scripts/scan-files.sh"; do
   name="${spec%%:*}"
   script="${spec#*:}"
   cat > "$TASKS_DIR/$name" <<EOF
