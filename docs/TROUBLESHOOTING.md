@@ -74,7 +74,7 @@ This is a PRoot/Android boundary, not necessarily a driver problem. termux-usb c
 
 ## Epson L3110 printer or scanner is not detected
 
-- The L3110 uses ESC/P-R for printing; Debian's native ARM64 `printer-driver-escpr` package is the matching driver family.
+- The L3110 uses ESC/P-R. The L3110 Series PPD is included in ESC/P-R 1.8.8 and newer; Debian 13's original 1.7.17 build is too old.
 - Re-run `bash scripts/install-printing.sh` to install/update CUPS, the printer driver and the **Epson L3110 Series Setup** shortcut on the desktop and in the Applications menu.
 - Start the desktop with `start-all`, open **Epson L3110 Series Setup**, then use CUPS **Administration → Add Printer**.
 - Run `bash scripts/check-epson-l3110.sh` to inspect the driver package, model entries, CUPS state, USB visibility and scanner detection.
