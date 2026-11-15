@@ -6,7 +6,7 @@ command -v proot-distro >/dev/null 2>&1 || {
   exit 1
 }
 
-proot-distro login debian -- /bin/bash -s <<'DEBIAN_PRINTING'
+proot-distro login --isolated debian -- /bin/bash -s <<'DEBIAN_PRINTING'
 set -Eeuo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
@@ -158,7 +158,7 @@ echo "After start-all, open that shortcut to reach CUPS Administration → Add P
 echo "Scanner support: SANE epson2 backend; check visibility with: scanimage -L"
 echo "CUPS admin URL: http://127.0.0.1:631/admin"
 echo "Set a password for the desktop user before CUPS administration:"
-echo "  proot-distro login debian -- passwd prime"
+echo "  proot-distro login --isolated debian -- passwd prime"
 DEBIAN_PRINTING
 
 echo
