@@ -247,7 +247,10 @@ Termux-Debian-X11/
     ├── start-desktop.sh
     ├── stop-desktop.sh
     ├── update-debian.sh
-    └── diagnose.sh
+    ├── diagnose.sh
+    ├── harden-debian.sh
+    ├── security-audit.sh
+    └── security-check-termux.sh
 ```
 
 ## Performance and compatibility
