@@ -13,12 +13,15 @@ SANE's supported-device list explicitly lists the **L3110 Series** with USB ID *
 
 ## Printing driver
 
-The Debian setup installs `printer-driver-escpr` and CUPS. This is the correct driver family for the L3110's ESC/P-R print language. Debian publishes a native ARM64 build of `printer-driver-escpr`; use it instead of Epson's Linux `amd64` download, which cannot run in this ARM64 Debian rootfs.
+The Debian setup installs CUPS and an L3110-aware ARM64 build of `printer-driver-escpr`. The stock Debian 13/Trixie version 1.7.17 does not include the L3110 model PPD; Debian's 1.8.8 ARM64 package does include `Epson-L3110_Series-epson-escpr-en.ppd`. The installer temporarily adds Debian Forky with a pin applying only to `printer-driver-escpr`, installs the newer package, and removes the temporary source and pin. It does not leave your system tracking Forky. Epson's current Linux download entry for this model is an `amd64` .deb, which must not be installed on this ARM64 Debian rootfs.
 
-- Debian ARM64 ESC/P-R package: https://packages.debian.org/trixie/arm64/printer-driver-escpr
+- Debian Trixie ESC/P-R package: https://packages.debian.org/trixie/arm64/printer-driver-escpr
+- Debian ARM64 1.8.8 package with L3110 PPD: https://packages.debian.org/forky/arm64/printer-driver-escpr
+- Debian 1.8.8 L3110 PPD file list: https://sources.debian.org/src/epson-inkjet-printer-escpr/1.8.8-1/ppd/
+- Epson's L3110 Linux download entry (Deb x64): https://download-center.epson.com/download/?device_id=L3110+Series&language=en&module_id=942262ec-5a61-482b-ae9c-3cd08f07584d%3A1.8.6&os=DEBX64&region=MN
 - Epson L3110 specifications: https://mediaserver.goepson.com/ImConvServlet/imconv/8cfeb3a65688824f46aadec9c4bc312118f007b9/original?assetDescr=Epson%2520L3110%2520L3150.pdf
 
-The installer also includes Gutenprint as an additional set of printer drivers, but ESC/P-R is the primary match for this model.
+The installer includes Gutenprint as an additional driver set. The ESC/P-R 1.8.8 model database is the source of the exact L3110 Series PPD.
 
 ## Scanner driver
 
