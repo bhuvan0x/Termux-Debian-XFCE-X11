@@ -258,121 +258,84 @@ GDEBI_WRAPPER
 chmod 0755 /usr/local/bin/primebook-gdebi-launcher
 chown root:root /usr/local/bin/primebook-gdebi-launcher
 
-# Shared Electron/Chromium launcher for ARM64 desktop packages running under
-# Termux:X11 + PRoot. The helper is applied only to apps that bundle both a
-# chrome-sandbox executable and a resources directory.
+# Shared Electron/Chromium launcher for ARM64 GUI packages under PRoot.
 cat > /usr/local/bin/primebook-electron-launcher <<'ELECTRON_WRAPPER'
 #!/bin/bash
 set -u
 APP="$1"
 shift
-if [ ! -x "$APP" ]; then
-  echo "ERROR: application binary is missing or not executable: $APP" >&2
-  exit 127
-fi
+[ -x "$APP" ] || { echo "Missing app binary: $APP" >&2; exit 127; }
 mkdir -p "$HOME/Downloads"
 APP_NAME="$(basename "$APP")"
 case "$APP" in
   /opt/OpenCode/*) LOG_FILE="$HOME/Downloads/opencode-desktop.log" ;;
   *) LOG_FILE="$HOME/Downloads/${APP_NAME}-desktop.log" ;;
 esac
-{
-  printf '\n===== %s launch: %s =====\n' "$APP_NAME" "$(date -Is)"
-  printf 'Binary: %s\n' "$APP"
-  printf 'Display: %s\n' "${DISPLAY:-:0}"
-} >> "$LOG_FILE"
-nohup env DISPLAY="${DISPLAY:-:0}" "$APP" \
-  --no-sandbox --disable-gpu --disable-dev-shm-usage --ozone-platform=x11 \
-  "$@" >> "$LOG_FILE" 2>&1 < /dev/null &
+printf '\n===== %s launch: %s =====\n' "$APP_NAME" "$(date -Is)" >> "$LOG_FILE"
+nohup env DISPLAY="${DISPLAY:-:0}" "$APP" --no-sandbox --disable-gpu --disable-dev-shm-usage --ozone-platform=x11 "$@" >> "$LOG_FILE" 2>&1 < /dev/null &
 ELECTRON_WRAPPER
 chmod 0755 /usr/local/bin/primebook-electron-launcher
 chown root:root /usr/local/bin/primebook-electron-launcher
 
-# Post-install integration: reject non-ARM64 packages, refresh MIME caches,
-# and add per-user launch overrides only for bundled Electron desktop apps.
+# Rebuild per-user launchers after installing a local ARM64 .deb package.
 cat > /usr/local/bin/primebook-deb-postinstall <<'DEB_POSTINSTALL'
 #!/bin/bash
 set -Eeuo pipefail
-[ "$(dpkg --print-architecture)" = "arm64" ] || {
-  echo "This helper is intended for the ARM64 Debian environment." >&2
-  exit 2
-}
-[ "$(id -un)" = "prime" ] || {
-  echo "Run this helper as the prime desktop user." >&2
-  exit 2
-}
+[ "$(dpkg --print-architecture)" = "arm64" ] || exit 2
+[ "$(id -un)" = "prime" ] || { echo "Run as prime." >&2; exit 2; }
 mkdir -p "$HOME/.local/share/applications"
-mkdir -p "$HOME/Downloads"
-
 for deb in "$@"; do
-  [ -f "$deb" ] || { echo "Skipping missing package file: $deb"; continue; }
+  [ -f "$deb" ] || continue
   pkg="$(dpkg-deb -f "$deb" Package)"
   arch="$(dpkg-deb -f "$deb" Architecture)"
-  case "$arch" in arm64|all) ;; *)
-    echo "Skipping incompatible architecture $arch: $deb" >&2
-    continue
-    ;;
-  esac
-  status="$(dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null || true)"
-  if [ "$status" != "install ok installed" ]; then
-    echo "Package is not installed; launcher refresh skipped: $pkg"
-    continue
-  fi
-
-  echo "Checking desktop launchers installed by $pkg ($arch)..."
+  case "$arch" in arm64|all) ;; *) echo "Refusing incompatible package architecture: $arch"; continue;; esac
+  [ "$(dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null || true)" = "install ok installed" ] || continue
   while IFS= read -r desktop_file; do
     [ -f "$desktop_file" ] || continue
     desktop_id="$(basename "$desktop_file")"
-
-    # Keep one OpenCode menu entry; its duplicate package entry is hidden
-    # in the prime user's menu.
     if [ "$desktop_id" = "ai.opencode.desktop.desktop" ]; then
-      cat > "$HOME/.local/share/applications/$desktop_id" <<'HIDDEN_DESKTOP'
-[Desktop Entry]
-Type=Application
-Hidden=true
-HIDDEN_DESKTOP
+      printf '[Desktop Entry]\nType=Application\nHidden=true\n' > "$HOME/.local/share/applications/$desktop_id"
       continue
     fi
-
     exec_line="$(sed -n 's/^Exec=//p' "$desktop_file" | head -n 1)"
     [ -n "$exec_line" ] || continue
-    read -r app_bin _ <<< "$exec_line"
-    app_bin="${app_bin#\"}"
-    app_bin="${app_bin%\"}"
-    case "$app_bin" in /*) ;; *) continue ;; esac
+    read -r app_bin rest <<< "$exec_line"
+    app_bin="${app_bin#\"}"; app_bin="${app_bin%\"}"
+    case "$app_bin" in /*) ;; *) continue;; esac
     app_dir="$(dirname "$app_bin")"
-
-    # Electron bundles generally ship a sibling chrome-sandbox and resources.
     if [ -x "$app_bin" ] && [ -x "$app_dir/chrome-sandbox" ] && [ -d "$app_dir/resources" ]; then
-      override="$HOME/.local/share/applications/$desktop_id"
-      cp "$desktop_file" "$override"
-      python3 - "$override" "$app_bin" "$exec_line" <<'PY_REWRITE'
-import pathlib, shlex, sys
-path = pathlib.Path(sys.argv[1])
-binary = sys.argv[2]
-original = sys.argv[3]
-parts = shlex.split(original)
-args = parts[1:]
-# Keep desktop-entry field codes (%U, %F, etc.) as literal arguments.
-quoted_binary = '"' + binary.replace('"', '\\"') + '"'
-new_exec = "/usr/local/bin/primebook-electron-launcher " + quoted_binary
-if args:
-    new_exec += " " + " ".join(args)
-lines = path.read_text(encoding="utf-8").splitlines()
-written = False
-for i, line in enumerate(lines):
-    if line.startswith("Exec="):
-        lines[i] = "Exec=" + new_exec
-        written = True
-        break
-if not written:
-    lines.append("Exec=" + new_exec)
-path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-PY_REWRITE
-      echo "Added PRoot-compatible launcher: $desktop_id"
+      cp "$desktop_file" "$HOME/.local/share/applications/$desktop_id"
+      escaped_bin="$(printf '%s' "$app_bin" | sed 's/[&|]/\\&/g')"
+      sed -i "s|^Exec=.*|Exec=/usr/local/bin/primebook-electron-launcher \"$escaped_bin\" $rest|" "$HOME/.local/share/applications/$desktop_id"
+      echo "Added Electron compatibility launcher: $desktop_id"
     fi
-  done < <(dpkg-query -L "$pkg" | grep -E '^/usr/share/applications/.*\.desktop
+  done < <(dpkg-query -L "$pkg" | grep -E '^/usr/share/applications/.*\.desktop$' || true)
+done
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database "$HOME/.local/share/applications" >/dev/null 2>&1 || true
+fi
+DEB_POSTINSTALL
+chmod 0755 /usr/local/bin/primebook-deb-postinstall
+chown root:root /usr/local/bin/primebook-deb-postinstall
+
+# One supported path for future local ARM64 Debian package installs.
+cat > /usr/local/bin/primebook-install-deb <<'INSTALL_DEB'
+#!/bin/bash
+set -Eeuo pipefail
+if [ "$#" -lt 1 ]; then echo "Usage: primebook-install-deb /path/to/package.deb"; exit 2; fi
+for deb in "$@"; do
+  [ -f "$deb" ] || { echo "File not found: $deb"; exit 2; }
+  arch="$(dpkg-deb -f "$deb" Architecture)"
+  case "$arch" in arm64|all) ;; *) echo "Refusing $arch package: $deb (this Debian is ARM64)"; exit 2;; esac
+done
+sudo gdebi "$@"
+if [ -x /usr/local/bin/primebook-deb-postinstall ]; then
+  /usr/local/bin/primebook-deb-postinstall "$@"
+fi
+INSTALL_DEB
+chmod 0755 /usr/local/bin/primebook-install-deb
+chown root:root /usr/local/bin/primebook-install-deb
+
 # Override the system GDebi desktop entry for prime. Launching through
 # xfce4-terminal keeps the authentication prompt and install output visible.
 APP_DIR="$PRIME_HOME/.local/share/applications"
@@ -641,6 +604,7 @@ echo "Desktop apps, shortcuts, wallpaper and XFCE polish installed for user prim
 DEBIAN_SCRIPT
 
 echo
-echo "Desktop apps, GDebi diagnostic launcher, and panel layout installed."
-echo "GDebi output is shown in a terminal and saved to /home/prime/Documents/gdebi-install.log."
-echo "Restart the desktop to apply the GDebi launcher and updated taskbar layout."
+echo "Desktop apps, GDebi diagnostics, ARM64 local .deb helper and Electron launch integration installed."
+echo "OpenCode launcher is installed when /opt/OpenCode/ai.opencode exists; log: /home/prime/Downloads/opencode-desktop.log."
+echo "Use primebook-install-deb /path/to/package.deb for future local ARM64 packages."
+echo "Restart the desktop to refresh application menus and the panel layout."
