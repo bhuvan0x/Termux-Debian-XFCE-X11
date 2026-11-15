@@ -234,6 +234,17 @@ The hardening script installs `debsums`, enforces authenticated APT repositories
 
 PRoot shares the Android kernel and app UID. It cannot provide a kernel firewall, AppArmor enforcement, kernel sysctl hardening, auditd or the isolation of a VM. Keep Android updated, use a strong device lock, install Termux add-ons from compatible trusted sources, keep Play Protect enabled, review app permissions and back up important files. Never store secrets in the repository. Electron launchers using `--no-sandbox` weaken renderer isolation; use only trusted packages and verify vendor hashes/signatures where available.
 
+## Optional ClamAV malware scanner
+
+ClamAV is available for Debian ARM64. Install the command-line scanner and signature updater from Termux:
+
+```bash
+bash scripts/install-clamav.sh
+bash scripts/scan-files.sh
+```
+
+The default scan target is `/home/prime/Downloads` inside Debian; another absolute Debian path can be supplied. Scan results are saved to `/home/prime/Documents/clamav-scan.log`. The script does not delete or quarantine detections automatically. The signature database download is sizeable, and ClamAV is on-demand rather than an always-running daemon. It cannot scan Android shared storage from an isolated Debian session and does not replace Android's built-in malware protections.
+
 ## Notes and limitations
 
 - This is Debian userspace under PRoot, not a virtual machine or a second kernel.
