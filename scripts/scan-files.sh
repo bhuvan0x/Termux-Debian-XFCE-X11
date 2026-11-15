@@ -1,17 +1,17 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-if [ -z "\${PREFIX:-}" ] || ! command -v proot-distro >/dev/null 2>&1; then
+if [ -z "${PREFIX:-}" ] || ! command -v proot-distro >/dev/null 2>&1; then
   echo "Run this script from Termux." >&2
   exit 1
 fi
-PD_VERSION="$(dpkg-query -W -f='\${Version}' proot-distro 2>/dev/null || true)"
+PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
 if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
   echo "Update proot-distro to 5.8.0 or newer before scanning." >&2
   exit 2
 fi
 
-SCAN_PATH="\${1:-/home/prime/Downloads}"
+SCAN_PATH="${1:-/home/prime/Downloads}"
 LOGIN_ARGS=(login --isolated)
 if [ "$SCAN_PATH" = "--android-downloads" ]; then
   BIND_SOURCE="$HOME/storage/shared/Download"
@@ -35,7 +35,7 @@ case "$SCAN_PATH" in
     ;;
 esac
 
-proot-distro "\${LOGIN_ARGS[@]}" debian -- /usr/bin/env "SCAN_PATH=$SCAN_PATH" /bin/bash -s <<'CLAMAV_SCAN'
+proot-distro "${LOGIN_ARGS[@]}" debian -- /usr/bin/env "SCAN_PATH=$SCAN_PATH" /bin/bash -s <<'CLAMAV_SCAN'
 set -u
 if ! command -v clamscan >/dev/null 2>&1; then
   echo "ClamAV is not installed. Run: bash scripts/install-clamav.sh" >&2
