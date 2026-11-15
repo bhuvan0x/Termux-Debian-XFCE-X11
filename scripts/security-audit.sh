@@ -28,8 +28,22 @@ apt list --upgradable 2>/dev/null | sed -n '1,50p' || true
 
 echo
 echo "===== TERMUX HOST LISTENERS ====="
+if command -v sshd >/dev/null 2>&1; then
+  if pgrep -af '[s]shd' >/dev/null 2>&1; then
+    echo "NOTICE: Termux sshd process detected:"
+    pgrep -af '[s]shd' || true
+  else
+    echo "Termux OpenSSH is installed, but no sshd process was detected."
+  fi
+else
+  echo "Termux OpenSSH server binary is not installed."
+fi
 if command -v ss >/dev/null 2>&1; then
-  ss -lntup 2>&1 || true
+  SS_OUTPUT="$(ss -lntup 2>&1 || true)"
+  printf '%s\\n' "$SS_OUTPUT"
+  if printf '%s\\n' "$SS_OUTPUT" | grep -q "Cannot open netlink socket: Permission denied"; then
+    echo "LIMITATION: Android denied netlink socket inspection; host listener inventory is incomplete."
+  fi
 else
   echo "ss is not installed in Termux; rerun setup-termux.sh to install iproute2."
 fi
@@ -53,7 +67,16 @@ section "APT SIGNATURE POLICY"
 cat /etc/apt/apt.conf.d/99-primebook-security 2>/dev/null || echo "Hardening config missing: run scripts/harden-debian.sh."
 
 section "SUDO AND ACCOUNT"
-visudo -c 2>&1 || true
+visudo -c 2>&1 || echo "WARNING: visudo validation reported a problem."
+if [ -d /etc/sudoers.d ]; then
+  BAD_SUDOERS="$(find /etc/sudoers.d -maxdepth 1 -type f \\( ! -perm 0440 -o ! -user root -o ! -group root \\) -print 2>/dev/null || true)"
+  if [ -n "$BAD_SUDOERS" ]; then
+    echo "WARNING: sudoers drop-ins with unsafe owner/mode:"
+    printf '%s\\n' "$BAD_SUDOERS"
+  else
+    echo "PASS: sudoers drop-in files have root ownership and mode 0440."
+  fi
+fi
 passwd -S prime 2>&1 || true
 if grep -RnsE 'NOPASSWD|!authenticate' /etc/sudoers /etc/sudoers.d 2>/dev/null; then
   echo "WARNING: review the sudo exceptions above."
@@ -99,8 +122,10 @@ fi
 
 section "PACKAGE FILE INTEGRITY"
 if command -v debsums >/dev/null 2>&1; then
-  echo "debsums reports changed/missing package-managed files below (empty output is expected):"
+  echo "Checking installed package files; this can take several minutes on the full Debian rootfs."
+  echo "Any reported paths indicate mismatches or missing package files:"
   debsums -s 2>&1 | sed -n '1,100p' || true
+  echo "Package-file integrity scan finished (unless interrupted above)."
 else
   echo "debsums is not installed; run scripts/harden-debian.sh."
 fi
