@@ -85,6 +85,8 @@ sudo gdebi /path/to/package.deb
 
 Check the package architecture first with `dpkg-deb -f /path/to/package.deb Architecture`. This device's Debian environment is ARM64; GDebi does not convert `amd64` packages to ARM64. For an existing installation, pull the repository update and rerun `bash scripts/install-apps.sh` to add GDebi.
 
+For the graphical workflow, use **GDebi Package Installer** from the desktop or open a `.deb` file in Thunar with GDebi. The repository's launcher starts the GTK frontend with administrator privileges before installation, keeps a terminal window open to show diagnostic output, and appends the session to `/home/prime/Documents/gdebi-install.log`. This avoids relying on a PolicyKit elevation prompt inside PRoot. The desktop installer also adjusts the XFCE panel to the bottom edge with a larger taskbar area.
+
 Optional office suite (large download and memory footprint):
 
 ```bash
