@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 command -v proot-distro >/dev/null 2>&1 || { echo "proot-distro is missing." >&2; exit 1; }
-proot-distro login debian -- /bin/bash -lc '
+proot-distro login --isolated debian -- /bin/bash -lc '
   if [ ! -x /usr/sbin/cupsd ]; then
     echo "CUPS is not installed. Run bash scripts/install-printing.sh first."
     exit 1
