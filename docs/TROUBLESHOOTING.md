@@ -118,7 +118,7 @@ This is a PRoot/Android boundary, not necessarily a driver problem. termux-usb c
 Set a password for the Debian desktop user, who is added to the lpadmin group:
 
 ```bash
-proot-distro login debian -- passwd prime
+proot-distro login --isolated debian -- passwd prime
 ```
 
 Then authenticate to CUPS as `prime`.
@@ -128,16 +128,16 @@ Then authenticate to CUPS as `prime`.
 First check the actual Debian user identity and sudoers configuration from Termux:
 
 ```bash
-proot-distro login debian -- bash -lc 'id prime; getent group sudo; grep -n "^%sudo" /etc/sudoers'
+proot-distro login --isolated debian -- bash -lc 'id prime; getent group sudo; grep -n "^%sudo" /etc/sudoers'
 ```
 
 PRoot selected-user sessions may not expose the supplemental sudo group as expected. The repository's `install-apps.sh` now creates this explicit rule automatically. On an existing installation, rerun `bash scripts/install-apps.sh`; alternatively create the drop-in from Termux (which enters Debian as root):
 
 ```bash
-proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
+proot-distro login --isolated debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
 ```
 
-Then fully stop and restart XFCE and test `sudo -v` in a new Debian terminal. The rule requires the `prime` password. Change it with `proot-distro login debian -- passwd prime`. Never put passwords in scripts or repository files.
+Then fully stop and restart XFCE and test `sudo -v` in a new Debian terminal. The rule requires the `prime` password. Change it with `proot-distro login --isolated debian -- passwd prime`. Never put passwords in scripts or repository files.
 
 ## OpenCode Desktop is installed but does not open from the menu
 
@@ -260,7 +260,7 @@ pactl list short modules | grep module-native-protocol-tcp
 Test Debian's connection:
 
 ```bash
-proot-distro login debian -- bash -lc 'PULSE_SERVER=tcp:127.0.0.1 pactl info'
+proot-distro login --isolated debian -- bash -lc 'PULSE_SERVER=tcp:127.0.0.1 pactl info'
 ```
 
 If the module is missing, load it once manually to test:
