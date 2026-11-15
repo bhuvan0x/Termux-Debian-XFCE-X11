@@ -40,6 +40,7 @@ APT_SECURITY
 chmod 0644 /etc/apt/apt.conf.d/99-primebook-security
 
 echo "== Tighten password-authenticated sudo defaults =="
+install -d -m 0755 /etc/sudoers.d
 SUDO_TMP="$(mktemp /etc/sudoers.d/.primebook-security.XXXXXX)"
 trap 'rm -f "$SUDO_TMP"' EXIT
 cat > "$SUDO_TMP" <<'SUDO_SECURITY'
