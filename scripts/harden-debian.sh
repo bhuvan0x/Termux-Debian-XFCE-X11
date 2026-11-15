@@ -61,8 +61,8 @@ visudo -c
 echo "== Restrict CUPS to this device (if installed) =="
 if [ -f /etc/cups/cupsd.conf ] && command -v cupsd >/dev/null 2>&1; then
   CUPS_CONF=/etc/cups/cupsd.conf
-  CUPS_BACKUP=/etc/cups/cupsd.conf.primebook-pre-hardening
-  [ -e "$CUPS_BACKUP" ] || cp -a "$CUPS_CONF" "$CUPS_BACKUP"
+  CUPS_BACKUP="/etc/cups/cupsd.conf.primebook-pre-hardening.$(date +%Y%m%d-%H%M%S)"
+  cp -a "$CUPS_CONF" "$CUPS_BACKUP"
   python3 - "$CUPS_CONF" <<'PY'
 import os, re, sys, tempfile
 path = sys.argv[1]
