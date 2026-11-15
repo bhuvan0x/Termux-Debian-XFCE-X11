@@ -8,7 +8,7 @@ fi
 
 # Install the official ARM64 Debian package and create a PRoot-compatible
 # per-user XFCE launcher. Run from Termux, not from inside the Debian shell.
-proot-distro login debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
+proot-distro login --isolated debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
 set -Eeuo pipefail
 
 ARCH="$(dpkg --print-architecture)"
