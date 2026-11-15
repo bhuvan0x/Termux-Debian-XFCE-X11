@@ -41,6 +41,12 @@ chmod 0644 /etc/apt/apt.conf.d/99-primebook-security
 
 echo "== Tighten password-authenticated sudo defaults =="
 install -d -m 0755 /etc/sudoers.d
+# Debian's packaged README may be mode 0644; visudo rejects that directory
+# entry even though it is documentation. Normalize it before validating.
+if [ -f /etc/sudoers.d/README ]; then
+  chown root:root /etc/sudoers.d/README
+  chmod 0440 /etc/sudoers.d/README
+fi
 SUDO_TMP="$(mktemp /etc/sudoers.d/.primebook-security.XXXXXX)"
 trap 'rm -f "$SUDO_TMP"' EXIT
 cat > "$SUDO_TMP" <<'SUDO_SECURITY'
