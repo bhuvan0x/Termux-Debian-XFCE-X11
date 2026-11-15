@@ -27,6 +27,14 @@ echo "Upgradable Termux packages:"
 apt list --upgradable 2>/dev/null | sed -n '1,50p' || true
 
 echo
+echo "===== TERMUX HOST LISTENERS ====="
+if command -v ss >/dev/null 2>&1; then
+  ss -lntup 2>&1 || true
+else
+  echo "ss is not installed in Termux; rerun setup-termux.sh to install iproute2."
+fi
+
+echo
 echo "===== DEBIAN SECURITY AUDIT ====="
 proot-distro login --isolated debian -- /bin/bash -s <<'DEBIAN_AUDIT'
 set -u
