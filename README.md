@@ -18,6 +18,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Firefox ESR, GDebi with a privileged diagnostic launcher, permanent OpenCode desktop launcher, and ARM64 `.deb` installation helper, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
 - Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
+- Optional ARM64 ClamAV scanner for on-demand file checks inside Debian (no always-on scanner daemon).
 - Isolated PRoot sessions (PRoot-Distro 5.8.0+): Termux home, shared storage and app paths are not exposed to Debian by default; only the X11 socket is explicitly shared with XFCE.
 - Security hardening and audit scripts: signed-APT enforcement, short sudo credential caching, CUPS loopback binding, package-file integrity checks, and Termux/PRoot version checks.
 - Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down, including the Android X11 viewer.
@@ -110,6 +111,8 @@ Background tasks:
 - **Harden Debian** — applies conservative security defaults and restricts CUPS to loopback.
 - **Security audit** — reviews host package versions, Debian packages, sudoers, listeners, CUPS and package-file checksums.
 - **Termux security check** — checks the Termux app environment and PRoot-Distro version.
+- **Install ClamAV** — installs the optional ARM64 antivirus CLI and updates signatures.
+- **Scan Debian Downloads** — scans `/home/prime/Downloads` without deleting or quarantining files.
 
 Install the Termux:Widget Android add-on from the same source/signing family as Termux, then add its widget from Android's home-screen widget picker. If you install Widget after the setup, run:
 
@@ -192,6 +195,17 @@ On Android, use a strong screen-lock PIN/password, install Termux and add-ons on
 
 Some Electron apps (including the OpenCode/VS Code compatibility launchers) require `--no-sandbox` under PRoot. This weakens Chromium isolation. Install only trusted builds, verify vendor checksums/signatures where provided, and do not use those launchers for untrusted applications or browsing. A clean audit is useful evidence, not a guarantee that the device is secure.
 
+### Optional on-demand malware scanning
+
+Install ClamAV from the Debian ARM64 repository:
+
+```bash
+bash scripts/install-clamav.sh
+bash scripts/scan-files.sh
+```
+
+By default, this scans `/home/prime/Downloads` inside Debian and writes a report to `/home/prime/Documents/clamav-scan.log`. You can pass another absolute Debian path. The scanner never deletes files automatically. ClamAV is an additional file scanner, not a substitute for Android Play Protect or safe package verification; it cannot scan Android shared storage while the Debian session is isolated, and large files/archives may be skipped by scanner limits.
+
 ## Debian sudo access
 
 The desktop user `prime` is unprivileged. `scripts/install-apps.sh` creates a dedicated, password-authenticated sudoers drop-in for `prime`; this avoids relying only on supplemental group membership in a PRoot selected-user session. To reapply it on an existing installation, rerun `bash scripts/install-apps.sh`.
@@ -250,7 +264,9 @@ Termux-Debian-X11/
     ├── diagnose.sh
     ├── harden-debian.sh
     ├── security-audit.sh
-    └── security-check-termux.sh
+    ├── security-check-termux.sh
+    ├── install-clamav.sh
+    └── scan-files.sh
 ```
 
 ## Performance and compatibility
