@@ -385,32 +385,96 @@ fi
 chown -R prime:prime "$DESKTOP_DIR"
 chmod 0755 "$DESKTOP_DIR"/*.desktop
 
-# Create a branded dark SVG wallpaper without downloading external assets.
+# Create a polished, futuristic PrimeBook wallpaper using a local SVG asset.
+# No network download or external image dependency is required.
 install -d -m 0755 /usr/share/backgrounds/termux-debian-x11
 cat > /usr/share/backgrounds/termux-debian-x11/primebook-midnight.svg <<'WALLPAPER'
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
 <defs>
-<linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#080d1b"/><stop offset=".55" stop-color="#111b32"/><stop offset="1" stop-color="#111126"/></linearGradient>
-<radialGradient id="c"><stop stop-color="#00c6c8" stop-opacity=".28"/><stop offset="1" stop-color="#00c6c8" stop-opacity="0"/></radialGradient>
-<pattern id="g" width="72" height="72" patternUnits="userSpaceOnUse"><path d="M72 0H0V72" fill="none" stroke="#a9c9e7" stroke-opacity=".07"/></pattern>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#070b16"/><stop offset=".52" stop-color="#0d1428"/><stop offset="1" stop-color="#17112b"/>
+  </linearGradient>
+  <radialGradient id="cyan">
+    <stop stop-color="#16d9d2" stop-opacity=".32"/><stop offset=".48" stop-color="#16d9d2" stop-opacity=".09"/><stop offset="1" stop-color="#16d9d2" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="violet">
+    <stop stop-color="#956cff" stop-opacity=".24"/><stop offset="1" stop-color="#956cff" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="orb" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#4cf1dd" stop-opacity=".72"/><stop offset=".52" stop-color="#5579db" stop-opacity=".22"/><stop offset="1" stop-color="#a36cff" stop-opacity=".1"/>
+  </linearGradient>
+  <linearGradient id="line" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#6cefe0" stop-opacity="0"/><stop offset=".48" stop-color="#6cefe0" stop-opacity=".55"/><stop offset="1" stop-color="#a58bff" stop-opacity="0"/>
+  </linearGradient>
+  <pattern id="grid" width="72" height="72" patternUnits="userSpaceOnUse">
+    <path d="M72 0H0V72" fill="none" stroke="#b8d7f3" stroke-opacity=".055" stroke-width="1"/>
+    <circle cx="0" cy="0" r="1.4" fill="#9bdedb" fill-opacity=".2"/>
+  </pattern>
 </defs>
-<rect width="1920" height="1080" fill="url(#b)"/><ellipse cx="1450" cy="300" rx="700" ry="520" fill="url(#c)"/><rect width="1920" height="1080" fill="url(#g)"/>
-<g fill="none" stroke="#55d4d0" stroke-opacity=".25" stroke-width="2"><circle cx="1450" cy="390" r="180"/><circle cx="1450" cy="390" r="250"/><circle cx="1450" cy="390" r="320"/><path d="M980 0L1920 940M1200 0L1920 720M1920 180L1020 1080M0 820L600 1080"/></g>
-<g fill="#d8f7f5" opacity=".4"><circle cx="1450" cy="390" r="4"/><circle cx="1220" cy="250" r="2"/><circle cx="1670" cy="540" r="2"/></g>
+<rect width="1920" height="1080" fill="url(#bg)"/>
+<ellipse cx="1430" cy="410" rx="850" ry="640" fill="url(#cyan)"/>
+<ellipse cx="1710" cy="870" rx="620" ry="470" fill="url(#violet)"/>
+<rect width="1920" height="1080" fill="url(#grid)"/>
+<g opacity=".52" fill="none" stroke="url(#line)" stroke-width="2">
+  <path d="M820 -80C1120 180 1020 430 1350 510S1740 670 2020 1030"/>
+  <path d="M1040 -100C1310 140 1210 420 1500 510S1790 720 1980 930"/>
+  <path d="M850 1180C1100 870 1190 760 1470 720S1760 480 1950 230"/>
+</g>
+<g transform="translate(1430 465)" fill="none">
+  <circle r="335" stroke="#7fece0" stroke-opacity=".10" stroke-width="1.5"/>
+  <circle r="274" stroke="#7fece0" stroke-opacity=".16" stroke-width="1.5" stroke-dasharray="3 14"/>
+  <circle r="214" stroke="#a58bff" stroke-opacity=".2" stroke-width="1.5"/>
+  <circle r="154" stroke="url(#orb)" stroke-opacity=".52" stroke-width="2"/>
+  <path d="M-440 0H440M0 -440V440" stroke="#a8d9e8" stroke-opacity=".10" stroke-width="1"/>
+  <path d="M-310 -310L310 310M310 -310L-310 310" stroke="#a8d9e8" stroke-opacity=".075" stroke-width="1"/>
+  <ellipse rx="420" ry="150" transform="rotate(-28)" stroke="#64e8dc" stroke-opacity=".27" stroke-width="2"/>
+  <ellipse rx="360" ry="112" transform="rotate(34)" stroke="#a18bff" stroke-opacity=".23" stroke-width="2"/>
+  <circle r="92" fill="url(#orb)" stroke="#98f5e8" stroke-opacity=".28" stroke-width="1.5"/>
+  <circle r="11" fill="#b5fff0" fill-opacity=".9" stroke="none"/>
+  <circle cx="305" cy="-288" r="5" fill="#85f4e8" stroke="none"/>
+  <circle cx="-390" cy="115" r="4" fill="#a88cff" stroke="none"/>
+  <circle cx="360" cy="214" r="3" fill="#b8fff4" stroke="none"/>
+</g>
+<g fill="#d7f8f4" opacity=".42">
+  <circle cx="1080" cy="210" r="2"/><circle cx="1740" cy="210" r="2"/>
+  <circle cx="1810" cy="610" r="2"/><circle cx="1220" cy="830" r="2"/>
+  <circle cx="1510" cy="930" r="2"/><circle cx="990" cy="610" r="1.5"/>
+</g>
+<path d="M110 760H390" stroke="#54e4d6" stroke-opacity=".62" stroke-width="3"/>
+<text x="110" y="835" fill="#edf7ff" font-family="Cantarell,Inter,Arial,sans-serif" font-size="58" font-weight="700" letter-spacing="9">PRIMEBOOK</text>
+<text x="114" y="882" fill="#9eb5cc" font-family="Cantarell,Inter,Arial,sans-serif" font-size="17" letter-spacing="5">IMMERSIVE COMPUTING WORKSPACE</text>
+<text x="114" y="932" fill="#7188a6" font-family="Cantarell,Inter,Arial,sans-serif" font-size="15" letter-spacing="2">BUILD  ·  EXPLORE  ·  CREATE</text>
 </svg>
 WALLPAPER
 chmod 0644 /usr/share/backgrounds/termux-debian-x11/primebook-midnight.svg
 
-# Persistent first-login XFCE appearance settings. The autostart helper runs
-# as prime after the Xfconf session has started.
+# Persistent first-login XFCE appearance settings. The helper changes
+# only per-user Xfconf appearance and panel-item properties; it does not
+# alter Debian services, CUPS, audio, networking or X11 startup.
 install -d -m 0755 -o prime -g prime "$PRIME_HOME/.config/autostart"
 cat > /usr/local/bin/primebook-xfce-tune <<'TUNE'
 #!/bin/bash
 set -u
 sleep 5
+
 set_setting() {
   xfconf-query -c "$1" -p "$2" --create -t "$3" -s "$4" >/dev/null 2>&1 || true
 }
+set_panel_color() {
+  local panel="$1"
+  local property="/panels/$panel/background-rgba"
+  if xfconf-query -c xfce4-panel -p "$property" >/dev/null 2>&1; then
+    xfconf-query -c xfce4-panel -p "$property" -a \
+      -t double -s 0.035 -t double -s 0.050 \
+      -t double -s 0.095 -t double -s 1.000 >/dev/null 2>&1 || true
+  else
+    xfconf-query -c xfce4-panel -p "$property" --create -a \
+      -t double -s 0.035 -t double -s 0.050 \
+      -t double -s 0.095 -t double -s 1.000 >/dev/null 2>&1 || true
+  fi
+}
+
+# A crisp dark theme with high-contrast icons and readable typography.
 GTK_THEME=Adwaita
 [ -d /usr/share/themes/Arc-Dark ] && GTK_THEME=Arc-Dark
 ICON_THEME=Adwaita
@@ -422,20 +486,62 @@ set_setting xsettings /Net/ThemeName string "$GTK_THEME"
 set_setting xsettings /Net/IconThemeName string "$ICON_THEME"
 set_setting xsettings /Net/FontName string "$FONT"
 set_setting xsettings /Gtk/FontName string "$FONT"
+set_setting xsettings /Net/CursorThemeName string "Adwaita"
+set_setting xsettings /Net/CursorThemeSize uint 24
 set_setting xfwm4 /general/theme string "$GTK_THEME"
-set_setting xfwm4 /general/title_font string "DejaVu Sans Bold 10"
+set_setting xfwm4 /general/title_font string "Cantarell Bold 10"
+# Keep the compositor disabled: this is more reliable on Termux:X11/PRoot.
 set_setting xfwm4 /general/use_compositing bool false
-set_setting xfce4-desktop /desktop-icons/icon-size uint 48
+
+# Calm desktop with the custom PrimeBook orbital wallpaper.
+set_setting xfce4-desktop /desktop-icons/icon-size uint 44
+set_setting xfce4-desktop /desktop-icons/font-name string "$FONT"
 set_setting xfce4-desktop /backdrop/screen0/monitor0/workspace0/last-image string "/usr/share/backgrounds/termux-debian-x11/primebook-midnight.svg"
 set_setting xfce4-desktop /backdrop/screen0/monitor0/workspace0/image-style int 5
-# Anchor the panel to the full bottom edge and give tasklist buttons
-# enough vertical room so their icons do not get clipped/overlapped.
+
+# Retain the current panel and every panel item; refine only their appearance.
+set_setting xfce4-panel /panels/dark-mode bool true
 set_setting xfce4-panel /panels/panel-1/position string "p=12;x=0;y=0"
-set_setting xfce4-panel /panels/panel-1/size uint 56
+set_setting xfce4-panel /panels/panel-1/size uint 52
 set_setting xfce4-panel /panels/panel-1/length uint 100
 set_setting xfce4-panel /panels/panel-1/position-locked bool true
 set_setting xfce4-panel /panels/panel-1/autohide-behavior uint 0
-set_setting xfce4-panel /panels/panel-1/icon-size uint 30
+set_setting xfce4-panel /panels/panel-1/icon-size uint 28
+set_setting xfce4-panel /panels/panel-1/background-style uint 1
+set_setting xfce4-panel /panels/panel-1/enter-opacity uint 100
+set_setting xfce4-panel /panels/panel-1/leave-opacity uint 100
+set_panel_color panel-1
+
+# Detect existing panel plugins by their IDs. No item is added, removed or
+# reordered, so the existing launchers and taskbar remain intact.
+plugin_ids="$(xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids 2>/dev/null | awk '/^[[:space:]]*[0-9]+[[:space:]]*$/ {gsub(/[[:space:]]/,""); print}')"
+for id in $plugin_ids; do
+  plugin_type="$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$id" 2>/dev/null | tail -n 1 || true)"
+  case "$plugin_type" in
+    applicationsmenu|whiskermenu)
+      set_setting xfce4-panel "/plugins/plugin-$id/show-button-title" bool false
+      set_setting xfce4-panel "/plugins/plugin-$id/show-menu-icons" bool true
+      set_setting xfce4-panel "/plugins/plugin-$id/show-tooltips" bool true
+      ;;
+    tasklist)
+      set_setting xfce4-panel "/plugins/plugin-$id/flat-buttons" bool true
+      set_setting xfce4-panel "/plugins/plugin-$id/show-labels" bool false
+      set_setting xfce4-panel "/plugins/plugin-$id/show-handle" bool false
+      set_setting xfce4-panel "/plugins/plugin-$id/show-tooltips" bool true
+      set_setting xfce4-panel "/plugins/plugin-$id/grouping" uint 1
+      ;;
+    systray)
+      set_setting xfce4-panel "/plugins/plugin-$id/icon-size" uint 22
+      set_setting xfce4-panel "/plugins/plugin-$id/single-row" bool true
+      ;;
+    clock)
+      set_setting xfce4-panel "/plugins/plugin-$id/mode" uint 2
+      set_setting xfce4-panel "/plugins/plugin-$id/digital-format" string "%a %d %b  %H:%M"
+      set_setting xfce4-panel "/plugins/plugin-$id/tooltip-format" string "%A, %d %B %Y"
+      ;;
+  esac
+done
+
 xfce4-panel -r >/dev/null 2>&1 || true
 xfdesktop --reload >/dev/null 2>&1 || true
 TUNE
@@ -446,8 +552,8 @@ cat > "$PRIME_HOME/.config/autostart/primebook-xfce-tune.desktop" <<'AUTOSTART'
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=PrimeBook Desktop Polish
-Comment=Apply the lightweight dark theme, wallpaper and panel layout
+Name=PrimeBook Neo Desktop
+Comment=Apply the PrimeBook dark interface, orbital wallpaper and refined taskbar
 Exec=/usr/local/bin/primebook-xfce-tune
 OnlyShowIn=XFCE;
 X-GNOME-Autostart-enabled=true
