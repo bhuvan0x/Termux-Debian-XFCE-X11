@@ -1,5 +1,16 @@
 # Troubleshooting
 
+## ClamAV reports that no database is available
+
+Run the optional installer from Termux to install ClamAV and refresh its signatures:
+
+```bash
+bash scripts/install-clamav.sh
+bash scripts/scan-files.sh
+```
+
+If signature updates fail, check network connectivity and retry `freshclam` from an isolated Debian root session. Do not treat a scan without current signatures as a clean result.
+
 ## PRoot-Distro is too old for isolated login
 
 The workstation requires PRoot-Distro 5.8.0 or newer. In Termux, update it before running the desktop:
