@@ -5,6 +5,13 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 command -v proot-distro >/dev/null || { echo "proot-distro is missing; run setup first." >&2; exit 1; }
 command -v termux-x11 >/dev/null || { echo "Termux:X11 package is missing; run setup first." >&2; exit 1; }
 
+PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
+if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
+  echo "Security stop: update Termux proot-distro to 5.8.0 or newer:" >&2
+  echo "  pkg update && pkg upgrade -y" >&2
+  exit 2
+fi
+
 export DISPLAY=:0
 
 # Start and configure the Termux-side PulseAudio server through its local
