@@ -22,7 +22,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Short Termux terminal commands: `start-all` and `stop-all`.
 - Repository-local Git configuration ignores executable-bit-only changes on Android, avoiding recurring pull conflicts.
 - Widget background tasks for Debian updates and desktop app refresh.
-- Epson L3110 support: Debian ARM64 ESC/P-R driver, CUPS, scanner tools, and a dedicated **Epson L3110 Series Setup** desktop/menu shortcut.
+- Epson L3110 support: model-aware ARM64 ESC/P-R 1.8.8 driver with L3110 PPD, CUPS, scanner tools, and a dedicated **Epson L3110 Series Setup** desktop/menu shortcut.
 - Android USB detection/permission diagnostics plus X11 input-device inspection.
 
 ## Quick installation
@@ -171,7 +171,7 @@ This requires running from Termux, which enters Debian as root. It grants `prime
 
 ## Epson printing and USB devices
 
-The default Debian installation includes CUPS and Debian's native ARM64 `printer-driver-escpr` package for Epson ESC/P-R printers, plus Gutenprint and SANE scanner support. The L3110 is USB-only, with no built-in Wi-Fi/Ethernet. After `start-all`, open **Epson L3110 Series Setup** from the XFCE desktop or Applications menu to reach CUPS Administration and add the printer. The driver can be installed even when the printer is unplugged; creating a working queue still requires CUPS to see the USB device. Android/PRoot does not automatically expose raw USB devices, so a separate Linux USB print/scan server may be needed. See docs/USB-AND-PRINTING.md.
+The default Debian setup installs the ARM64 ESC/P-R 1.8.8 driver package, which contains the L3110 Series PPD, plus CUPS, Gutenprint and SANE scanner support. The installer temporarily pins only `printer-driver-escpr` from Debian Forky, then removes that source and pin. The L3110 is USB-only, with no built-in Wi-Fi/Ethernet. After `start-all`, open **Epson L3110 Series Setup** from the XFCE desktop or Applications menu to reach CUPS Administration and add the printer. The driver can be installed while the printer is unplugged; creating a working queue still requires CUPS to see the USB device. Android/PRoot does not automatically expose raw USB devices, so a separate Linux USB print/scan server may be needed. See docs/USB-AND-PRINTING.md.
 
 Reapply printer support on an existing Debian installation with:
 
