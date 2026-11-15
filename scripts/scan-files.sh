@@ -1,20 +1,33 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-if [ -z "${PREFIX:-}" ] || ! command -v proot-distro >/dev/null 2>&1; then
+if [ -z "\${PREFIX:-}" ] || ! command -v proot-distro >/dev/null 2>&1; then
   echo "Run this script from Termux." >&2
   exit 1
 fi
-PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
+PD_VERSION="$(dpkg-query -W -f='\${Version}' proot-distro 2>/dev/null || true)"
 if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
   echo "Update proot-distro to 5.8.0 or newer before scanning." >&2
   exit 2
 fi
-SCAN_PATH="${1:-/home/prime/Downloads}"
-case "$SCAN_PATH" in
-  /*) ;;
-  *) echo "Use an absolute path inside Debian, for example /home/prime/Downloads." >&2; exit 2 ;;
-esac
+
+SCAN_PATH="\${1:-/home/prime/Downloads}"
+LOGIN_ARGS=(login --isolated)
+if [ "$SCAN_PATH" = "--android-downloads" ]; then
+  BIND_SOURCE="$HOME/storage/shared/Download"
+  if [ ! -d "$BIND_SOURCE" ]; then
+    echo "Android Downloads is unavailable. Run termux-setup-storage and grant storage access first." >&2
+    exit 2
+  fi
+  SCAN_PATH="/mnt/android-downloads"
+  proot-distro login --isolated debian -- /bin/mkdir -p "$SCAN_PATH"
+  LOGIN_ARGS+=(--bind "$BIND_SOURCE:$SCAN_PATH")
+else
+  case "$SCAN_PATH" in
+    /*) ;;
+    *) echo "Use an absolute path inside Debian, or pass --android-downloads." >&2; exit 2 ;;
+  esac
+fi
 case "$SCAN_PATH" in
   /|/proc|/proc/*|/sys|/sys/*|/dev|/dev/*|/run|/run/*)
     echo "Refusing to recursively scan a virtual/system filesystem: $SCAN_PATH" >&2
@@ -22,7 +35,7 @@ case "$SCAN_PATH" in
     ;;
 esac
 
-proot-distro login --isolated debian -- /usr/bin/env "SCAN_PATH=$SCAN_PATH" /bin/bash -s <<'CLAMAV_SCAN'
+proot-distro "\${LOGIN_ARGS[@]}" debian -- /usr/bin/env "SCAN_PATH=$SCAN_PATH" /bin/bash -s <<'CLAMAV_SCAN'
 set -u
 if ! command -v clamscan >/dev/null 2>&1; then
   echo "ClamAV is not installed. Run: bash scripts/install-clamav.sh" >&2
@@ -30,7 +43,7 @@ if ! command -v clamscan >/dev/null 2>&1; then
 fi
 if [ ! -e "$SCAN_PATH" ]; then
   echo "Path not found inside isolated Debian: $SCAN_PATH" >&2
-  echo "Only paths inside Debian are visible by default; Android shared storage is intentionally not mounted."
+  echo "Android shared storage is not mounted unless you select --android-downloads."
   exit 2
 fi
 LOG="/home/prime/Documents/clamav-scan.log"
