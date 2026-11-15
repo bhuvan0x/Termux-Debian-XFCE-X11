@@ -78,12 +78,28 @@ EOF
 done
 
 # Maintenance tasks remain separate from the two everyday controls.
-cat > "$TASKS_DIR/Update Debian packages" <<'EOF'
+cat > "$TASKS_DIR/Update Debian packages" <<EOF
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
-exec proot-distro login debian -- /bin/bash -lc 'apt-get update && apt-get full-upgrade -y && apt-get autoremove -y && apt-get clean'
+REPO_DIR=$REPO_Q
+exec bash "\$REPO_DIR/scripts/update-debian.sh"
 EOF
 chmod 700 "$TASKS_DIR/Update Debian packages"
+
+for spec in \
+  "Harden Debian:scripts/harden-debian.sh" \
+  "Security audit:scripts/security-audit.sh" \
+  "Termux security check:scripts/security-check-termux.sh"; do
+  name="${spec%%:*}"
+  script="${spec#*:}"
+  cat > "$TASKS_DIR/$name" <<EOF
+#!/data/data/com.termux/files/usr/bin/bash
+set -Eeuo pipefail
+REPO_DIR=$REPO_Q
+exec bash "\$REPO_DIR/$script"
+EOF
+  chmod 700 "$TASKS_DIR/$name"
+done
 
 for spec in \
   "Refresh Debian desktop:scripts/install-apps.sh" \
