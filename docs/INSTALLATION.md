@@ -68,7 +68,7 @@ Then long-press the Android home screen, open **Widgets**, find **Termux:Widget*
 bash scripts/install-debian.sh
 ```
 
-This installs Debian, XFCE, everyday GUI applications, CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user `prime`, a password-authenticated sudoers rule for `prime`, launchers under `/home/prime/Desktop` and the PrimeBook dark desktop styling.
+This installs Debian, XFCE, everyday GUI applications (including GDebi), CUPS, Epson ESC/P-R and Gutenprint drivers, USB diagnostics and scanner utilities. It creates the non-root desktop user `prime`, a password-authenticated sudoers rule for `prime`, launchers under `/home/prime/Desktop` and the PrimeBook dark desktop styling.
 
 For an existing Debian installation, run:
 
@@ -76,6 +76,14 @@ For an existing Debian installation, run:
 bash scripts/install-apps.sh
 bash scripts/install-printing.sh
 ```
+
+To install a local Debian package and let GDebi resolve its dependencies, use a Debian terminal as `prime`:
+
+```bash
+sudo gdebi /path/to/package.deb
+```
+
+Check the package architecture first with `dpkg-deb -f /path/to/package.deb Architecture`. This device's Debian environment is ARM64; GDebi does not convert `amd64` packages to ARM64. For an existing installation, pull the repository update and rerun `bash scripts/install-apps.sh` to add GDebi.
 
 Optional office suite (large download and memory footprint):
 
