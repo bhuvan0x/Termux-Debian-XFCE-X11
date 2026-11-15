@@ -213,9 +213,11 @@ Install ClamAV from the Debian ARM64 repository:
 bash scripts/install-clamav.sh
 bash scripts/update-clamav.sh
 bash scripts/scan-files.sh
+# Or scan Android Downloads through a one-session bind:
+bash scripts/scan-files.sh --android-downloads
 ```
 
-By default, this scans `/home/prime/Downloads` inside Debian and writes a report to `/home/prime/Documents/clamav-scan.log`. You can pass another absolute Debian path. The scanner never deletes files automatically. ClamAV is an additional file scanner, not a substitute for Android Play Protect or safe package verification; it cannot scan Android shared storage while the Debian session is isolated, and large files/archives may be skipped by scanner limits.
+By default, this scans `/home/prime/Downloads` inside Debian and writes a report to `/home/prime/Documents/clamav-scan.log`. You can pass another absolute Debian path, or use `bash scripts/scan-files.sh --android-downloads` to bind only Android's Downloads folder for that scan. The scanner never deletes files automatically. ClamAV is an additional file scanner, not a substitute for Android Play Protect or safe package verification; it cannot scan Android shared storage while the Debian session is isolated, and large files/archives may be skipped by scanner limits.
 
 ## Debian sudo access
 
@@ -304,6 +306,7 @@ bash scripts/security-check-termux.sh
 bash scripts/install-clamav.sh
 bash scripts/update-clamav.sh
 bash scripts/scan-files.sh
+bash scripts/scan-files.sh --android-downloads
 bash scripts/check-usb.sh
 bash scripts/check-epson-l3110.sh
 ```
