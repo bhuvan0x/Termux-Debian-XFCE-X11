@@ -120,7 +120,7 @@ proot-distro login --isolated debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:
 The rule requires the `prime` password; it does not grant passwordless sudo. Set or change the Debian password without putting it in a script or repository:
 
 ```bash
-proot-distro login debian -- passwd prime
+proot-distro login --isolated debian -- passwd prime
 ```
 
 After changing group membership, fully stop and restart XFCE so the new session receives updated groups.
@@ -178,7 +178,7 @@ http://127.0.0.1:631
 Before administering printers, set a password for the prime desktop account from Termux:
 
 ```bash
-proot-distro login debian -- passwd prime
+proot-distro login --isolated debian -- passwd prime
 ```
 
 You can open the same page from the **Epson L3110 Series Setup** desktop shortcut. In CUPS, use **Administration → Add Printer** and select the Epson L3110 Series driver when it appears in the model list. For the L3110, direct USB printing works only if Android exposes the raw USB device to PRoot. The L3110 itself has no Wi-Fi/Ethernet. If PRoot cannot access USB, connect the printer to a separate Linux host and share that host's CUPS queue over IPP.
