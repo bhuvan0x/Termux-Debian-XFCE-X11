@@ -21,7 +21,7 @@ fi
 printf '\n%s\n' '== Debian distro =='
 if command -v proot-distro >/dev/null 2>&1; then
   proot-distro list
-  proot-distro login debian -- /bin/bash -lc '
+  proot-distro login --isolated debian -- /bin/bash -lc '
     cat /etc/os-release 2>/dev/null
     echo
     dpkg -l xfce4 dbus-x11 cups printer-driver-escpr printer-driver-gutenprint usbutils xinput 2>/dev/null | tail -n +6
