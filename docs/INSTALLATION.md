@@ -240,6 +240,7 @@ ClamAV is available for Debian ARM64. Install the command-line scanner and signa
 
 ```bash
 bash scripts/install-clamav.sh
+bash scripts/update-clamav.sh
 bash scripts/scan-files.sh
 ```
 
