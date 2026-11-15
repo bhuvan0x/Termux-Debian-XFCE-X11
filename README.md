@@ -190,6 +190,15 @@ Hardening applies signed-APT settings, installs `debsums` for package-file integ
 
 PRoot-Distro's `--isolated` option removes automatic bindings for the Termux home directory, Android shared storage and Termux app paths. The XFCE session uses `--shared-x11` to expose only the X11 socket it needs. This means Android Downloads and Termux files are no longer automatically visible inside Debian. When a transfer is needed, explicitly bind only the required directory for that session; do not re-enable broad shared-home or shared-tmp mounts.
 
+For example, to expose only Android's Downloads folder for one temporary Debian session, run this in Termux:
+
+```bash
+termux-setup-storage
+proot-distro login --isolated --bind "$HOME/storage/shared/Download:/mnt/android-downloads" debian
+```
+
+The directory appears inside that session at `/mnt/android-downloads`; it is not mounted into normal desktop sessions.
+
 **What this cannot secure from inside Debian:** PRoot shares the Android kernel and app UID. It is not a VM or a kernel-enforced container. Debian cannot independently enforce a host firewall, AppArmor/SELinux policy, kernel sysctls, kernel audit, systemd service timers, or kernel namespaces. Do not install UFW/Fail2ban and assume they protect the Android device. The Android OS remains the security boundary.
 
 On Android, use a strong screen-lock PIN/password, install Termux and add-ons only from trusted compatible sources, keep Android security updates and Play Protect enabled, review app permissions, and avoid granting broad file access unless required. Keep backups of important Termux and Debian data. Never put passwords, API keys, SSH private keys or GitHub tokens in this repository.
@@ -291,8 +300,6 @@ bash scripts/install-apps.sh
 bash scripts/install-termux-widget.sh
 bash scripts/update-debian.sh
 bash scripts/diagnose.sh
-bash scripts/harden-debian.sh
-bash scripts/security-audit.sh
 bash scripts/security-check-termux.sh
 bash scripts/install-clamav.sh
 bash scripts/update-clamav.sh
