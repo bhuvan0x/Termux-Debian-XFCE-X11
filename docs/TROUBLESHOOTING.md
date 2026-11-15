@@ -113,6 +113,22 @@ proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" >
 
 Then fully stop and restart XFCE and test `sudo -v` in a new Debian terminal. The rule requires the `prime` password. Change it with `proot-distro login debian -- passwd prime`. Never put passwords in scripts or repository files.
 
+## OpenCode Desktop is installed but does not open from the menu
+
+Run `bash scripts/install-apps.sh` from Termux after pulling the latest repository. It creates a permanent OpenCode menu/desktop launcher that runs the ARM64 Electron app in the background with PRoot-compatible flags. Restart XFCE using `stop-all` and `start-all`.
+
+OpenCode logs are saved to `~/Downloads/opencode-desktop.log` inside Debian. Inspect the latest output with:
+
+```bash
+tail -n 100 ~/Downloads/opencode-desktop.log
+```
+
+The `opencode` terminal command is not provided by the OpenCode Desktop `.deb`; install the separate OpenCode CLI if you need the terminal interface.
+
+## Installing future local ARM64 .deb packages
+
+Use `primebook-install-deb ~/Downloads/package.deb` from the Debian `prime` account. It checks that the package architecture is `arm64` or `all`, installs through GDebi, and refreshes detected Electron desktop launchers. It cannot make every package compatible with PRoot or supply missing libraries, drivers, kernel features or GPU support.
+
 ## GDebi opens but clicking Install does nothing
 
 The normal GDebi GTK action can fail when its PolicyKit privilege hand-off is unavailable in a PRoot desktop. The repository app installer creates a per-user GDebi launcher that asks for the `prime` sudo password first, starts `gdebi-gtk` with administrator privileges, and keeps a terminal open to show errors.
