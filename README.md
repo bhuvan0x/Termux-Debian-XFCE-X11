@@ -18,6 +18,8 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Firefox ESR, GDebi with a privileged diagnostic launcher, permanent OpenCode desktop launcher, and ARM64 `.deb` installation helper, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
 - Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
+- Isolated PRoot sessions (PRoot-Distro 5.8.0+): Termux home, shared storage and app paths are not exposed to Debian by default; only the X11 socket is explicitly shared with XFCE.
+- Security hardening and audit scripts: signed-APT enforcement, short sudo credential caching, CUPS loopback binding, package-file integrity checks, and Termux/PRoot version checks.
 - Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down, including the Android X11 viewer.
 - Short Termux terminal commands: `start-all` and `stop-all`.
 - Repository-local Git configuration ignores executable-bit-only changes on Android, avoiding recurring pull conflicts.
@@ -41,6 +43,8 @@ cd Termux-Debian-X11
 
 bash scripts/setup-termux.sh
 bash scripts/install-debian.sh
+bash scripts/harden-debian.sh
+bash scripts/security-audit.sh
 ```
 
 Open the Termux:X11 Android app once, then launch the desktop:
@@ -103,6 +107,9 @@ Background tasks:
 - **Refresh Debian desktop** — reruns the GUI app installer and desktop launchers.
 - **Check USB devices** — runs the USB and XInput diagnostics.
 - **Install printer support** — installs CUPS and the Epson/Gutenprint driver packages.
+- **Harden Debian** — applies conservative security defaults and restricts CUPS to loopback.
+- **Security audit** — reviews host package versions, Debian packages, sudoers, listeners, CUPS and package-file checksums.
+- **Termux security check** — checks the Termux app environment and PRoot-Distro version.
 
 Install the Termux:Widget Android add-on from the same source/signing family as Termux, then add its widget from Android's home-screen widget picker. If you install Widget after the setup, run:
 
@@ -159,12 +166,38 @@ These options are a PRoot compatibility workaround. `--no-sandbox` weakens Chrom
 
 Do not install an `amd64` VS Code package on this ARM64 Debian environment. GDebi is included for local `.deb` installation and dependency resolution, but it cannot convert an `amd64` package into an ARM64 package. Check a package before installing it with `dpkg-deb -f package.deb Architecture`.
 
+## Security hardening and maintenance
+
+Run these from **Termux**, in this order, after pulling the latest repository:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+pkg update && pkg upgrade -y
+pkg install -y proot-distro
+bash scripts/security-check-termux.sh
+bash scripts/harden-debian.sh
+bash scripts/security-audit.sh
+```
+
+The isolated-session workflow requires PRoot-Distro **5.8.0 or newer**. The scripts stop rather than silently falling back to a less isolated session. Keep Termux, Termux:X11 and their add-ons updated from compatible signing sources.
+
+Hardening applies signed-APT settings, installs `debsums` for package-file integrity checks, tightens password-authenticated sudo defaults, and configures CUPS to listen on loopback only with printer sharing disabled. Debian maintenance remains deliberate: run `bash scripts/update-debian.sh` regularly, then review `bash scripts/security-audit.sh`. PRoot does not provide a working systemd timer here, so the project does not claim unattended security updates.
+
+PRoot-Distro's `--isolated` option removes automatic bindings for the Termux home directory, Android shared storage and Termux app paths. The XFCE session uses `--shared-x11` to expose only the X11 socket it needs. This means Android Downloads and Termux files are no longer automatically visible inside Debian. When a transfer is needed, explicitly bind only the required directory for that session; do not re-enable broad shared-home or shared-tmp mounts.
+
+**What this cannot secure from inside Debian:** PRoot shares the Android kernel and app UID. It is not a VM or a kernel-enforced container. Debian cannot independently enforce a host firewall, AppArmor/SELinux policy, kernel sysctls, kernel audit, systemd service timers, or kernel namespaces. Do not install UFW/Fail2ban and assume they protect the Android device. The Android OS remains the security boundary.
+
+On Android, use a strong screen-lock PIN/password, install Termux and add-ons only from trusted compatible sources, keep Android security updates and Play Protect enabled, review app permissions, and avoid granting broad file access unless required. Keep backups of important Termux and Debian data. Never put passwords, API keys, SSH private keys or GitHub tokens in this repository.
+
+Some Electron apps (including the OpenCode/VS Code compatibility launchers) require `--no-sandbox` under PRoot. This weakens Chromium isolation. Install only trusted builds, verify vendor checksums/signatures where provided, and do not use those launchers for untrusted applications or browsing. A clean audit is useful evidence, not a guarantee that the device is secure.
+
 ## Debian sudo access
 
 The desktop user `prime` is unprivileged. `scripts/install-apps.sh` creates a dedicated, password-authenticated sudoers drop-in for `prime`; this avoids relying only on supplemental group membership in a PRoot selected-user session. To reapply it on an existing installation, rerun `bash scripts/install-apps.sh`.
 
 ```bash
-proot-distro login debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
+proot-distro login --isolated debian -- bash -lc 'printf "%s\n" "prime ALL=(ALL:ALL) ALL" > /etc/sudoers.d/prime && chmod 0440 /etc/sudoers.d/prime && visudo -c'
 ```
 
 This requires running from Termux, which enters Debian as root. It grants `prime` password-authenticated sudo access. Never store a plaintext password in this repository.
@@ -192,6 +225,8 @@ Run `bash scripts/check-usb.sh` (an occasional diagnostic command) to list Andro
 ```text
 Termux-Debian-X11/
 ├── README.md
+├── assets/
+│   └── primebook-midnight.svg
 ├── docs/
 │   ├── INSTALLATION.md
 │   ├── TROUBLESHOOTING.md
@@ -234,6 +269,9 @@ bash scripts/install-apps.sh
 bash scripts/install-termux-widget.sh
 bash scripts/update-debian.sh
 bash scripts/diagnose.sh
+bash scripts/harden-debian.sh
+bash scripts/security-audit.sh
+bash scripts/security-check-termux.sh
 bash scripts/check-usb.sh
 bash scripts/check-epson-l3110.sh
 ```
