@@ -12,7 +12,7 @@ case "${1:-}" in
   *) echo "Usage: bash scripts/security-audit.sh [--integrity]" >&2; exit 2 ;;
 esac
 PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
-printf 'Termux proot-distro: %s\\n' "${PD_VERSION:-missing}"
+printf 'Termux proot-distro: %s\n' "${PD_VERSION:-missing}"
 if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
   echo "WARNING: update Termux packages; isolated login requires proot-distro >= 5.8.0."
   exit 2
@@ -46,8 +46,8 @@ else
 fi
 if command -v ss >/dev/null 2>&1; then
   SS_OUTPUT="$(ss -lntup 2>&1 || true)"
-  printf '%s\\n' "$SS_OUTPUT"
-  if printf '%s\\n' "$SS_OUTPUT" | grep -q "Cannot open netlink socket: Permission denied"; then
+  printf '%s\n' "$SS_OUTPUT"
+  if printf '%s\n' "$SS_OUTPUT" | grep -q "Cannot open netlink socket: Permission denied"; then
     echo "LIMITATION: Android denied netlink socket inspection; host listener inventory is incomplete."
   fi
 else
@@ -75,10 +75,10 @@ cat /etc/apt/apt.conf.d/99-primebook-security 2>/dev/null || echo "Hardening con
 section "SUDO AND ACCOUNT"
 visudo -c 2>&1 || echo "WARNING: visudo validation reported a problem."
 if [ -d /etc/sudoers.d ]; then
-  BAD_SUDOERS="$(find /etc/sudoers.d -maxdepth 1 -type f \\( ! -perm 0440 -o ! -user root -o ! -group root \\) -print 2>/dev/null || true)"
+  BAD_SUDOERS="$(find /etc/sudoers.d -maxdepth 1 -type f \( ! -perm 0440 -o ! -user root -o ! -group root \) -print 2>/dev/null || true)"
   if [ -n "$BAD_SUDOERS" ]; then
     echo "WARNING: sudoers drop-ins with unsafe owner/mode:"
-    printf '%s\\n' "$BAD_SUDOERS"
+    printf '%s\n' "$BAD_SUDOERS"
   else
     echo "PASS: sudoers drop-in files have root ownership and mode 0440."
   fi
@@ -106,7 +106,7 @@ fi
 section "CUPS NETWORK BINDING"
 if [ -f /etc/cups/cupsd.conf ]; then
   grep -nE '^[[:space:]]*(Listen|Port|Browsing|DefaultShared)[[:space:]]' /etc/cups/cupsd.conf || true
-  if grep -E '^[[:space:]]*(Port[[:space:]]+|Listen[[:space:]]+\\*:|Listen[[:space:]]+0\\.0\\.0\\.0:|Listen[[:space:]]+\\[::\\]:)' /etc/cups/cupsd.conf >/dev/null; then
+  if grep -E '^[[:space:]]*(Port[[:space:]]+|Listen[[:space:]]+\*:|Listen[[:space:]]+0\.0\.0\.0:|Listen[[:space:]]+\[::\]:)' /etc/cups/cupsd.conf >/dev/null; then
     echo "WARNING: CUPS may be listening beyond loopback. Run scripts/harden-debian.sh."
   else
     echo "PASS: no wildcard CUPS TCP listener found in cupsd.conf."
