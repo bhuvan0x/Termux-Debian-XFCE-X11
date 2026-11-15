@@ -15,7 +15,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 
 - Debian userspace through `proot-distro`; no device root required.
 - XFCE desktop with a lightweight, dark appearance, custom wallpaper, larger desktop icons and a slim bottom panel.
-- Firefox ESR, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
+- Firefox ESR, GDebi for local `.deb` packages, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
 - Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
 - Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down, including the Android X11 viewer.
@@ -117,6 +117,7 @@ Official project: https://github.com/termux/termux-widget
 | App | Use |
 |---|---|
 | Firefox ESR | Web browser |
+| GDebi | Local Debian package installer with dependency resolution |
 | VLC / MPV | Video and audio |
 | FFmpeg | Media conversion |
 | Geany | Lightweight code editor |
@@ -154,7 +155,7 @@ Run it from Termux. It downloads the official `linux-deb-arm64` package, verifie
 
 These options are a PRoot compatibility workaround. `--no-sandbox` weakens Chromium's normal renderer isolation; use this only in the trusted local PRoot desktop, not as a general Linux desktop recommendation. The launcher override is stored under `/home/prime/.local/share/applications` and does not modify the package-owned desktop files. The VS Code keyring prompt is separate from installation; credential storage may need GNOME Keyring configuration later.
 
-Do not install an `amd64` VS Code package on this ARM64 Debian environment.
+Do not install an `amd64` VS Code package on this ARM64 Debian environment. GDebi is included for local `.deb` installation and dependency resolution, but it cannot convert an `amd64` package into an ARM64 package. Check a package before installing it with `dpkg-deb -f package.deb Architecture`.
 
 ## Debian sudo access
 
