@@ -6,7 +6,7 @@ command -v proot-distro >/dev/null 2>&1 || {
   exit 1
 }
 
-proot-distro login debian -- /bin/bash -s <<'DEBIAN_EPSON_CHECK'
+proot-distro login --isolated debian -- /bin/bash -s <<'DEBIAN_EPSON_CHECK'
 set -u
 
 echo "===== DEBIAN ARCHITECTURE ====="
