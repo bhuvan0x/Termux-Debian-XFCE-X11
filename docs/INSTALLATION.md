@@ -251,9 +251,11 @@ ClamAV is available for Debian ARM64. Install the command-line scanner and signa
 bash scripts/install-clamav.sh
 bash scripts/update-clamav.sh
 bash scripts/scan-files.sh
+# Optional: bind only Android Downloads for this scan
+bash scripts/scan-files.sh --android-downloads
 ```
 
-The default scan target is `/home/prime/Downloads` inside Debian; another absolute Debian path can be supplied. Scan results are saved to `/home/prime/Documents/clamav-scan.log`. The script does not delete or quarantine detections automatically. The signature database download is sizeable, and ClamAV is on-demand rather than an always-running daemon. It cannot scan Android shared storage from an isolated Debian session and does not replace Android's built-in malware protections.
+The default scan target is `/home/prime/Downloads` inside Debian; another absolute Debian path can be supplied. To scan Android Downloads, run `bash scripts/scan-files.sh --android-downloads`; the script binds only that folder for that scan. Scan results are saved to `/home/prime/Documents/clamav-scan.log`. The script does not delete or quarantine detections automatically. The signature database download is sizeable, and ClamAV is on-demand rather than an always-running daemon. It cannot scan Android shared storage from an isolated Debian session and does not replace Android's built-in malware protections.
 
 ## Notes and limitations
 
