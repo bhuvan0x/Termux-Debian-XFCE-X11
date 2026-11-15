@@ -13,7 +13,7 @@ pkg update -y
 pkg upgrade -y
 pkg install -y x11-repo
 pkg update -y
-pkg install -y proot-distro pulseaudio termux-x11-nightly termux-api
+pkg install -y proot-distro pulseaudio termux-x11-nightly termux-api iproute2
 
 # PRoot-Distro 5.8.0 contains the major filesystem/input hardening baseline
 # used by this repository's isolated login workflow.
