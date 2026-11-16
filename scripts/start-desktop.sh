@@ -84,18 +84,49 @@ if proot-distro login --isolated debian -- test -x /usr/sbin/cupsd >/dev/null 2>
   bash "$SCRIPT_DIR/start-printing.sh" || echo "Warning: CUPS did not start; see docs/USB-AND-PRINTING.md."
 fi
 
-proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -lc '
-  export DISPLAY=:0
-  export PULSE_SERVER=tcp:127.0.0.1
-  export XDG_RUNTIME_DIR=/tmp/runtime-prime
-  export XDG_SESSION_TYPE=x11
-  mkdir -p "$XDG_RUNTIME_DIR"
-  chmod 700 "$XDG_RUNTIME_DIR"
+# Keep the system D-Bus daemon alive in the same root PRoot session as
+# XFCE. Starting it in a separate proot-distro login would leave a stale
+# socket when that isolated session exits (the exact GNOME Software failure).
+# The GUI itself still runs as the unprivileged prime user.
+proot-distro login --isolated --shared-x11 debian -- /bin/bash -lc '
+  set -Eeuo pipefail
+  install -d -m 0755 /run/dbus
+  rm -f /run/dbus/system_bus_socket
+  dbus-daemon --system --nofork --nopidfile &
+  SYSTEM_DBUS_PID=$!
+  cleanup_system_bus() {
+    kill "$SYSTEM_DBUS_PID" 2>/dev/null || true
+    wait "$SYSTEM_DBUS_PID" 2>/dev/null || true
+    rm -f /run/dbus/system_bus_socket
+  }
+  trap cleanup_system_bus EXIT INT TERM
+
+  bus_ready=0
+  for attempt in $(seq 1 10); do
+    if dbus-send --system --print-reply --dest=org.freedesktop.DBus \
+      /org/freedesktop/DBus org.freedesktop.DBus.ListNames >/dev/null 2>&1; then
+      bus_ready=1
+      break
+    fi
+    sleep 1
+  done
+  if [ "$bus_ready" -eq 1 ]; then
+    echo "Debian system D-Bus is ready for PackageKit/Discover."
+  else
+    echo "WARNING: system D-Bus did not become ready; XFCE will still start."
+    echo "Discover will log the unavailable service in ~/Documents/discover.log."
+  fi
 
   if pgrep -x xfce4-session >/dev/null 2>&1; then
     echo "An XFCE session already appears to be running. Stop it first."
     exit 1
   fi
 
-  dbus-launch --exit-with-session startxfce4
+  install -d -m 0700 -o prime -g prime /tmp/runtime-prime
+  runuser -u prime -- env \
+    DISPLAY=:0 \
+    PULSE_SERVER=tcp:127.0.0.1 \
+    XDG_RUNTIME_DIR=/tmp/runtime-prime \
+    XDG_SESSION_TYPE=x11 \
+    dbus-launch --exit-with-session startxfce4
 '
