@@ -86,13 +86,6 @@ fi
 if [ -d "$LOWPAPER_CONFIG" ]; then
   cp -a "$LOWPAPER_CONFIG" "$BACKUP/previous-lowpaper-config"
 fi
-if [ -d "$PRIME_HOME/.config/fresco" ]; then
-  cp -a "$PRIME_HOME/.config/fresco" "$BACKUP/fresco-config-before-migration"
-fi
-if [ -d "$PRIME_HOME/.local/state/fresco" ]; then
-  cp -a "$PRIME_HOME/.local/state/fresco" "$BACKUP/fresco-state-before-migration"
-fi
-
 TMP="$(mktemp)"
 trap 'rm -f "$TMP"' EXIT
 LOWPAPER_URL="https://github.com/Meinianda-L/lowpaper/releases/download/v0.1.1/lowpaper"
@@ -151,7 +144,7 @@ STATUS="$(as_prime "$LOWPAPER" status 2>&1 || true)"
 printf '%s\n' "$STATUS"
 if ! grep -q 'playing' <<< "$STATUS"; then
   as_prime "$LOWPAPER" stop >/dev/null 2>&1 || true
-  die "MPV did not report active playback. Fresco has NOT been removed. Check /tmp/lowpaper-$(id -u prime)/$(basename "$WALLPAPER").log and retry after diagnosis."
+  die "MPV did not report active playback. Fresco has NOT been removed. Check /tmp/runtime-prime/lowpaper-$(id -u prime)/<monitor-name>.log and retry after diagnosis."
 fi
 
 echo
@@ -213,7 +206,13 @@ move_to_backup "/usr/share/applications/fresco.desktop" "$BACKUP/fresco-launcher
 move_to_backup "/etc/xdg/autostart/fresco.desktop" "$BACKUP/fresco-launchers/system-autostart-fresco.desktop"
 move_to_backup "/usr/local/share/fresco" "$BACKUP/fresco-system-share"
 
-rm -f /usr/local/bin/fresco /usr/local/bin/frescod
+for binary in /usr/local/bin/fresco /usr/local/bin/frescod; do
+  if [ -e "$binary" ] || [ -L "$binary" ]; then
+    install -d -m 0700 -o prime -g prime "$BACKUP/fresco-system-binaries"
+    cp -a "$binary" "$BACKUP/fresco-system-binaries/"
+    rm -f -- "$binary"
+  fi
+done
 
 SOURCE_TREE="$PRIME_HOME/src/Fresco"
 if [ -d "$SOURCE_TREE" ]; then
