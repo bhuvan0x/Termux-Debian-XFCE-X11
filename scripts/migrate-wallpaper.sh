@@ -136,7 +136,7 @@ if [ -d "$LOWPAPER_CONFIG" ]; then
   cp -a "$LOWPAPER_CONFIG" "$BACKUP/previous-lowpaper-config"
 fi
 TMP="$(mktemp)"
-trap 'rm -f "$TMP"' EXIT
+trap 'rm -f "$TMP"; restore_unconfirmed_state' EXIT
 LOWPAPER_URL="https://github.com/Meinianda-L/lowpaper/releases/download/v0.1.1/lowpaper"
 EXPECTED_SHA256="f2596b647c1d7241264712c5027a7644b6b9b0d7166f6b91691f62236c198d25"
 curl -fL --retry 3 --connect-timeout 20 "$LOWPAPER_URL" -o "$TMP"
