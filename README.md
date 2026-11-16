@@ -313,9 +313,9 @@ Termux-Debian-X11/
 - This is not a VM and does not boot another kernel. systemd, kernel modules, nested containers and some hardware integrations may not work normally.
 - Optional themes and plugins are installed only when available in the Debian repositories.
 
-## Prayag2 Modern Clock — XFCE port
+## Prayag2 Modern Clock — centered transparent XFCE port
 
-The standalone [Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock) project is a faithful XFCE port of [Prayag2/kde_modernclock](https://github.com/Prayag2/kde_modernclock). It preserves the original Anurati and Poppins fonts, three-row layout, default font sizes, letter spacing, white text, date/time formatting and hyphen style characters. Only the Plasma-specific applet shell is replaced with a Qt Quick desktop window.
+The standalone [Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock) project is a faithful XFCE port of [Prayag2/kde_modernclock](https://github.com/Prayag2/kde_modernclock). It preserves the original fonts, typography, letter spacing and output, with a **transparent frameless window centered on the screen** by default.
 
 Install or update from Termux:
 
@@ -325,13 +325,7 @@ git pull --ff-only
 bash scripts/install-modernclock.sh
 ```
 
-Remove it with:
-
-```bash
-bash scripts/install-modernclock.sh --remove
-```
-
-See [docs/MODERN-CLOCK.md](docs/MODERN-CLOCK.md) for the upstream defaults, customization and XFCE-specific limitations.
+See [docs/MODERN-CLOCK.md](docs/MODERN-CLOCK.md) for positioning, transparency notes and removal.
 
 ## WhiteSur XFCE desktop customization
 
