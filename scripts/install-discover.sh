@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 command -v proot-distro >/dev/null 2>&1 || { echo "proot-distro is missing. Run scripts/setup-termux.sh first." >&2; exit 1; }
-PD_VERSION="$(dpkg-query -W -f='\${Version}' proot-distro 2>/dev/null || true)"
+PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
 if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
   echo "Update Termux proot-distro to version 5.8.0 or newer first." >&2
   exit 2
@@ -27,7 +27,7 @@ fi
 
 # Install Discover before removing the previous GNOME storefront. Shared
 # PackageKit and Flatpak dependencies are intentionally retained.
-if dpkg-query -W -f='\${Status}' gnome-software 2>/dev/null | grep -q 'install ok installed'; then
+if dpkg-query -W -f='${Status}' gnome-software 2>/dev/null | grep -q 'install ok installed'; then
   apt-get purge -y gnome-software gnome-software-plugin-deb gnome-software-plugin-flatpak || true
 fi
 
@@ -43,7 +43,7 @@ mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/discover.log"
 {
   printf '\n===== Discover launch: %s =====\n' "$(date -Is)"
-  printf 'User: %s | DISPLAY: %s\n' "$(id -un)" "\${DISPLAY:-unset}"
+  printf 'User: %s | DISPLAY: %s\n' "$(id -un)" "${DISPLAY:-unset}"
   if ! dbus-send --system --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.ListNames >/dev/null 2>&1; then
     echo "ERROR: The Debian system D-Bus is unavailable."
     echo "Stop the desktop and start it again with start-all; the updated startup script initializes the system bus."
@@ -51,7 +51,7 @@ LOG_FILE="$LOG_DIR/discover.log"
   fi
   echo "System D-Bus: reachable"
 } >> "$LOG_FILE" 2>&1
-export QT_QPA_PLATFORM="\${QT_QPA_PLATFORM:-xcb}"
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
 exec /usr/bin/plasma-discover "$@" >> "$LOG_FILE" 2>&1
 DISCOVER_WRAPPER
 chmod 0755 /usr/local/bin/primebook-discover
@@ -76,9 +76,9 @@ rm -f "$APP_DIR/primebook-software-center.desktop" "$DESKTOP_DIR/Software Center
 if command -v update-desktop-database >/dev/null 2>&1; then update-desktop-database "$APP_DIR" >/dev/null 2>&1 || true; fi
 
 echo
-echo "KDE Discover: $(dpkg-query -W -f='\${Version}' plasma-discover)"
-echo "Flatpak backend: $(dpkg-query -W -f='\${Version}' plasma-discover-backend-flatpak)"
-echo "PackageKit: $(dpkg-query -W -f='\${Version}' packagekit)"
+echo "KDE Discover: $(dpkg-query -W -f='${Version}' plasma-discover)"
+echo "Flatpak backend: $(dpkg-query -W -f='${Version}' plasma-discover-backend-flatpak)"
+echo "PackageKit: $(dpkg-query -W -f='${Version}' packagekit)"
 echo "Flathub: per-user remote for prime (if network setup succeeded)"
 echo "Launcher: $APP_DIR/primebook-discover.desktop"
 echo
