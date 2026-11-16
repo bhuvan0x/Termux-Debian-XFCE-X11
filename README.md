@@ -27,6 +27,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Widget background tasks for Debian updates and desktop app refresh.
 - Epson L3110 support: model-aware ARM64 ESC/P-R 1.8.8 driver with L3110 PPD, CUPS, scanner tools, and a dedicated **Epson L3110 Series Setup** desktop/menu shortcut.
 - Android USB detection/permission diagnostics plus X11 input-device inspection.
+- Optional Fresco live wallpaper manager (native Debian ARM64 build) with an XFCE Applications-menu launcher and quick wallpaper actions. Fresco remains opt-in and does not change the existing wallpaper or enable autostart.
 
 ## Quick installation
 
@@ -152,6 +153,39 @@ bash scripts/install-apps.sh --office
 
 This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
+## Fresco live wallpapers (optional)
+
+Fresco is an optional native ARM64 live wallpaper manager. This repository provides the integration/installer and XFCE launcher; it does **not** bundle prebuilt binaries. Build Fresco inside Debian on the target device first. The tested source release is [Fresco v1.1.55](https://github.com/DibbayajyotiRoy/Fresco).
+
+The tested Debian 13 ARM64 build uses Rust stable via rustup, GTK4/libadwaita development libraries, and `libmpv2`. The native X11 backend uses libmpv dynamically; `mpvpaper` is a Wayland helper and is not required for this XFCE/X11 setup.
+
+After building Fresco with its documented Cargo command and confirming the executables are in `/home/prime/src/Fresco/target/release/`, run this from **Termux**:
+
+```bash
+bash scripts/install-fresco.sh
+```
+
+If your release binaries are in a different directory, pass the Debian path explicitly:
+
+```bash
+bash scripts/install-fresco.sh /home/prime/path/to/Fresco/target/release
+```
+
+The installer checks both files are executable AArch64 binaries, checks their linked libraries, verifies `libmpv2`, installs `fresco` and `frescod` under `/usr/local/bin`, and creates `/home/prime/.local/share/applications/fresco.desktop`. The XFCE menu entry is named **Fresco** and includes quick actions for Next, Previous, Random and Choose Wallpaper. You can also find it with XFCE App Finder.
+
+The installer does not start the daemon, enable session autostart, or replace the current XFCE wallpaper. Launch Fresco from the Applications menu and configure/test it manually first. Fresco's own diagnostics can be opened with:
+
+```bash
+fresco doctor
+fresco status
+fresco logs
+```
+
+To remove the integration without deleting Fresco's source tree or user settings, run this from Termux:
+
+```bash
+bash scripts/remove-fresco.sh
+```
 ## Visual Studio Code (optional)
 
 The project includes an ARM64-only installer for the official stable Debian package:
@@ -263,6 +297,8 @@ Termux-Debian-X11/
     ├── install-debian.sh
     ├── install-apps.sh
     ├── install-vscode.sh
+    ├── install-fresco.sh
+    ├── remove-fresco.sh
     ├── install-termux-widget.sh
     ├── install-printing.sh
     ├── check-epson-l3110.sh
