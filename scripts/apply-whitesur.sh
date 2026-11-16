@@ -169,7 +169,83 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     while IFS= read -r property; do
       [ -n "$property" ] || continue
       xfconf-query -c xfce4-desktop -p "$property" --create -t string -s "$WALLPAPER"
-    done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep '/last-image$' || true)
+    done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep '/last-image
+  fi
+  sleep 2
+done
+exit 0
+LOGIN_SCRIPT
+
+sed -i "s|__GTK_THEME__|$GTK_THEME|g" "$LOCAL_BIN/primebook-whitesur-session.sh"
+chmod 0755 "$LOCAL_BIN/primebook-whitesur-session.sh"
+
+cat > "$AUTOSTART_DIR/primebook-whitesur.desktop" <<'AUTOSTART_ENTRY'
+[Desktop Entry]
+Type=Application
+Name=PrimeBook WhiteSur Appearance
+Comment=Restore WhiteSur appearance on every XFCE login
+Exec=/bin/bash -lc "$HOME/.local/bin/primebook-whitesur-session.sh"
+OnlyShowIn=XFCE;
+Terminal=false
+Hidden=false
+X-GNOME-Autostart-enabled=true
+AUTOSTART_ENTRY
+
+# GTK fallback for apps started before xfsettingsd completes startup.
+mkdir -p "$HOME/.config/gtk-3.0"
+GTK_SETTINGS="$HOME/.config/gtk-3.0/settings.ini"
+touch "$GTK_SETTINGS"
+if ! grep -q '^\[Settings\]$' "$GTK_SETTINGS"; then
+  echo "[Settings]" >> "$GTK_SETTINGS"
+fi
+for entry in "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
+  key="${entry%%=*}"
+  if grep -q "^$key=" "$GTK_SETTINGS"; then
+    sed -i "s|^$key=.*|$entry|" "$GTK_SETTINGS"
+  else
+    echo "$entry" >> "$GTK_SETTINGS"
+  fi
+done
+
+echo "Persistent WhiteSur login hook: $AUTOSTART_DIR/primebook-whitesur.desktop"
+echo "GTK fallback settings: $GTK_SETTINGS"
+
+echo "WhiteSur assets and persistent XFCE settings are ready."
+DEBIAN_SCRIPT
+
+echo
+echo "== Restarting the existing XFCE / Termux:X11 session =="
+bash "$SCRIPT_DIR/stop-all.sh" || true
+sleep 2
+echo "Starting the desktop with the new WhiteSur profile..."
+exec bash "$SCRIPT_DIR/start-all.sh"
+ || true)
+
+    # Restore the macOS-inspired dock and app finder on every XFCE login.
+    # Keep the existing panel IDs, plugins, launchers and item ordering.
+    mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -Eo '[0-9]+' | sort -nu)
+    DOCK_PANEL=""
+    for id in "${PANEL_IDS[@]}"; do
+      behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
+      if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
+    done
+    if [ -z "$DOCK_PANEL" ] && [ "${#PANEL_IDS[@]}" -gt 0 ]; then
+      DOCK_PANEL="${PANEL_IDS[$(("${#PANEL_IDS[@]}" - 1))]}"
+    fi
+    if [ -n "$DOCK_PANEL" ]; then
+      DOCK="/panels/panel-$DOCK_PANEL"
+      xfconf-query -c xfce4-panel -p "$DOCK/length" --create -t uint -s 52
+      xfconf-query -c xfce4-panel -p "$DOCK/length-adjust" --create -t bool -s false
+      xfconf-query -c xfce4-panel -p "$DOCK/position-locked" --create -t bool -s true
+      xfconf-query -c xfce4-panel -p "$DOCK/size" --create -t uint -s 50
+      xfconf-query -c xfce4-panel -p "$DOCK/icon-size" --create -t uint -s 34
+      xfconf-query -c xfce4-panel -p "$DOCK/autohide-behavior" --create -t uint -s 2
+      xfconf-query -c xfce4-panel -p "$DOCK/enter-opacity" --create -t uint -s 100
+      xfconf-query -c xfce4-panel -p "$DOCK/leave-opacity" --create -t uint -s 92
+    fi
+    xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>space' --create -t string -s 'xfce4-appfinder --collapsed'
+    xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>e' --create -t string -s 'xfce4-appfinder --expanded'
+    xfce4-panel -r >/dev/null 2>&1 || true
     exit 0
   fi
   sleep 2
