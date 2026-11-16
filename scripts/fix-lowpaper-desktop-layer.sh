@@ -105,9 +105,9 @@ text = text[:start] + over + text[end:]
 
 old = '    [ -n "$so" ] && xfdesktop_over "$so" $new'
 new = '''    if [ -n "$so" ]; then
-      xfdesktop_over "$so" "$new" || die "could not put XFCE icons above the wallpaper; check the XFCE compositor and D-Bus session"
+      if ! xfdesktop_over "$so" "$new"; then\n      stop\n      die "could not put XFCE icons above the wallpaper; wallpaper was stopped to prevent an overlay."\n    fi
     else
-      die "could not prepare the XFCE RGBA desktop layer; the wallpaper was not safely layered"
+      stop\n      die "could not prepare the XFCE RGBA desktop layer; wallpaper was stopped to prevent an overlay."
     fi'''
 if text.count(old) != 1:
     raise SystemExit("Could not locate the expected XFCE layer activation line; no changes made.")
