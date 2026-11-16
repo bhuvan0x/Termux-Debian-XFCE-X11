@@ -4,6 +4,16 @@ This profile refines the existing Debian XFCE desktop for Termux:X11. It keeps X
 
 ## Apply
 
+The recommended full setup is now integrated into `scripts/apply-whitesur.sh`; that installer also persists the dock and app-finder profile across XFCE logins. Use it for a complete setup:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/apply-whitesur.sh
+```
+
+Use the dock-only script below only when you want to retune the dock separately, without reinstalling the WhiteSur assets:
+
 Run from Termux while the desktop is running:
 
 ```bash
