@@ -23,4 +23,9 @@ trap cleanup EXIT
 
 echo "== Fetching the shared Modern Gaming Clock source =="
 git clone --depth 1 --quiet https://github.com/bhuvan0x/Mordern_Gaming_Clock.git "$WORK_DIR/source"
-exec bash "$WORK_DIR/source/install.sh" "$MODE"
+
+set +e
+bash "$WORK_DIR/source/install.sh" "$MODE"
+status=$?
+set -e
+exit "$status"
