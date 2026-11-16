@@ -9,7 +9,7 @@ command -v proot-distro >/dev/null 2>&1 || {
   exit 1
 }
 
-PD_VERSION="$(dpkg-query -W -f='\${Version}' proot-distro 2>/dev/null || true)"
+PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
 if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
   echo "Update Termux proot-distro to version 5.8.0 or newer first." >&2
   exit 2
@@ -19,14 +19,14 @@ echo "== Configuring the live Debian XFCE session =="
 
 proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
 set -Eeuo pipefail
-export DISPLAY="\${DISPLAY:-:0}"
+export DISPLAY="${DISPLAY:-:0}"
 
 # Reuse the actual XFCE session bus. A new/private D-Bus session would write
 # settings somewhere the running desktop never reads.
 SESSION_PID="$(pgrep -u "$(id -u)" -x xfce4-session | head -n 1 || true)"
 DBUS_ADDRESS=""
 if [ -n "$SESSION_PID" ] && [ -r "/proc/$SESSION_PID/environ" ]; then
-  DBUS_ADDRESS="$(tr '\\0' '\\n' < "/proc/$SESSION_PID/environ" | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' | head -n 1)"
+  DBUS_ADDRESS="$(tr '\0' '\n' < "/proc/$SESSION_PID/environ" | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' | head -n 1)"
 fi
 
 if [ -z "$DBUS_ADDRESS" ]; then
@@ -69,19 +69,19 @@ set_string() {
 # Identify the existing auto-hidden panel (the user's bottom panel).
 # If no panel currently auto-hides, use the last configured panel.
 mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -Eo '[0-9]+' | sort -nu)
-if [ "\${#PANEL_IDS[@]}" -eq 0 ]; then
+if [ "${#PANEL_IDS[@]}" -eq 0 ]; then
   echo "ERROR: No XFCE panels were found; nothing was changed."
   exit 5
 fi
 
 DOCK_PANEL=""
-for id in "\${PANEL_IDS[@]}"; do
+for id in "${PANEL_IDS[@]}"; do
   behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
   if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
 done
 if [ -z "$DOCK_PANEL" ]; then
-  PANEL_LAST_INDEX=$(("\${#PANEL_IDS[@]}" - 1))
-  DOCK_PANEL="\${PANEL_IDS[$PANEL_LAST_INDEX]}"
+  PANEL_LAST_INDEX=$(("${#PANEL_IDS[@]}" - 1))
+  DOCK_PANEL="${PANEL_IDS[$PANEL_LAST_INDEX]}"
 fi
 DOCK="/panels/panel-$DOCK_PANEL"
 
@@ -103,10 +103,10 @@ set_uint xfce4-panel "$DOCK/leave-opacity" 92
 # Make the existing tasklist behave like an icon dock; do not add, delete,
 # reorder or replace any panel plugins or launchers.
 while IFS= read -r line; do
-  plugin_path="\${line%%:*}"
-  plugin_type="\${line#*: }"
+  plugin_path="${line%%:*}"
+  plugin_type="${line#*: }"
   [[ "$plugin_path" =~ ^/plugins/plugin-([0-9]+)$ ]] || continue
-  plugin_id="\${BASH_REMATCH[1]}"
+  plugin_id="${BASH_REMATCH[1]}"
   case "$plugin_type" in
     tasklist)
       set_bool xfce4-panel "/plugins/plugin-$plugin_id/show-labels" false
