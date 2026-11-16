@@ -129,6 +129,8 @@ xfconf-query -c xsettings -p /Net/ThemeName --create -t string -s "$GTK_THEME"
 xfconf-query -c xfwm4 -p /general/theme --create -t string -s "$GTK_THEME"
 xfconf-query -c xsettings -p /Net/IconThemeName --create -t string -s "$ICON_THEME"
 xfconf-query -c xsettings -p /Gtk/CursorThemeName --create -t string -s "$CURSOR_THEME"
+xfconf-query -c xsettings -p /Gtk/FontName --create -t string -s 'Noto Sans 10'
+xfconf-query -c xfwm4 -p /general/title_font --create -t string -s 'Noto Sans Bold 10'
 
 mapfile -t BACKDROP_PROPS < <(
   xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/last-image$' || true
