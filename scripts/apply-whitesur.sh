@@ -123,12 +123,12 @@ apply_profile() {
 
   mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -Eo '[0-9]+' | sort -nu)
   DOCK_PANEL=""
-  for id in "\${PANEL_IDS[@]}"; do
+  for id in "${PANEL_IDS[@]}"; do
     behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
     if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
   done
-  if [ -z "$DOCK_PANEL" ] && [ "\${#PANEL_IDS[@]}" -gt 0 ]; then
-    DOCK_PANEL="\${PANEL_IDS[$(("\${#PANEL_IDS[@]}" - 1))]}"
+  if [ -z "$DOCK_PANEL" ] && [ "${#PANEL_IDS[@]}" -gt 0 ]; then
+    DOCK_PANEL="${PANEL_IDS[$(("${#PANEL_IDS[@]}" - 1))]}"
   fi
   if [ -n "$DOCK_PANEL" ]; then
     DOCK="/panels/panel-$DOCK_PANEL"
@@ -141,10 +141,10 @@ apply_profile() {
     set_value xfce4-panel "$DOCK/enter-opacity" int 100
     set_value xfce4-panel "$DOCK/leave-opacity" int 92
     while IFS= read -r line; do
-      plugin_path="\${line%%:*}"
-      plugin_type="\${line#*: }"
+      plugin_path="${line%%:*}"
+      plugin_type="${line#*: }"
       [[ "$plugin_path" =~ ^/plugins/plugin-([0-9]+)$ ]] || continue
-      plugin_id="\${BASH_REMATCH[1]}"
+      plugin_id="${BASH_REMATCH[1]}"
       if [ "$plugin_type" = "tasklist" ]; then
         set_value xfce4-panel "/plugins/plugin-$plugin_id/show-labels" bool false
         set_value xfce4-panel "/plugins/plugin-$plugin_id/flat-buttons" bool true
