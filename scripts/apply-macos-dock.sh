@@ -68,7 +68,7 @@ set_string() {
 
 # Identify the existing auto-hidden panel (the user's bottom panel).
 # If no panel currently auto-hides, use the last configured panel.
-mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -Eo '[0-9]+' | sort -nu)
+mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' | sort -nu)
 if [ "${#PANEL_IDS[@]}" -eq 0 ]; then
   echo "ERROR: No XFCE panels were found; nothing was changed."
   exit 5
