@@ -18,7 +18,7 @@ The script:
 3. Verifies the WhiteSur dark icon and cursor assets, rebuilding/installing them only if missing.
 4. Copies the upstream WhiteSur static wallpaper into `~/.local/share/backgrounds`.
 5. Writes GTK, XFWM4, icon, cursor and XFCE wallpaper selections to the `prime` user's persistent XFConf configuration.
-6. Installs `~/.config/autostart/primebook-whitesur.desktop` and `~/.local/bin/primebook-whitesur-session.sh`. XFCE runs this hook in its Application autostart phase, after the window manager and panel have started. It waits for session restoration to finish, then reapplies WhiteSur twice on the real XFCE D-Bus. It does not create a private D-Bus session.
+6. Installs `~/.config/autostart/primebook-whitesur.desktop` and `~/.local/bin/primebook-whitesur-session.sh`. XFCE runs this hook in its Application autostart phase, after the window manager and panel have started. It runs in XFCE's Initialization autostart phase, waits only for the Xfconf channel, and applies WhiteSur before the window manager, panels and normal application launchers. It does not create a private D-Bus session.
 7. Writes GTK 3 fallback selections and Noto Sans typography to `~/.config/gtk-3.0/settings.ini`.
 8. Persists Noto Sans desktop/window-title fonts and refreshes the WhiteSur icon cache.
 9. Integrates the floating bottom-dock profile and app-finder shortcuts into the same XFCE login hook: the existing auto-hidden panel is shortened, icons enlarged, and Super+Space / Super+E launch compact / expanded app finder.
@@ -54,7 +54,7 @@ If the desktop still looks unchanged after the script:
 
 3. Confirm that the selected GTK theme directory exists under `~/.local/share/themes` and contains `gtk-3.0` and `xfwm4` subdirectories.
 4. Check that `~/.config/autostart/primebook-whitesur.desktop` exists and that `~/.local/bin/primebook-whitesur-session.sh` is executable.
-5. Read `~/.cache/primebook-whitesur-session.log` to confirm the login hook ran. If the theme still reverts, capture the four XFConf values and this log before changing anything else.
+5. Read `~/.cache/primebook-whitesur-session.log` to confirm the early login hook ran. It should report `Early WhiteSur`. If the theme still reverts, capture the four XFConf values and this log before changing anything else.\n6. Confirm the obsolete `~/.config/autostart/primebook-xfce-tune.desktop` is absent; that older helper forced Arc-Dark/Papirus-Dark after login.
 6. Check the XFCE session log and run `bash scripts/diagnose.sh` from Termux if the desktop fails to start.
 
 Do not run the upstream GTK installer's GNOME Shell stages again merely to refresh XFCE.
