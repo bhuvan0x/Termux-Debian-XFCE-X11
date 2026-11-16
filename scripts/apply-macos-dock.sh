@@ -165,12 +165,32 @@ done < <(xfconf-query -c xfce4-panel -lv 2>/dev/null || true)
 set_string xfce4-keyboard-shortcuts '/commands/custom/<Super>space' 'xfce4-appfinder --collapsed'
 set_string xfce4-keyboard-shortcuts '/commands/custom/<Super>e' 'xfce4-appfinder --expanded'
 
+# Liquid-glass-inspired surface shared with the full WhiteSur installer.
+mkdir -p "$HOME/.config/gtk-3.0"
+cat > "$HOME/.config/gtk-3.0/gtk.css" <<'GLASS_CSS'
+#XfcePanelWindow {
+  background-color: rgba(20, 24, 38, 0.76);
+  border: 1px solid rgba(235, 242, 255, 0.28);
+  border-radius: 18px;
+  background-clip: padding-box;
+}
+#XfcePanelWindow button,
+#XfcePanelWindow .tasklist button {
+  border-radius: 12px;
+  background-clip: padding-box;
+}
+#XfcePanelWindow button:hover,
+#XfcePanelWindow .tasklist button:hover {
+  background-color: rgba(210, 225, 255, 0.16);
+}
+GLASS_CSS
+
 # Refresh only the panel. No XFCE session, audio, CUPS or X11 restart.
 xfce4-panel -r >/dev/null 2>&1 || true
 
 echo
 echo "Applied:"
-echo "  Bottom panel: 52% width, icon-only tasklist, auto-hide"
+echo "  Bottom panel: 52% width, bottom-centered icon group, liquid-glass styling, auto-hide"
 echo "  Super+Space:  compact Spotlight-style app search"
 echo "  Super+E:      expanded Launchpad-style app grid"
 echo "  Existing panel items and launchers: preserved"
