@@ -20,7 +20,7 @@ bash scripts/install-discover.sh
 
 ## Debian packages
 
-The installer uses Debian 13 (Trixie) ARM64 packages from the configured Debian repositories:
+The installer uses Debian 13 (Trixie) ARM64 packages from the configured Debian repositories. Discover is currently packaged as version 6.3.6-1 in Trixie; this follows Debian stable security and point-release updates rather than mixing KDE libraries from testing or unstable.
 
 - `plasma-discover` — graphical storefront and PackageKit integration.
 - `plasma-discover-backend-flatpak` — Flatpak backend.
@@ -55,7 +55,7 @@ For a one-off package install, open a root Debian session and use `apt install p
 Check system-bus connectivity from a Debian terminal:
 
 ```bash
-dbus-send --system --print-reply --dest=org.freedesktop.DBus \\
+dbus-send --system --print-reply --dest=org.freedesktop.DBus \
   /org/freedesktop/DBus org.freedesktop.DBus.ListNames
 ```
 
