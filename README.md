@@ -302,18 +302,25 @@ git pull --ff-only
 bash scripts/apply-whitesur.sh
 ```
 
-The script runs inside the isolated Debian `prime` account, detects the installed WhiteSur GTK/XFWM theme directory, verifies or repairs the dark icon and cursor assets, installs the bundled WhiteSur wallpaper, writes the XFCE appearance settings, and restarts the existing desktop session.
+The script runs inside the isolated Debian `prime` account, verifies or repairs the WhiteSur GTK/XFWM theme, dark icon pack and cursor pack, installs the wallpaper, and applies the complete persistent desktop profile.
 
 Profile:
-- WhiteSur Dark GTK theme with blue accent and solid surfaces.
-- Matching WhiteSur XFWM4 window decorations.
-- WhiteSur dark icons and WhiteSur cursor theme.
-- WhiteSur wallpaper.
-- Existing XFCE panels, panel plugins, launchers, applications, audio, printer and security configuration are preserved. No GNOME desktop, GNOME Shell extensions, Plank replacement or Conky installation is performed.
+- WhiteSur Dark GTK theme with blue accent and matching XFWM4 window decorations.
+- WhiteSur dark application icons and matching cursor theme.
+- WhiteSur wallpaper and Noto Sans desktop typography.
+- Floating, auto-hidden bottom dock with larger icons, while preserving existing panel items and launchers.
+- **Super + Space** opens compact app search; **Super + E** opens the expanded application finder.
+- XFCE autostart restores the appearance and dock profile on every login; GTK fallback settings are also saved.
 
-The script is safe to rerun and keeps the theme assets in the `prime` user's local theme/icon/background directories. It does not use the GNOME theme-switcher launcher installed by the upstream GTK installer.
+One command applies the whole profile:
 
-For troubleshooting and manual rollback, see [docs/WHITESUR-XFCE.md](docs/WHITESUR-XFCE.md).
+```bash
+bash scripts/apply-whitesur.sh
+```
+
+Run it from Termux after `git pull --ff-only`. The installer restarts the existing desktop once during setup. No GNOME desktop, GNOME Shell extensions, Plank, Conky or Picom is installed. Audio, printer, PRoot isolation and security configuration are left untouched.
+
+For details, troubleshooting and rollback, see [docs/WHITESUR-XFCE.md](docs/WHITESUR-XFCE.md).
  
 ## Useful commands
 
@@ -346,18 +353,6 @@ Unofficial community setup. Debian, Termux, Termux:X11 and Termux:Widget are mai
 </p>
 
 
-
-### Make WhiteSur permanent across XFCE logins
-
-The WhiteSur installer now saves the theme selections in XFCE's per-user configuration, adds GTK fallback settings, and installs an XFCE autostart hook that reapplies WhiteSur on every login. To install or refresh this persistent setup:
-
-```bash
-cd ~/Termux-Debian-X11
-git pull --ff-only
-bash scripts/apply-whitesur.sh
-```
-
-This restarts the existing desktop once to load the profile. Future XFCE/Termux:X11 relaunches restore WhiteSur automatically; no manual theme selection should be needed.
 
 ## macOS-inspired floating dock and app finder
 
