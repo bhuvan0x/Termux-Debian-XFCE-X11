@@ -184,7 +184,7 @@ cat > "$AUTOSTART_DIR/primebook-whitesur.desktop" <<'AUTOSTART_ENTRY'
 Type=Application
 Name=PrimeBook WhiteSur Appearance
 Comment=Restore WhiteSur appearance on every XFCE login
-Exec=/bin/bash -lc "$HOME/.local/bin/primebook-whitesur-session.sh"
+Exec=/home/prime/.local/bin/primebook-whitesur-session.sh
 OnlyShowIn=XFCE;
 Terminal=false
 Hidden=false
