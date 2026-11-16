@@ -12,6 +12,24 @@ command -v xfconf-query >/dev/null 2>&1 || { echo "xfconf-query is missing." >&2
   exit 1
 }
 
+# Reconnect to the actual XFCE session bus. PRoot sessions can have a different
+# or empty DBUS_SESSION_BUS_ADDRESS even while sharing the X11 display.
+DBUS_BUS=""
+if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] && xfconf-query -c xfwm4 -p /general/use_compositing >/dev/null 2>&1; then
+  DBUS_BUS="$DBUS_SESSION_BUS_ADDRESS"
+else
+  for bus_socket in /tmp/dbus-*; do
+    [ -S "$bus_socket" ] || continue
+    candidate="unix:path=$bus_socket"
+    if DBUS_SESSION_BUS_ADDRESS="$candidate" xfconf-query -c xfwm4 -p /general/use_compositing >/dev/null 2>&1; then
+      DBUS_BUS="$candidate"
+      break
+    fi
+  done
+fi
+[ -n "$DBUS_BUS" ] || { echo "Cannot connect to the active XFCE session D-Bus; open the XFCE desktop and retry." >&2; exit 1; }
+export DBUS_SESSION_BUS_ADDRESS="$DBUS_BUS"
+
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP="$LOWPAPER.before-xfce-layer-fix-$STAMP"
 cp -p "$LOWPAPER" "$BACKUP"
