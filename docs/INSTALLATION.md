@@ -111,7 +111,18 @@ bash scripts/install-apps.sh --office
 
 ## Optional Fresco live wallpaper integration
 
-Fresco v1.1.55 was built natively on Debian 13 ARM64 under PRoot with Rust stable, GTK4/libadwaita development libraries and `libmpv2`. Build Fresco inside Debian as the `prime` user using the upstream build instructions. For the tested source tree at `/home/prime/src/Fresco`, the release executables should be:
+Fresco v1.1.55 was built natively on Debian 13 ARM64 under PRoot with Rust stable (rustup), GTK4/libadwaita development libraries and `libmpv2`. Build Fresco inside Debian as the `prime` user. For the tested source tree at `/home/prime/src/Fresco`, the build command is:
+
+```bash
+cd ~/src/Fresco
+source "$HOME/.cargo/env"
+CARGO_BUILD_JOBS=1 \\
+CARGO_PROFILE_RELEASE_LTO=false \\
+CARGO_PROFILE_RELEASE_CODEGEN_UNITS=4 \\
+cargo build --release --all-features
+```
+
+The resulting executables should be:
 
 ```text
 /home/prime/src/Fresco/target/release/fresco
