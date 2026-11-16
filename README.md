@@ -308,7 +308,7 @@ Profile:
 - WhiteSur Dark GTK theme with blue accent and matching XFWM4 window decorations.
 - WhiteSur dark application icons and matching cursor theme.
 - WhiteSur wallpaper and Noto Sans desktop typography.
-- Floating, auto-hidden bottom dock with larger icons, while preserving existing panel items and launchers.
+- Floating, auto-hidden bottom-center dock with centered app icons, larger icon sizing, and a liquid-glass-inspired translucent GTK surface; existing panel items and launchers are preserved.
 - **Super + Space** opens compact app search; **Super + E** opens the expanded application finder.
 - XFCE autostart restores the appearance and dock profile on every login; GTK fallback settings are also saved.
 
