@@ -45,6 +45,14 @@ if [ -z "$THEME_DIR" ]; then
   exit 3
 fi
 
+# GTK and XFCE commonly search ~/.themes and ~/.icons first. Expose the
+# installed theme through those standard paths without duplicating assets.
+GTK_THEME="$(basename "$THEME_DIR")"
+mkdir -p "$HOME/.themes" "$HOME/.icons"
+if [ ! -e "$HOME/.themes/$GTK_THEME" ]; then
+  ln -s "$THEME_DIR" "$HOME/.themes/$GTK_THEME"
+fi
+
 # Repair missing icon assets only; do not overwrite an existing icon theme.
 ICON_SOURCE="/tmp/whitesur-review/WhiteSur-icon-theme"
 if [ ! -d "$ICON_ROOT/WhiteSurPrime-dark" ]; then
@@ -71,6 +79,13 @@ if [ ! -d "$ICON_ROOT/WhiteSur-cursors" ]; then
   fi
   (cd "$CURSOR_SOURCE" && bash install.sh)
 fi
+
+# Make icon and cursor themes discoverable through the standard ~/.icons path.
+for asset in "$ICON_ROOT"/WhiteSurPrime* "$ICON_ROOT/WhiteSur-cursors"; do
+  [ -e "$asset" ] || continue
+  target="$HOME/.icons/$(basename "$asset")"
+  [ -e "$target" ] || ln -s "$asset" "$target"
+done
 
 # Keep the wallpaper available even if the temporary review directory is cleared.
 GTK_SOURCE="/tmp/whitesur-review/WhiteSur-gtk-theme"
