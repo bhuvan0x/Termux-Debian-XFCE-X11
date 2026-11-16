@@ -228,9 +228,44 @@ move_to_backup() {
   fi
 }
 
-# Do not use pgrep/kill here: the migration runs in a separate isolated
-# PRoot process view and cannot reliably inspect the desktop's process table.
-# Fresco's binaries and data are archived below after lowpaper is confirmed.
+# Stop Fresco through its documented control socket. The isolated PRoot
+# process table cannot reliably see or signal the daemon launched by XFCE.
+FRESCO_SOCKET="$RUNTIME_DIR/fresco/control.sock"
+if [ -S "$FRESCO_SOCKET" ]; then
+  echo "Stopping Fresco through its control socket..."
+  as_prime python3 - "$FRESCO_SOCKET" <<'PY'
+import socket
+import sys
+
+sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+sock.settimeout(8)
+try:
+    sock.connect(sys.argv[1])
+    sock.sendall(b'{"cmd":"stop"}\\n')
+    response = b""
+    while b"\\n" not in response and len(response) < 65536:
+        chunk = sock.recv(4096)
+        if not chunk:
+            break
+        response += chunk
+    if not response:
+        raise SystemExit("Fresco control socket returned no response to stop.")
+    print("Fresco stop response:", response.decode("utf-8", "replace").strip())
+finally:
+    sock.close()
+PY
+  stopped=0
+  for attempt in $(seq 1 20); do
+    if [ ! -S "$FRESCO_SOCKET" ]; then
+      stopped=1
+      break
+    fi
+    sleep 0.5
+  done
+  [ "$stopped" -eq 1 ] || die "Fresco did not release its control socket after the stop request. Its files have NOT been archived or removed."
+else
+  echo "No active Fresco control socket found; continuing with Fresco data archival."
+fi
 
 move_to_backup "$PRIME_HOME/.config/fresco" "$BACKUP/fresco-user/config"
 move_to_backup "$PRIME_HOME/.local/state/fresco" "$BACKUP/fresco-user/state"
