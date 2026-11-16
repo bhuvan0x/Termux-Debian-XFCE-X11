@@ -153,39 +153,48 @@ bash scripts/install-apps.sh --office
 
 This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
-## Fresco live wallpapers (optional)
+## Live video wallpapers (lowpaper)
 
-Fresco is an optional native ARM64 live wallpaper manager. This repository provides the integration/installer and XFCE launcher; it does **not** bundle prebuilt binaries. Build Fresco inside Debian on the target device first. The tested source release is [Fresco v1.1.55](https://github.com/DibbayajyotiRoy/Fresco).
+The previous optional Fresco integration has been retired. This project now uses [lowpaper v0.1.1](https://github.com/Meinianda-L/lowpaper), a lightweight MPV-based wallpaper script. The migration pins the upstream release and verifies its SHA-256 checksum before installing it.
 
-The tested Debian 13 ARM64 build uses Rust stable via rustup, GTK4/libadwaita development libraries, and `libmpv2`. The native X11 backend uses libmpv dynamically; `mpvpaper` is a Wayland helper and is not required for this XFCE/X11 setup.
+### Migrate an existing Fresco installation
 
-After building Fresco with its documented Cargo command and confirming the executables are in `/home/prime/src/Fresco/target/release/`, run this from **Termux**:
-
-```bash
-bash scripts/install-fresco.sh
-```
-
-If your release binaries are in a different directory, pass the Debian path explicitly:
+Run this from Termux while the Debian XFCE desktop is open in Termux:X11:
 
 ```bash
-bash scripts/install-fresco.sh /home/prime/path/to/Fresco/target/release
+cd ~/Termux-Debian-X11
+bash scripts/migrate-wallpaper.sh
 ```
 
-The installer checks both files are executable AArch64 binaries, checks their linked libraries, verifies `libmpv2`, installs `fresco` and `frescod` under `/usr/local/bin`, and creates `/home/prime/.local/share/applications/fresco.desktop`. The XFCE menu entry is named **Fresco** and includes quick actions for Next, Previous, Random and Choose Wallpaper. You can also find it with XFCE App Finder.
+The migration is deliberately interactive and guarded:
 
-The installer does not start the daemon, enable session autostart, or replace the current XFCE wallpaper. Launch Fresco from the Applications menu and configure/test it manually first. Fresco's own diagnostics can be opened with:
+1. Checks the active XFCE/X11 session, compositor, dependencies and wallpaper file.
+2. Preserves the Alisa wallpaper at `~/Videos/Wallpapers/Alisa-Live-Wallpaper.mp4`.
+3. Downloads lowpaper v0.1.1 and verifies its pinned SHA-256 digest.
+4. Applies the software-rendered OpenGL/X11 EGL options already tested on the target Termux:X11 device.
+5. Starts the wallpaper and waits for a human visual check. You must confirm that both the video and desktop icons are visible before Fresco cleanup proceeds.
+6. Enables lowpaper autostart, then archives Fresco user configuration, state, wallpaper library, launchers and source tree under `~/Documents/Wallpaper-Migration-Backup-*/`. It removes only the known Fresco executables and archived integration paths.
+
+If the video or icons are not correct, do not type `YES`. The script stops lowpaper and leaves Fresco installed. A successful MPV process check is not treated as proof that the video is visible.
+
+The lowpaper X11 integration uses XFCE's compositor and an RGBA visual for desktop icons. The migration does not disable compositing. It sets software rendering only in lowpaper's own process, not globally for other MPV applications.
+
+### lowpaper controls
+
+Run these inside Debian as the `prime` user:
 
 ```bash
-fresco doctor
-fresco status
-fresco logs
+lowpaper status
+lowpaper pause
+lowpaper resume
+lowpaper toggle
+lowpaper stop
+lowpaper startup on
+lowpaper startup off
 ```
 
-To remove the integration without deleting Fresco's source tree or user settings, run this from Termux:
+The migration enables login autostart only after the visual confirmation. Your original wallpaper and Fresco data are retained in the migration backup for recovery.
 
-```bash
-bash scripts/remove-fresco.sh
-```
 ## Visual Studio Code (optional)
 
 The project includes an ARM64-only installer for the official stable Debian package:
