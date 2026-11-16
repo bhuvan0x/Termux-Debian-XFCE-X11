@@ -344,3 +344,24 @@ Unofficial community setup. Debian, Termux, Termux:X11 and Termux:Widget are mai
   <b>Built for a portable Linux workflow.</b><br>
   <sub>Maintained by <a href="https://github.com/bhuvan0x">bhuvan0x</a></sub>
 </p>
+
+
+## macOS-inspired floating dock and app finder
+
+After pulling the latest changes, run this **from Termux while the XFCE desktop is running**:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/apply-macos-dock.sh
+```
+
+This updates the live XFCE session without restarting Debian, Termux:X11, audio or CUPS. It reuses the existing bottom panel and its current launchers/items, changes it to a shorter auto-hidden dock, and makes the existing task list icon-only. Move the pointer to the bottom screen edge to reveal it.
+
+Keyboard shortcuts:
+- **Super + Space** — compact app search (Spotlight-style).
+- **Super + E** — expanded application finder (Launchpad-style grid with search).
+
+The script detects the live XFCE D-Bus session and stops with an error if it cannot reach it; it does not write settings to a private temporary D-Bus session. It does not delete or reorder panel items.
+
+**XFCE limitation:** the built-in panel does not provide macOS-style animated icon magnification or a true glass floating capsule. This profile uses native XFCE panel capabilities for a lightweight, stable dock. It does not install Plank, GNOME Shell or a compositor.
