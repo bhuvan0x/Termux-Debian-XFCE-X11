@@ -1,8 +1,10 @@
-# PrimeBook Modern Clock
+# PrimeBook Modern Clock integration
 
-This adds a lightweight XFCE-compatible desktop clock inspired by Prayag2's KDE Modern Clock. The original is a Plasma 6 applet and cannot run as an XFCE panel widget, so this profile uses Conky as a transparent desktop layer instead of installing KDE Plasma.
+The standalone implementation lives in [bhuvan0x/Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock). This repository provides a small Termux-side bootstrap so both projects use the same installer and clock configuration rather than maintaining divergent copies.
 
-## Install
+The upstream KDE Modern Clock is a Plasma 6 applet and cannot run as an XFCE panel widget. The shared project recreates its clean digital-clock aesthetic with Conky, without installing KDE Plasma or changing the existing XFCE panels and dock.
+
+## Install or update
 
 Run from Termux:
 
@@ -12,18 +14,7 @@ git pull --ff-only
 bash scripts/install-modernclock.sh
 ```
 
-The installer adds Debian's `conky-all` and Noto Sans packages, writes a dedicated configuration at `/home/prime/.config/conky/primebook-modernclock.conf`, creates an XFCE autostart entry, and launches the clock in the current X11 session.
-
-## Appearance and behavior
-
-- Top-right desktop placement, with spacing below the existing top panel.
-- Three-line layout: uppercase weekday, full date, and large 24-hour digital time.
-- White text with a restrained WhiteSur blue accent.
-- Transparent desktop window; no panel, dock, wallpaper, GTK theme, or XFCE settings are changed.
-- Time refreshes every second; weekday text refreshes every minute.
-- Runs as the unprivileged `prime` user.
-
-Conky's transparent desktop window depends on the X11 server's ARGB visual support. If transparency is unavailable in a particular Termux:X11 build, the clock may render with a solid background; this does not affect the XFCE session.
+The bootstrap fetches the latest default-branch source from the standalone public repository and runs its installer. It installs Debian's `conky-all` and Noto Sans packages, configures the desktop clock for the unprivileged `prime` account, and creates an XFCE autostart entry.
 
 ## Remove
 
@@ -31,4 +22,11 @@ Conky's transparent desktop window depends on the X11 server's ARGB visual suppo
 bash scripts/install-modernclock.sh --remove
 ```
 
-This stops the clock and removes only this profile's configuration and autostart entry. It leaves the Conky package installed in case another configuration uses it. To remove Conky as well, run `apt-get remove conky-all` in a root Debian session.
+The same shared installer removes only the clock process, its configuration and its autostart entry. Conky remains installed in case another desktop configuration uses it.
+
+## Source of truth
+
+- Standalone project and clock configuration: [Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock)
+- Termux/Debian integration bootstrap: `scripts/install-modernclock.sh`
+
+The clock uses an X11 ARGB desktop window. Transparency depends on Termux:X11 visual support. True background blur and animated icon effects are not provided; no compositor is added.
