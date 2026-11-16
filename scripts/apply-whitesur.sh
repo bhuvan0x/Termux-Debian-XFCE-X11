@@ -251,6 +251,17 @@ exec bash "$SCRIPT_DIR/start-all.sh"
       xfconf-query -c xfce4-panel -p "$DOCK/autohide-behavior" --create -t int -s 2
       xfconf-query -c xfce4-panel -p "$DOCK/enter-opacity" --create -t int -s 100
       xfconf-query -c xfce4-panel -p "$DOCK/leave-opacity" --create -t int -s 92
+      while IFS= read -r line; do
+        plugin_path="${line%%:*}"
+        plugin_type="${line#*: }"
+        [[ "$plugin_path" =~ ^/plugins/plugin-([0-9]+)$ ]] || continue
+        plugin_id="${BASH_REMATCH[1]}"
+        if [ "$plugin_type" = "tasklist" ]; then
+          xfconf-query -c xfce4-panel -p "/plugins/plugin-$plugin_id/show-labels" --create -t bool -s false
+          xfconf-query -c xfce4-panel -p "/plugins/plugin-$plugin_id/flat-buttons" --create -t bool -s true
+          xfconf-query -c xfce4-panel -p "/plugins/plugin-$plugin_id/show-tooltips" --create -t bool -s true
+        fi
+      done < <(xfconf-query -c xfce4-panel -lv 2>/dev/null || true)
     fi
     xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>space' --create -t string -s 'xfce4-appfinder --collapsed'
     xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>e' --create -t string -s 'xfce4-appfinder --expanded'
