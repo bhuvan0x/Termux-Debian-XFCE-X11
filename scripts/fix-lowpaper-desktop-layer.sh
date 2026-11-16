@@ -25,6 +25,12 @@ fi
 [ -n "$DBUS_BUS" ] || { echo "Cannot connect to the active XFCE session D-Bus; open the XFCE desktop and retry." >&2; exit 1; }
 export DBUS_SESSION_BUS_ADDRESS="$DBUS_BUS"
 
+# A fresh PRoot login does not inherit the desktop-session environment. Lowpaper
+# uses XDG_CURRENT_DESKTOP to decide whether the XFCE RGBA icon shim is applicable.
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-XFCE}"
+export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-xfce}"
+export DESKTOP_SESSION="${DESKTOP_SESSION:-xfce}"
+
 # Only test compositor state after attaching to the real XFCE session bus.
 COMPOSITING="$(xfconf-query -c xfwm4 -p /general/use_compositing 2>/dev/null || true)"
 [ "$COMPOSITING" = true ] || {
