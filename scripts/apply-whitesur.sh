@@ -104,6 +104,11 @@ GTK_THEME="$(basename "$THEME_DIR")"
 ICON_THEME="WhiteSurPrime-dark"
 CURSOR_THEME="WhiteSur-cursors"
 
+# Refresh the icon theme cache when the theme contains an index.theme.
+if [ -f "$ICON_ROOT/$ICON_THEME/index.theme" ] && command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache -f -t "$ICON_ROOT/$ICON_THEME" >/dev/null 2>&1 || true
+fi
+
 echo "GTK/XFWM theme: $GTK_THEME"
 echo "Icon theme:     $ICON_THEME"
 echo "Cursor theme:   $CURSOR_THEME"
@@ -166,6 +171,8 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     xfconf-query -c xfwm4 -p /general/theme --create -t string -s "$GTK_THEME"
     xfconf-query -c xsettings -p /Net/IconThemeName --create -t string -s "$ICON_THEME"
     xfconf-query -c xsettings -p /Gtk/CursorThemeName --create -t string -s "$CURSOR_THEME"
+    xfconf-query -c xsettings -p /Gtk/FontName --create -t string -s 'Noto Sans 10'
+    xfconf-query -c xfwm4 -p /general/title_font --create -t string -s 'Noto Sans Bold 10'
     while IFS= read -r property; do
       [ -n "$property" ] || continue
       xfconf-query -c xfce4-desktop -p "$property" --create -t string -s "$WALLPAPER"
@@ -198,7 +205,7 @@ touch "$GTK_SETTINGS"
 if ! grep -q '^\[Settings\]$' "$GTK_SETTINGS"; then
   echo "[Settings]" >> "$GTK_SETTINGS"
 fi
-for entry in "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
+for entry in "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME" "gtk-font-name=Noto Sans 10"; do
   key="${entry%%=*}"
   if grep -q "^$key=" "$GTK_SETTINGS"; then
     sed -i "s|^$key=.*|$entry|" "$GTK_SETTINGS"
