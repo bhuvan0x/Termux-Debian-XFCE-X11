@@ -125,9 +125,10 @@ apply_profile() {
   set_value xsettings /Gtk/CursorThemeName string "$CURSOR_THEME"
   set_value xsettings /Gtk/FontName string 'Noto Sans 10'
   set_value xfwm4 /general/title_font string 'Noto Sans Bold 10'
-  while IFS= read -r property; do
-    [ -n "$property" ] && set_value xfce4-desktop "$property" string "$WALLPAPER"
-  done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/last-image$' || true)
+  # Keep XFCE compositing enabled across every start-all session.
+  set_value xfwm4 /general/use_compositing bool true
+  # Do not overwrite xfce4-desktop /last-image here: preserve the user's
+  # selected static or live wallpaper across Stop All / Start All cycles.
 
   mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' | sort -nu)
   DOCK_PANEL=""
