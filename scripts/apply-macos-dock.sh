@@ -90,15 +90,15 @@ echo "Using existing panel: panel-$DOCK_PANEL"
 # Floating dock: retain all existing panel items and their order. A 52%
 # length creates side margins; auto-hide reveals it when the pointer reaches
 # the bottom screen edge. XFCE's native panel has no icon magnification.
-set_uint xfce4-panel "$DOCK/length" 52
+set_int xfce4-panel "$DOCK/length" 52
 set_bool xfce4-panel "$DOCK/length-adjust" false
 set_bool xfce4-panel "$DOCK/position-locked" true
-set_uint xfce4-panel "$DOCK/size" 50
-set_uint xfce4-panel "$DOCK/icon-size" 34
-set_uint xfce4-panel "$DOCK/autohide-behavior" 2
-set_uint xfce4-panel "$DOCK/background-style" 0
-set_uint xfce4-panel "$DOCK/enter-opacity" 100
-set_uint xfce4-panel "$DOCK/leave-opacity" 92
+set_int xfce4-panel "$DOCK/size" 50
+set_int xfce4-panel "$DOCK/icon-size" 34
+set_int xfce4-panel "$DOCK/autohide-behavior" 2
+set_int xfce4-panel "$DOCK/background-style" 0
+set_int xfce4-panel "$DOCK/enter-opacity" 100
+set_int xfce4-panel "$DOCK/leave-opacity" 92
 
 # Make the existing tasklist behave like an icon dock; do not add, delete,
 # reorder or replace any panel plugins or launchers.
@@ -113,7 +113,7 @@ while IFS= read -r line; do
       set_bool xfce4-panel "/plugins/plugin-$plugin_id/flat-buttons" true
       set_bool xfce4-panel "/plugins/plugin-$plugin_id/show-handle" false
       set_bool xfce4-panel "/plugins/plugin-$plugin_id/show-tooltips" true
-      set_uint xfce4-panel "/plugins/plugin-$plugin_id/grouping" 1
+      set_int xfce4-panel "/plugins/plugin-$plugin_id/grouping" 1
       ;;
     docklike)
       # Keep Docklike's existing launcher/task grouping configuration.
