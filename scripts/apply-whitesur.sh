@@ -146,9 +146,7 @@ xfconf-query -c xsettings -p /Gtk/CursorThemeName
 XFCONF_SCRIPT
 
 
-# Install a login-time enforcement hook. XFCE's session manager can restore
-# previously cached appearance values; this hook reapplies the selected
-# WhiteSur profile on every login using the real session D-Bus.
+# Install a login-time enforcement hook. XFCE executes it on every login.
 AUTOSTART_DIR="$HOME/.config/autostart"
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$AUTOSTART_DIR" "$LOCAL_BIN"
@@ -161,8 +159,7 @@ ICON_THEME="WhiteSurPrime-dark"
 CURSOR_THEME="WhiteSur-cursors"
 WALLPAPER="$HOME/.local/share/backgrounds/WhiteSur-wallpaper.png"
 
-# This script is launched by XFCE itself, so it inherits the active session
-# D-Bus address. Retry briefly while xfconf daemons finish starting.
+# XFCE autostart inherits the active session D-Bus.
 for attempt in 1 2 3 4 5 6 7 8 9 10; do
   if xfconf-query -c xsettings -p /Net/ThemeName >/dev/null 2>&1; then
     xfconf-query -c xsettings -p /Net/ThemeName --create -t string -s "$GTK_THEME"
@@ -172,16 +169,7 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     while IFS= read -r property; do
       [ -n "$property" ] || continue
       xfconf-query -c xfce4-desktop -p "$property" --create -t string -s "$WALLPAPER"
-    done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep '/last-image
-DEBIAN_SCRIPT
-
-echo
-echo "== Restarting the existing XFCE / Termux:X11 session =="
-bash "$SCRIPT_DIR/stop-all.sh" || true
-sleep 2
-echo "Starting the desktop with the new WhiteSur profile..."
-exec bash "$SCRIPT_DIR/start-all.sh"
- || true)
+    done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep '/last-image$' || true)
     exit 0
   fi
   sleep 2
@@ -189,8 +177,6 @@ done
 exit 0
 LOGIN_SCRIPT
 
-# Inject the exact selected theme directory without relying on shell parsing
-# of arbitrary upstream folder names.
 sed -i "s|__GTK_THEME__|$GTK_THEME|g" "$LOCAL_BIN/primebook-whitesur-session.sh"
 chmod 0755 "$LOCAL_BIN/primebook-whitesur-session.sh"
 
@@ -198,7 +184,7 @@ cat > "$AUTOSTART_DIR/primebook-whitesur.desktop" <<'AUTOSTART_ENTRY'
 [Desktop Entry]
 Type=Application
 Name=PrimeBook WhiteSur Appearance
-Comment=Restore the WhiteSur appearance when XFCE starts
+Comment=Restore WhiteSur appearance on every XFCE login
 Exec=/bin/bash -lc "$HOME/.local/bin/primebook-whitesur-session.sh"
 OnlyShowIn=XFCE;
 Terminal=false
@@ -206,29 +192,21 @@ Hidden=false
 X-GNOME-Autostart-enabled=true
 AUTOSTART_ENTRY
 
-# Also persist GTK's theme selection in its user settings file as a fallback
-# for GTK applications launched before XFCE's settings daemon is ready.
+# GTK fallback for apps started before xfsettingsd completes startup.
 mkdir -p "$HOME/.config/gtk-3.0"
 GTK_SETTINGS="$HOME/.config/gtk-3.0/settings.ini"
 touch "$GTK_SETTINGS"
 for entry in "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
-  key="\${entry%%=*}"
+  key="${entry%%=*}"
   if grep -q "^$key=" "$GTK_SETTINGS"; then
     sed -i "s|^$key=.*|$entry|" "$GTK_SETTINGS"
   else
-    printf '%s\n' "$entry" >> "$GTK_SETTINGS"
+    printf '%s
+' "$entry" >> "$GTK_SETTINGS"
   fi
 done
 
-# Verify that xfconf actually wrote the persistent channel XML files.
-XFCONF_DIR="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
-for channel in xsettings xfwm4 xfce4-desktop; do
-  if [ ! -s "$XFCONF_DIR/$channel.xml" ]; then
-    echo "WARNING: XFCE channel $channel.xml was not written; login hook will reapply it."
-  fi
-done
-
-echo "Persistent login hook: $AUTOSTART_DIR/primebook-whitesur.desktop"
+echo "Persistent WhiteSur login hook: $AUTOSTART_DIR/primebook-whitesur.desktop"
 echo "GTK fallback settings: $GTK_SETTINGS"
 
 echo "WhiteSur assets and persistent XFCE settings are ready."
