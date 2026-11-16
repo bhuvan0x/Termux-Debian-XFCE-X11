@@ -88,7 +88,11 @@ fi
 
 # XFCE appearance is applied by the autostart hook on the real session bus.
 
-# XFCE autostart hook: reapply the full profile on every desktop login.
+# Remove the legacy PrimeBook tune hook. It forced Arc-Dark/Papirus-Dark
+# several seconds after login and raced the WhiteSur profile.
+rm -f "$HOME/.config/autostart/primebook-xfce-tune.desktop"
+
+# Apply WhiteSur before the desktop UI is launched.
 mkdir -p "$HOME/.config/autostart" "$HOME/.local/bin"
 cat > "$HOME/.local/bin/primebook-whitesur-session.sh" <<'LOGIN_SCRIPT'
 #!/bin/bash
@@ -100,14 +104,18 @@ WALLPAPER="$HOME/.local/share/backgrounds/WhiteSur-wallpaper.png"
 LOG="$HOME/.cache/primebook-whitesur-session.log"
 mkdir -p "$(dirname "$LOG")"
 exec >>"$LOG" 2>&1
-echo "[$(date -Is)] WhiteSur login hook started; waiting for XFCE session restoration."
+echo "[$(date -Is)] WhiteSur early-login hook started."
 
+# Apply during XFCE Initialization, before its window manager, panels and
+# desktop launchers. Wait only for the real session Xfconf channel.
 for attempt in $(seq 1 30); do
   if xfconf-query -c xsettings -p /Net/ThemeName >/dev/null 2>&1; then break; fi
   sleep 1
 done
-# XFCE may restore cached settings after the settings daemon first appears.
-sleep 12
+if ! xfconf-query -c xsettings -p /Net/ThemeName >/dev/null 2>&1; then
+  echo "[$(date -Is)] ERROR: XFCE Xfconf channel did not become available."
+  exit 1
+fi
 
 set_value() { xfconf-query -c "$1" -p "$2" --create -t "$3" -s "$4"; }
 apply_profile() {
@@ -195,10 +203,10 @@ apply_profile() {
   set_value xfce4-keyboard-shortcuts '/commands/custom/<Super>e' string 'xfce4-appfinder --expanded'
 }
 apply_profile
-sleep 5
-apply_profile
-xfce4-panel -r >/dev/null 2>&1 || true
-echo "[$(date -Is)] WhiteSur theme=$GTK_THEME icons=$ICON_THEME cursor=$CURSOR_THEME; dock profile enforced."
+if pgrep -u "$(id -u)" -x xfce4-panel >/dev/null 2>&1; then
+  xfce4-panel -r >/dev/null 2>&1 || true
+fi
+echo "[$(date -Is)] Early WhiteSur theme=$GTK_THEME icons=$ICON_THEME cursor=$CURSOR_THEME; dock profile enforced."
 LOGIN_SCRIPT
 sed -i "s|__GTK_THEME__|$GTK_THEME|g" "$HOME/.local/bin/primebook-whitesur-session.sh"
 chmod 0755 "$HOME/.local/bin/primebook-whitesur-session.sh"
@@ -210,7 +218,7 @@ Name=PrimeBook WhiteSur Appearance
 Comment=Restore WhiteSur theme, icons, cursor, wallpaper and dock on login
 Exec=/home/prime/.local/bin/primebook-whitesur-session.sh
 OnlyShowIn=XFCE;
-X-XFCE-Autostart-Phase=Application
+X-XFCE-Autostart-Phase=Initialization
 StartupNotify=false
 Terminal=false
 Hidden=false
