@@ -25,7 +25,9 @@ bash scripts/apply-macos-dock.sh
 The script:
 - Connects to the running XFCE session D-Bus (and refuses to continue if it cannot).
 - Detects the existing auto-hidden panel, falling back to the last configured panel.
-- Reduces its length, sets a larger icon size, enables auto-hide and hides task labels.
+- Sets the dock to 52% width and bottom-center position, increases icon size, enables auto-hide and hides task labels.
+- Adds transparent expanding separators around the existing app-launcher/task group so the icons sit in the horizontal center without replacing or reordering existing launchers.
+- Applies a liquid-glass-inspired GTK surface: translucent dark fill, rounded corners, a subtle light rim and soft hover treatment.
 - Keeps all existing panel items and their order.
 - Assigns Super+Space to compact app search and Super+E to the expanded application finder.
 
@@ -43,7 +45,7 @@ If a shortcut is already assigned by the desktop or keyboard layout, open **Sett
 
 ## Limitations
 
-XFCE's built-in panel does not implement macOS Dock's animated icon magnification or its exact glass capsule appearance. The configuration uses native XFCE behavior to avoid a heavier replacement dock or compositor on Termux:X11/PRoot.
+XFCE's built-in panel does not implement macOS Dock's animated icon magnification or true backdrop blur. The GTK styling gives a liquid-glass-inspired translucent surface and rounded rim; actual transparency depends on the active X11 compositor. This profile does not enable a new compositor or install Plank/Picom, to avoid destabilizing Termux:X11/PRoot.
 
 ## Scope
 
