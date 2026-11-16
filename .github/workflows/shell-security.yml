@@ -2,7 +2,7 @@ name: Shell security checks
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/fresco-termux-x11-software-rendering]
   pull_request:
 
 permissions:
