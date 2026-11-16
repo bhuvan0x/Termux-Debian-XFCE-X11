@@ -313,6 +313,28 @@ Termux-Debian-X11/
 - This is not a VM and does not boot another kernel. systemd, kernel modules, nested containers and some hardware integrations may not work normally.
 - Optional themes and plugins are installed only when available in the Debian repositories.
 
+## XFCE Modern Clock
+
+The upstream [KDE Modern Clock](https://github.com/Prayag2/kde_modernclock) is a Plasma 6 applet and cannot run inside this XFCE desktop. This project provides a lightweight XFCE-native recreation using Conky, without installing KDE Plasma or changing the existing panels and dock.
+
+Install from Termux:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/install-modernclock.sh
+```
+
+It adds a transparent desktop clock with an uppercase weekday, full date and large 24-hour time, styled for the WhiteSur Dark/Blue profile. The clock starts automatically with XFCE.
+
+Remove the clock profile with:
+
+```bash
+bash scripts/install-modernclock.sh --remove
+```
+
+The removal command leaves Conky installed in case another configuration uses it. See [docs/MODERN-CLOCK.md](docs/MODERN-CLOCK.md) for details and limitations.
+
 ## WhiteSur XFCE desktop customization
 
 Apply the installed WhiteSur profile with one command from Termux:
