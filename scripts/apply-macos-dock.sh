@@ -1,0 +1,144 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -Eeuo pipefail
+
+# Apply a macOS-inspired floating dock and fast XFCE app finders.
+# Run from Termux while the Debian XFCE desktop is running.
+
+command -v proot-distro >/dev/null 2>&1 || {
+  echo "proot-distro is missing. Run scripts/setup-termux.sh first." >&2
+  exit 1
+}
+
+PD_VERSION="$(dpkg-query -W -f='\${Version}' proot-distro 2>/dev/null || true)"
+if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; then
+  echo "Update Termux proot-distro to version 5.8.0 or newer first." >&2
+  exit 2
+fi
+
+echo "== Configuring the live Debian XFCE session =="
+
+proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
+set -Eeuo pipefail
+export DISPLAY="\${DISPLAY:-:0}"
+
+# Reuse the actual XFCE session bus. A new/private D-Bus session would write
+# settings somewhere the running desktop never reads.
+SESSION_PID="$(pgrep -u "$(id -u)" -x xfce4-session | head -n 1 || true)"
+DBUS_ADDRESS=""
+if [ -n "$SESSION_PID" ] && [ -r "/proc/$SESSION_PID/environ" ]; then
+  DBUS_ADDRESS="$(tr '\\0' '\\n' < "/proc/$SESSION_PID/environ" | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' | head -n 1)"
+fi
+
+if [ -z "$DBUS_ADDRESS" ]; then
+  for bus_file in "$HOME"/.dbus/session-bus/*; do
+    [ -f "$bus_file" ] || continue
+    candidate="$(sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' "$bus_file" | head -n 1 | sed 's/^"//; s/"$//')"
+    [ -n "$candidate" ] || continue
+    if DBUS_SESSION_BUS_ADDRESS="$candidate" xfconf-query -c xsettings -p /Net/ThemeName >/dev/null 2>&1; then
+      DBUS_ADDRESS="$candidate"
+      break
+    fi
+  done
+fi
+
+if [ -z "$DBUS_ADDRESS" ]; then
+  echo "ERROR: Could not locate the running XFCE session D-Bus."
+  echo "Start the desktop with 'start-all', then rerun this script from Termux."
+  exit 3
+fi
+export DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS"
+
+if ! xfconf-query -c xsettings -p /Net/ThemeName >/dev/null 2>&1; then
+  echo "ERROR: The discovered D-Bus address does not reach the live XFCE session."
+  exit 4
+fi
+
+set_int() {
+  xfconf-query -c "$1" -p "$2" --create -t int -s "$3" >/dev/null
+}
+set_uint() {
+  xfconf-query -c "$1" -p "$2" --create -t uint -s "$3" >/dev/null
+}
+set_bool() {
+  xfconf-query -c "$1" -p "$2" --create -t bool -s "$3" >/dev/null
+}
+set_string() {
+  xfconf-query -c "$1" -p "$2" --create -t string -s "$3" >/dev/null
+}
+
+# Identify the existing auto-hidden panel (the user's bottom panel).
+# If no panel currently auto-hides, use the last configured panel.
+mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -Eo '[0-9]+' | sort -nu)
+if [ "\${#PANEL_IDS[@]}" -eq 0 ]; then
+  echo "ERROR: No XFCE panels were found; nothing was changed."
+  exit 5
+fi
+
+DOCK_PANEL=""
+for id in "\${PANEL_IDS[@]}"; do
+  behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
+  if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
+done
+if [ -z "$DOCK_PANEL" ]; then
+  PANEL_LAST_INDEX=$(("\${#PANEL_IDS[@]}" - 1))
+  DOCK_PANEL="\${PANEL_IDS[$PANEL_LAST_INDEX]}"
+fi
+DOCK="/panels/panel-$DOCK_PANEL"
+
+echo "Using existing panel: panel-$DOCK_PANEL"
+
+# Floating dock: retain all existing panel items and their order. A 52%
+# length creates side margins; auto-hide reveals it when the pointer reaches
+# the bottom screen edge. XFCE's native panel has no icon magnification.
+set_uint xfce4-panel "$DOCK/length" 52
+set_bool xfce4-panel "$DOCK/length-adjust" false
+set_bool xfce4-panel "$DOCK/position-locked" true
+set_uint xfce4-panel "$DOCK/size" 50
+set_uint xfce4-panel "$DOCK/icon-size" 34
+set_uint xfce4-panel "$DOCK/autohide-behavior" 2
+set_uint xfce4-panel "$DOCK/background-style" 0
+set_uint xfce4-panel "$DOCK/enter-opacity" 100
+set_uint xfce4-panel "$DOCK/leave-opacity" 92
+
+# Make the existing tasklist behave like an icon dock; do not add, delete,
+# reorder or replace any panel plugins or launchers.
+while IFS= read -r line; do
+  plugin_path="\${line%%:*}"
+  plugin_type="\${line#*: }"
+  [[ "$plugin_path" =~ ^/plugins/plugin-([0-9]+)$ ]] || continue
+  plugin_id="\${BASH_REMATCH[1]}"
+  case "$plugin_type" in
+    tasklist)
+      set_bool xfce4-panel "/plugins/plugin-$plugin_id/show-labels" false
+      set_bool xfce4-panel "/plugins/plugin-$plugin_id/flat-buttons" true
+      set_bool xfce4-panel "/plugins/plugin-$plugin_id/show-handle" false
+      set_bool xfce4-panel "/plugins/plugin-$plugin_id/show-tooltips" true
+      set_uint xfce4-panel "/plugins/plugin-$plugin_id/grouping" 1
+      ;;
+    docklike)
+      # Keep Docklike's existing launcher/task grouping configuration.
+      ;;
+  esac
+done < <(xfconf-query -c xfce4-panel -lv 2>/dev/null || true)
+
+# Spotlight-style compact search: Super+Space.
+# Launchpad-style expanded application grid: Super+E.
+set_string xfce4-keyboard-shortcuts '/commands/custom/<Super>space' 'xfce4-appfinder --collapsed'
+set_string xfce4-keyboard-shortcuts '/commands/custom/<Super>e' 'xfce4-appfinder --expanded'
+
+# Refresh only the panel. No XFCE session, audio, CUPS or X11 restart.
+xfce4-panel -r >/dev/null 2>&1 || true
+
+echo
+echo "Applied:"
+echo "  Bottom panel: 52% width, icon-only tasklist, auto-hide"
+echo "  Super+Space:  compact Spotlight-style app search"
+echo "  Super+E:      expanded Launchpad-style app grid"
+echo "  Existing panel items and launchers: preserved"
+echo
+echo "Current GTK theme: $(xfconf-query -c xsettings -p /Net/ThemeName)"
+DEBIAN_SCRIPT
+
+echo
+echo "Done. Move the pointer to the bottom edge to reveal the floating dock."
+echo "Press Super+Space for instant search or Super+E for the expanded app grid."
