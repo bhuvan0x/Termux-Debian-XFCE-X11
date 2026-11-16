@@ -196,6 +196,77 @@ AUTOSTART_ENTRY
 mkdir -p "$HOME/.config/gtk-3.0"
 GTK_SETTINGS="$HOME/.config/gtk-3.0/settings.ini"
 touch "$GTK_SETTINGS"
+if ! grep -q '^\[Settings\] "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
+  key="${entry%%=*}"
+  if grep -q "^$key=" "$GTK_SETTINGS"; then
+    sed -i "s|^$key=.*|$entry|" "$GTK_SETTINGS"
+  else
+    printf '%s' "$entry"
+  fi
+done
+
+echo "Persistent WhiteSur login hook: $AUTOSTART_DIR/primebook-whitesur.desktop"
+echo "GTK fallback settings: $GTK_SETTINGS"
+
+echo "WhiteSur assets and persistent XFCE settings are ready."
+DEBIAN_SCRIPT
+
+echo
+echo "== Restarting the existing XFCE / Termux:X11 session =="
+bash "$SCRIPT_DIR/stop-all.sh" || true
+sleep 2
+echo "Starting the desktop with the new WhiteSur profile..."
+exec bash "$SCRIPT_DIR/start-all.sh"
+ "$GTK_SETTINGS"; then
+  tmp_settings="$(mktemp)"
+  printf '%s\n' '[Settings]' > "$tmp_settings"
+  cat "$GTK_SETTINGS" >> "$tmp_settings"
+  mv "$tmp_settings" "$GTK_SETTINGS"
+fi
+for entry in "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
+  key="${entry%%=*}"
+  if grep -q "^$key=" "$GTK_SETTINGS"; then
+    sed -i "s|^$key=.*|$entry|" "$GTK_SETTINGS"
+  else
+    printf '%s
+' "$entry" >> "$GTK_SETTINGS"
+  fi
+done
+
+echo "Persistent WhiteSur login hook: $AUTOSTART_DIR/primebook-whitesur.desktop"
+echo "GTK fallback settings: $GTK_SETTINGS"
+
+echo "WhiteSur assets and persistent XFCE settings are ready."
+DEBIAN_SCRIPT
+
+echo
+echo "== Restarting the existing XFCE / Termux:X11 session =="
+bash "$SCRIPT_DIR/stop-all.sh" || true
+sleep 2
+echo "Starting the desktop with the new WhiteSur profile..."
+exec bash "$SCRIPT_DIR/start-all.sh"
+\n' >> "$GTK_SETTINGS"
+  fi
+done
+
+echo "Persistent WhiteSur login hook: $AUTOSTART_DIR/primebook-whitesur.desktop"
+echo "GTK fallback settings: $GTK_SETTINGS"
+
+echo "WhiteSur assets and persistent XFCE settings are ready."
+DEBIAN_SCRIPT
+
+echo
+echo "== Restarting the existing XFCE / Termux:X11 session =="
+bash "$SCRIPT_DIR/stop-all.sh" || true
+sleep 2
+echo "Starting the desktop with the new WhiteSur profile..."
+exec bash "$SCRIPT_DIR/start-all.sh"
+ "$GTK_SETTINGS"; then
+  tmp_settings="$(mktemp)"
+  printf '%s\n' '[Settings]' > "$tmp_settings"
+  cat "$GTK_SETTINGS" >> "$tmp_settings"
+  mv "$tmp_settings" "$GTK_SETTINGS"
+fi
 for entry in "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
   key="${entry%%=*}"
   if grep -q "^$key=" "$GTK_SETTINGS"; then
