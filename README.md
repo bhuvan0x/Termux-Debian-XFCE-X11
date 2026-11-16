@@ -292,6 +292,22 @@ Termux-Debian-X11/
 - This is not a VM and does not boot another kernel. systemd, kernel modules, nested containers and some hardware integrations may not work normally.
 - Optional themes and plugins are installed only when available in the Debian repositories.
 
+## WhiteSur XFCE desktop customization (optional)
+
+The project includes a **staged, reversible WhiteSur-inspired XFCE profile** for a full desktop layout. It keeps XFCE and Termux:X11; it does not install GNOME or replace the current desktop environment.
+
+The proposed design combines WhiteSur Dark GTK styling, matching XFWM4 window decorations, WhiteSur icons, the existing XFCE top panel, an optional Plank bottom dock, optional lightweight Conky widgets, a static wallpaper, and coordinated terminal colors.
+
+**Start with inspection only.** Run this from a terminal inside Debian XFCE as user `prime`:
+
+```bash
+bash scripts/audit-xfce-theme.sh
+```
+
+The audit is read-only: it checks XFCE versions/settings, display/session information, available rendering diagnostics, existing panel/autostart configuration, installed components, memory and storage. It does not install packages, download themes, modify settings, create backups, or restart processes. Review the report before approving any changes.
+
+Read the full implementation and rollback plan in [docs/WHITESUR-XFCE.md](docs/WHITESUR-XFCE.md). Do not run an all-in-one theme installer or install GNOME Shell extensions. Back up existing XFCE/GTK configuration before changing panel layout, autostart, themes or window decorations. Keep the existing Termux:X11 startup, PRoot isolation, audio, printer and security configuration unchanged.
+
 ## Useful commands
 
 ```bash
