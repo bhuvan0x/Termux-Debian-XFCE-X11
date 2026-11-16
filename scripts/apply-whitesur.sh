@@ -119,7 +119,7 @@ mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | gr
 DOCK_PANEL=""
 for id in "${PANEL_IDS[@]}"; do
   behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
-  [ "$behavior" = "2" ] && DOCK_PANEL="$id"
+  if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
 done
 if [ -z "$DOCK_PANEL" ] && [ "${#PANEL_IDS[@]}" -gt 0 ]; then
   DOCK_PANEL="${PANEL_IDS[$(("${#PANEL_IDS[@]}" - 1))]}"
@@ -177,7 +177,7 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     DOCK_PANEL=""
     for id in "${PANEL_IDS[@]}"; do
       behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
-      [ "$behavior" = "2" ] && DOCK_PANEL="$id"
+      if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
     done
     if [ -z "$DOCK_PANEL" ] && [ "${#PANEL_IDS[@]}" -gt 0 ]; then
       DOCK_PANEL="${PANEL_IDS[$(("${#PANEL_IDS[@]}" - 1))]}"
