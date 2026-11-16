@@ -52,6 +52,8 @@ LOG_FILE="$LOG_DIR/discover.log"
   echo "System D-Bus: reachable"
 } >> "$LOG_FILE" 2>&1
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+# Prefer Qt Quick software rendering on Termux:X11 when ZINK/EGL is unavailable.
+export QT_QUICK_BACKEND="${QT_QUICK_BACKEND:-software}"
 exec /usr/bin/plasma-discover "$@" >> "$LOG_FILE" 2>&1
 DISCOVER_WRAPPER
 chmod 0755 /usr/local/bin/primebook-discover
