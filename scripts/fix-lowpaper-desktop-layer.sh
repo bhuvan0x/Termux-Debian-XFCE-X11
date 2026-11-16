@@ -142,4 +142,6 @@ bash -n "$LOWPAPER"
 grep -q 'LOWPAPER_XFCE_LAYER_FIX=1' "$LOWPAPER"
 echo "Patched lowpaper XFCE layering."
 echo "Backup: $BACKUP"
-echo "Next: restart Lowpaper Control Center and click 'Reapply desktop layer'."
+echo "Reapplying the current wallpaper through the corrected XFCE desktop layer..."
+"$LOWPAPER" restore
+echo "XFCE wallpaper layer reapplied. Check that desktop icons are visible and clickable."
