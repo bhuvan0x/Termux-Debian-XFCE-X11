@@ -121,7 +121,7 @@ apply_profile() {
     [ -n "$property" ] && set_value xfce4-desktop "$property" string "$WALLPAPER"
   done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/last-image$' || true)
 
-  mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | grep -Eo '[0-9]+' | sort -nu)
+  mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' | sort -nu)
   DOCK_PANEL=""
   for id in "${PANEL_IDS[@]}"; do
     behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
