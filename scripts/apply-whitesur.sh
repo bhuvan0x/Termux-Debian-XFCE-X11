@@ -134,7 +134,7 @@ apply_profile() {
     # Center the contiguous application-icon group with transparent expanders.
     # Preserve all existing plugin IDs and their relative order.
     PANEL_PATH="/panels/panel-$DOCK_PANEL"
-    mapfile -t ORDER < <(xfconf-query -c xfce4-panel -p "$PANEL_PATH/plugin-ids" 2>/dev/null | grep -Eo '[0-9]+' || true)
+    mapfile -t ORDER < <(xfconf-query -c xfce4-panel -p "$PANEL_PATH/plugin-ids" 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' || true)
     APP_POS=()
     for i in "${!ORDER[@]}"; do
       kind="$(xfconf-query -c xfce4-panel -p "/plugins/plugin-${ORDER[$i]}" 2>/dev/null || true)"
