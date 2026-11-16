@@ -7,11 +7,6 @@ LOWPAPER="${HOME}/.local/bin/lowpaper"
 [ -x "$LOWPAPER" ] || { echo "lowpaper not found at $LOWPAPER" >&2; exit 1; }
 [ -n "${DISPLAY:-}" ] || { echo "DISPLAY is empty; run this from the Debian XFCE session." >&2; exit 1; }
 command -v xfconf-query >/dev/null 2>&1 || { echo "xfconf-query is missing." >&2; exit 1; }
-[ "$(xfconf-query -c xfwm4 -p /general/use_compositing 2>/dev/null || true)" = true ] || {
-  echo "XFCE compositing is disabled. Enable it in Window Manager Tweaks > Compositor, then retry." >&2
-  exit 1
-}
-
 # Reconnect to the actual XFCE session bus. PRoot sessions can have a different
 # or empty DBUS_SESSION_BUS_ADDRESS even while sharing the X11 display.
 DBUS_BUS=""
@@ -29,6 +24,14 @@ else
 fi
 [ -n "$DBUS_BUS" ] || { echo "Cannot connect to the active XFCE session D-Bus; open the XFCE desktop and retry." >&2; exit 1; }
 export DBUS_SESSION_BUS_ADDRESS="$DBUS_BUS"
+
+# Only test compositor state after attaching to the real XFCE session bus.
+COMPOSITING="$(xfconf-query -c xfwm4 -p /general/use_compositing 2>/dev/null || true)"
+[ "$COMPOSITING" = true ] || {
+  echo "XFCE compositor is genuinely disabled (or its setting is unreadable). Check Window Manager Tweaks > Compositor." >&2
+  exit 1
+}
+
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP="$LOWPAPER.before-xfce-layer-fix-$STAMP"
