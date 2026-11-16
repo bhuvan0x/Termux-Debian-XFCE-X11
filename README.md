@@ -127,7 +127,8 @@ Official project: https://github.com/termux/termux-widget
 
 | App | Use |
 |---|---|
-| KDE Discover | Modern software storefront with PackageKit and Flatpak backends; install/update support depends on PRoot services |\n| Firefox ESR | Web browser |
+| KDE Discover | Modern software storefront with PackageKit and Flatpak backends; install/update support depends on PRoot services |
+| Firefox ESR | Web browser |
 | GDebi | Local Debian package installer; terminal output is visible and saved to `~/Documents/gdebi-install.log` |
 | OpenCode Desktop | Permanent XFCE launcher with PRoot-compatible Electron flags and log in `~/Downloads/opencode-desktop.log` |
 | ARM64 local package helper | `primebook-install-deb /path/to/package.deb` validates `arm64`/`all` packages and refreshes detected Electron launchers |
@@ -156,21 +157,21 @@ This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
 Install KDE Discover without installing KDE Plasma or replacing XFCE:
 
-\`\`\`bash
+```bash
 bash scripts/install-discover.sh
-\`\`\`
+```
 
 The installer uses Debian 13 ARM64 packages, adds Discover's Flatpak backend and a per-user Flathub remote, and replaces the previous GNOME Software launcher. It does not add testing/unstable repositories or relax Flatpak sandboxing.
 
-The desktop startup now launches a temporary system D-Bus inside the same isolated root PRoot session as XFCE, verifies the bus, and runs the graphical desktop as the unprivileged \`prime\` user. The bus exits with the desktop; no systemd service or broad Android storage bind is added.
+The desktop startup now launches a temporary system D-Bus inside the same isolated root PRoot session as XFCE, verifies the bus, and runs the graphical desktop as the unprivileged `prime` user. The bus exits with the desktop; no systemd service or broad Android storage bind is added.
 
 **PRoot limitation:** Discover's APT backend uses PackageKit and may require PolicyKit authorization. Flatpak deployment may be restricted by Android kernel sandbox/user-namespace support. The storefront may work for browsing even if GUI installation is unavailable. For dependable package installation and updates, use APT through the existing root Debian workflow. See [docs/DISCOVER.md](docs/DISCOVER.md).
 
 For a combined Discover install + WhiteSur startup repair + desktop restart:
 
-\`\`\`bash
+```bash
 bash scripts/refresh-primebook.sh
-\`\`\`
+```
 
 ## Visual Studio Code (optional)
 
