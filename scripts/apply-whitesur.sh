@@ -234,14 +234,14 @@ exec bash "$SCRIPT_DIR/start-all.sh"
     fi
     if [ -n "$DOCK_PANEL" ]; then
       DOCK="/panels/panel-$DOCK_PANEL"
-      xfconf-query -c xfce4-panel -p "$DOCK/length" --create -t uint -s 52
+      xfconf-query -c xfce4-panel -p "$DOCK/length" --create -t int -s 52
       xfconf-query -c xfce4-panel -p "$DOCK/length-adjust" --create -t bool -s false
       xfconf-query -c xfce4-panel -p "$DOCK/position-locked" --create -t bool -s true
-      xfconf-query -c xfce4-panel -p "$DOCK/size" --create -t uint -s 50
-      xfconf-query -c xfce4-panel -p "$DOCK/icon-size" --create -t uint -s 34
-      xfconf-query -c xfce4-panel -p "$DOCK/autohide-behavior" --create -t uint -s 2
-      xfconf-query -c xfce4-panel -p "$DOCK/enter-opacity" --create -t uint -s 100
-      xfconf-query -c xfce4-panel -p "$DOCK/leave-opacity" --create -t uint -s 92
+      xfconf-query -c xfce4-panel -p "$DOCK/size" --create -t int -s 50
+      xfconf-query -c xfce4-panel -p "$DOCK/icon-size" --create -t int -s 34
+      xfconf-query -c xfce4-panel -p "$DOCK/autohide-behavior" --create -t int -s 2
+      xfconf-query -c xfce4-panel -p "$DOCK/enter-opacity" --create -t int -s 100
+      xfconf-query -c xfce4-panel -p "$DOCK/leave-opacity" --create -t int -s 92
     fi
     xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>space' --create -t string -s 'xfce4-appfinder --collapsed'
     xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>e' --create -t string -s 'xfce4-appfinder --expanded'
