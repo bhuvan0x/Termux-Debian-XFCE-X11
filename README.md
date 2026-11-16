@@ -15,7 +15,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 
 - Debian userspace through `proot-distro`; no device root required.
 - PrimeBook WhiteSur XFCE desktop profile: WhiteSur Dark/Blue styling, matching dark icons and cursors, wallpaper, Noto Sans typography, and a persistent floating auto-hidden dock with app-finder shortcuts. Existing panel items and Linux services are preserved.
-- GNOME Software Center with Debian APT and Flatpak plugins (PRoot backend limitations documented), Firefox ESR, GDebi with a privileged diagnostic launcher, permanent OpenCode desktop launcher, and ARM64 `.deb` installation helper, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
+- KDE Discover software center with Flatpak backend and session-scoped system-D-Bus startup (PackageKit/Flatpak PRoot limitations documented), Firefox ESR, GDebi with a privileged diagnostic launcher, permanent OpenCode desktop launcher, and ARM64 `.deb` installation helper, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
 - Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
 - Optional ARM64 ClamAV scanner for on-demand file checks inside Debian (no always-on scanner daemon).
@@ -127,7 +127,7 @@ Official project: https://github.com/termux/termux-widget
 
 | App | Use |
 |---|---|
-| GNOME Software Center | App-store interface for Debian APT and Flathub catalogues; install/update backend support depends on PRoot services |\n| Firefox ESR | Web browser |
+| KDE Discover | Modern software storefront with PackageKit and Flatpak backends; install/update support depends on PRoot services |\n| Firefox ESR | Web browser |
 | GDebi | Local Debian package installer; terminal output is visible and saved to `~/Documents/gdebi-install.log` |
 | OpenCode Desktop | Permanent XFCE launcher with PRoot-compatible Electron flags and log in `~/Downloads/opencode-desktop.log` |
 | ARM64 local package helper | `primebook-install-deb /path/to/package.deb` validates `arm64`/`all` packages and refreshes detected Electron launchers |
@@ -152,23 +152,25 @@ bash scripts/install-apps.sh --office
 
 This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
-## GNOME Software Center
+## KDE Discover Software Center
 
-Install the Play Store-style GNOME Software storefront without installing GNOME Desktop or replacing XFCE:
+Install KDE Discover without installing KDE Plasma or replacing XFCE:
 
-```bash
-bash scripts/install-gnome-software.sh
-```
+\`\`\`bash
+bash scripts/install-discover.sh
+\`\`\`
 
-The installer adds the Debian package and Flatpak plugins, PackageKit, AppStream metadata, and a per-user Flathub remote for `prime`. It creates a **Software Center** launcher in the XFCE Applications menu and on the desktop.
+The installer uses Debian 13 ARM64 packages, adds Discover's Flatpak backend and a per-user Flathub remote, and replaces the previous GNOME Software launcher. It does not add testing/unstable repositories or relax Flatpak sandboxing.
 
-**PRoot limitation:** GNOME Software's catalogue can be browsed, but Debian package installation/update actions depend on PackageKit, system D-Bus and PolicyKit services. Flatpak deployment may be restricted by Android kernel sandbox/user-namespace support. The installer does not weaken PRoot isolation to bypass these limitations. Use `bash scripts/update-debian.sh` for reliable Debian system updates. See [docs/GNOME-SOFTWARE.md](docs/GNOME-SOFTWARE.md).
+The desktop startup now launches a temporary system D-Bus inside the same isolated root PRoot session as XFCE, verifies the bus, and runs the graphical desktop as the unprivileged \`prime\` user. The bus exits with the desktop; no systemd service or broad Android storage bind is added.
 
-For a combined store install + WhiteSur startup repair + desktop restart:
+**PRoot limitation:** Discover's APT backend uses PackageKit and may require PolicyKit authorization. Flatpak deployment may be restricted by Android kernel sandbox/user-namespace support. The storefront may work for browsing even if GUI installation is unavailable. For dependable package installation and updates, use APT through the existing root Debian workflow. See [docs/DISCOVER.md](docs/DISCOVER.md).
 
-```bash
+For a combined Discover install + WhiteSur startup repair + desktop restart:
+
+\`\`\`bash
 bash scripts/refresh-primebook.sh
-```
+\`\`\`
 
 ## Visual Studio Code (optional)
 
