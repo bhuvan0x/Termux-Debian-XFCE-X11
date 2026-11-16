@@ -41,7 +41,7 @@ PRIME_ENV=(
 [ -z "$XAUTH" ] || PRIME_ENV+=("XAUTHORITY=$XAUTH")
 
 as_prime() {
-  runuser -u prime -- env "\${PRIME_ENV[@]}" "$@"
+  runuser -u prime -- env "${PRIME_ENV[@]}" "$@"
 }
 
 [ -d /tmp/runtime-prime ] || die "The XFCE runtime directory /tmp/runtime-prime is missing."
@@ -108,8 +108,8 @@ import sys
 path = pathlib.Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
 
-old_launch = 'setsid mpv "\${opts[@]}" --vo=xv,gpu,x11 --wid="$wid" --input-ipc-server="$sock" "$@"'
-new_launch = 'setsid mpv "\${opts[@]}" --vo=gpu --gpu-api=opengl --gpu-context=x11egl --wid="$wid" --input-ipc-server="$sock" "$@"'
+old_launch = 'setsid mpv "${opts[@]}" --vo=xv,gpu,x11 --wid="$wid" --input-ipc-server="$sock" "$@"'
+new_launch = 'setsid mpv "${opts[@]}" --vo=gpu --gpu-api=opengl --gpu-context=x11egl --wid="$wid" --input-ipc-server="$sock" "$@"'
 
 if text.count("set -u\n") != 1:
     raise SystemExit("Unexpected lowpaper header; refusing to patch an unknown script.")
@@ -151,7 +151,7 @@ STATUS="$(as_prime "$LOWPAPER" status 2>&1 || true)"
 printf '%s\n' "$STATUS"
 if ! grep -q 'playing' <<< "$STATUS"; then
   as_prime "$LOWPAPER" stop >/dev/null 2>&1 || true
-  die "MPV did not report active playback. Fresco has NOT been removed. Check $PRIME_HOME/.local/share/lowpaper-$(id -u)/$(basename "$WALLPAPER").log and retry after diagnosis."
+  die "MPV did not report active playback. Fresco has NOT been removed. Check /tmp/lowpaper-$(id -u prime)/$(basename "$WALLPAPER").log and retry after diagnosis."
 fi
 
 echo
@@ -218,8 +218,8 @@ rm -f /usr/local/bin/fresco /usr/local/bin/frescod
 SOURCE_TREE="$PRIME_HOME/src/Fresco"
 if [ -d "$SOURCE_TREE" ]; then
   if [ -f "$SOURCE_TREE/Cargo.toml" ] && grep -qiE '^name[[:space:]]*=[[:space:]]*"fresco"' "$SOURCE_TREE/Cargo.toml"; then
-    rm -rf -- "$SOURCE_TREE"
-    echo "Removed the verified Fresco source/build tree at $SOURCE_TREE."
+    move_to_backup "$SOURCE_TREE" "$BACKUP/fresco-source-tree"
+    echo "Archived the verified Fresco source/build tree at $BACKUP/fresco-source-tree."
   else
     echo "Skipped $SOURCE_TREE because it did not match the expected Fresco Cargo project."
   fi
