@@ -1,18 +1,8 @@
-# Prayag2 Modern Clock — XFCE port
+# Prayag2 Modern Clock — centered transparent XFCE port
 
-This integration installs a faithful desktop port of [Prayag2/kde_modernclock](https://github.com/Prayag2/kde_modernclock) for the existing Debian 13 XFCE + Termux:X11 environment.
+This integration installs the XFCE/Termux:X11 port of [Prayag2/kde_modernclock](https://github.com/Prayag2/kde_modernclock), maintained in [bhuvan0x/Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock).
 
-The original project is a Plasma 6 applet, so its Plasma shell cannot be loaded directly by XFCE. The standalone project replaces only that Plasma-specific shell with a transparent, frameless Qt Quick window. It retains the upstream three-row design, Anurati/Poppins font files, font sizes, letter spacing, default colours, date format, 12-hour time format and style-character output.
-
-## Exact upstream defaults
-
-- Day: Anurati, 72 px, 17 px letter spacing, uppercase.
-- Date: Poppins, 19 px, 3 px letter spacing, `dd MMM yyyy`, uppercase.
-- Time: Poppins, 19 px, 3 px letter spacing, 12-hour format with AM/PM.
-- Style character: hyphen before and after time.
-- All text: white; column spacing: 5 px.
-
-The font files are fetched from the upstream repository at installation time; they are not replaced with system substitutes.
+The clock window is transparent and frameless, with the clock positioned at the horizontal and vertical center of the screen by default. It retains the upstream Anurati and Poppins fonts, typography, letter spacing, date/time layout, white text, and style characters.
 
 ## Install or update
 
@@ -24,17 +14,17 @@ git pull --ff-only
 bash scripts/install-modernclock.sh
 ```
 
-The bootstrap fetches the latest standalone installer from [bhuvan0x/Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock). That installer installs the Qt 6 QML runtime, retrieves the original Anurati and Poppins font assets, installs the clock under `/home/prime/.local/share/modern-gaming-clock`, creates an XFCE autostart entry and launches it.
+The bootstrap fetches the latest standalone installer, updates the QML and configuration files, and launches the clock. Re-running the installer replaces the running instance and refreshes its autostart configuration.
 
-## Customize
+## Position
 
-As Debian user `prime`, edit:
+- Default: screen center.
+- Drag the clock to move it manually.
+- Edit `~/.local/share/modern-gaming-clock/config.js` as Debian user `prime` to set `center_offset_x` and `center_offset_y` for the next launch.
 
-```text
-~/.local/share/modern-gaming-clock/config.js
-```
+## Transparency note
 
-This exposes the original visibility, font size, letter spacing, colour, date-format, 12/24-hour and style-character settings. Drag the clock to reposition it; change `window_margin_right` and `window_margin_top` for its next launch position.
+The QML window has a transparent background and draws only the clock text. X11 transparency/compositing depends on Termux:X11 and the active XFCE window manager configuration. This setup does not install or enable a compositor.
 
 ## Remove
 
@@ -42,8 +32,4 @@ This exposes the original visibility, font size, letter spacing, colour, date-fo
 bash scripts/install-modernclock.sh --remove
 ```
 
-This removes the clock and autostart entry, and cleans up the previous Conky approximation. Shared Qt packages remain installed.
-
-## Fidelity boundary
-
-The displayed typography, layout and output defaults follow the upstream applet. The KDE Plasma applet frame/shadow and Plasma settings dialog are not part of the XFCE port; a normal frameless desktop window and editable config file replace them. Transparency and desktop stacking depend on Termux:X11/XFWM. No KDE Plasma session or compositor is installed.
+This removes the clock and its autostart entry, including the previous Conky approximation's files. Shared Qt packages remain installed.
