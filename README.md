@@ -346,6 +346,19 @@ Unofficial community setup. Debian, Termux, Termux:X11 and Termux:Widget are mai
 </p>
 
 
+
+### Make WhiteSur permanent across XFCE logins
+
+The WhiteSur installer now saves the theme selections in XFCE's per-user configuration, adds GTK fallback settings, and installs an XFCE autostart hook that reapplies WhiteSur on every login. To install or refresh this persistent setup:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/apply-whitesur.sh
+```
+
+This restarts the existing desktop once to load the profile. Future XFCE/Termux:X11 relaunches restore WhiteSur automatically; no manual theme selection should be needed.
+
 ## macOS-inspired floating dock and app finder
 
 After pulling the latest changes, run this **from Termux while the XFCE desktop is running**:
