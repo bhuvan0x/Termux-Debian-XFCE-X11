@@ -109,6 +109,36 @@ bash scripts/install-apps.sh --office
 
 **Your L3110:** the printer uses ESC/P-R, and SANE lists its scanner (USB ID 04b8:1142) as fully supported by the epson2 backend. The L3110 has USB 2.0 only; it does not have built-in Wi-Fi/Ethernet. Direct operation still requires USB visibility through Android/PRoot. Details are in USB-AND-PRINTING.md.
 
+## Optional Fresco live wallpaper integration
+
+Fresco v1.1.55 was built natively on Debian 13 ARM64 under PRoot with Rust stable, GTK4/libadwaita development libraries and `libmpv2`. Build Fresco inside Debian as the `prime` user using the upstream build instructions. For the tested source tree at `/home/prime/src/Fresco`, the release executables should be:
+
+```text
+/home/prime/src/Fresco/target/release/fresco
+/home/prime/src/Fresco/target/release/frescod
+```
+
+From Termux, after the binaries exist, install the integration:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/install-fresco.sh
+```
+
+The installer validates that both files are executable AArch64 binaries, checks normal dynamic dependencies and verifies `libmpv2` is installed. It then installs `fresco` and `frescod` into `/usr/local/bin` and creates a user-level XFCE launcher at `/home/prime/.local/share/applications/fresco.desktop`. Find **Fresco** in Applications or XFCE App Finder. The launcher includes desktop actions for next, previous, random and picker.
+
+If the build output is elsewhere, pass its Debian path as the first argument, for example `bash scripts/install-fresco.sh /home/prime/build/Fresco/target/release`.
+
+This is an optional integration. The script does not launch Fresco, enable autostart, alter XFCE wallpaper settings or install `mpvpaper` (not needed for the X11 backend). Test the GUI and wallpaper rendering manually before making any session-level changes. Use `fresco doctor`, `fresco status` and `fresco logs` for diagnostics.
+
+To remove only the installed binaries and menu entry:
+
+```bash
+bash scripts/remove-fresco.sh
+```
+
+The removal script leaves the Fresco source tree, build output, user configuration and wallpaper library intact.
 ## 5. Configure Debian sudo access if needed
 
 The desktop user `prime` is unprivileged. The app installer creates a dedicated password-authenticated sudoers drop-in. If `sudo` still reports that `prime` is not in the sudoers file, reapply the desktop app setup with `bash scripts/install-apps.sh`, or create the rule manually from Termux (Termux enters Debian as root):
