@@ -27,7 +27,6 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Widget background tasks for Debian updates and desktop app refresh.
 - Epson L3110 support: model-aware ARM64 ESC/P-R 1.8.8 driver with L3110 PPD, CUPS, scanner tools, and a dedicated **Epson L3110 Series Setup** desktop/menu shortcut.
 - Android USB detection/permission diagnostics plus X11 input-device inspection.
-- Optional Fresco live wallpaper manager (native Debian ARM64 build) with an XFCE Applications-menu launcher and quick wallpaper actions. Fresco remains opt-in and does not change the existing wallpaper or enable autostart.
 
 ## Quick installation
 
@@ -153,48 +152,6 @@ bash scripts/install-apps.sh --office
 
 This installs LibreOffice Writer and Calc and uses more storage and RAM.
 
-## Live video wallpapers (lowpaper)
-
-The previous optional Fresco integration has been retired. This project now uses [lowpaper v0.1.1](https://github.com/Meinianda-L/lowpaper), a lightweight MPV-based wallpaper script. The migration pins the upstream release and verifies its SHA-256 checksum before installing it.
-
-### Migrate an existing Fresco installation
-
-Run this from Termux while the Debian XFCE desktop is open in Termux:X11:
-
-```bash
-cd ~/Termux-Debian-X11
-bash scripts/migrate-wallpaper.sh
-```
-
-The migration is deliberately interactive and guarded:
-
-1. Checks the active XFCE/X11 session, compositor, dependencies and wallpaper file.
-2. Preserves the Alisa wallpaper at `~/Videos/Wallpapers/Alisa-Live-Wallpaper.mp4`.
-3. Downloads lowpaper v0.1.1 and verifies its pinned SHA-256 digest.
-4. Applies the software-rendered OpenGL/X11 EGL options already tested on the target Termux:X11 device.
-5. Starts the wallpaper and waits for a human visual check. You must confirm that both the video and desktop icons are visible before Fresco cleanup proceeds.
-6. Enables lowpaper autostart, then archives Fresco user configuration, state, wallpaper library, launchers and source tree under `~/Documents/Wallpaper-Migration-Backup-*/`. It removes only the known Fresco executables and archived integration paths.
-
-If the video or icons are not correct, do not type `YES`. The script stops lowpaper and leaves Fresco installed. A successful MPV process check is not treated as proof that the video is visible.
-
-The lowpaper X11 integration uses XFCE's compositor and an RGBA visual for desktop icons. The migration does not disable compositing. It sets software rendering only in lowpaper's own process, not globally for other MPV applications.
-
-### lowpaper controls
-
-Run these inside Debian as the `prime` user:
-
-```bash
-lowpaper status
-lowpaper pause
-lowpaper resume
-lowpaper toggle
-lowpaper stop
-lowpaper startup on
-lowpaper startup off
-```
-
-The migration enables login autostart only after the visual confirmation. Your original wallpaper and Fresco data are retained in the migration backup for recovery.
-
 ## Visual Studio Code (optional)
 
 The project includes an ARM64-only installer for the official stable Debian package:
@@ -306,8 +263,6 @@ Termux-Debian-X11/
     ├── install-debian.sh
     ├── install-apps.sh
     ├── install-vscode.sh
-    ├── install-fresco.sh
-    ├── remove-fresco.sh
     ├── install-termux-widget.sh
     ├── install-printing.sh
     ├── check-epson-l3110.sh
