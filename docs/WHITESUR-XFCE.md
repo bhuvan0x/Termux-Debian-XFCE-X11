@@ -18,9 +18,11 @@ The script:
 3. Verifies the WhiteSur dark icon and cursor assets, rebuilding/installing them only if missing.
 4. Copies the upstream WhiteSur static wallpaper into `~/.local/share/backgrounds`.
 5. Writes GTK, XFWM4, icon, cursor and XFCE wallpaper selections to the `prime` user's persistent XFConf configuration.
-6. Restarts the existing Termux:X11/XFCE workflow using the repository's Stop All and Start All scripts.
+6. Installs `~/.config/autostart/primebook-whitesur.desktop` and `~/.local/bin/primebook-whitesur-session.sh`. XFCE runs this hook at every login, restoring WhiteSur selections on the live session bus after the settings daemon starts.
+7. Writes GTK 3 fallback selections to `~/.config/gtk-3.0/settings.ini` so GTK applications also pick up the appearance early in startup.
+8. Restarts the existing Termux:X11/XFCE workflow using the repository's Stop All and Start All scripts.
 
-The theme and icon assets remain user-local. The script does not use the upstream GNOME theme-switcher, install GNOME Shell, replace XFCE panels, install Plank or Conky, enable Picom, or alter PRoot isolation, audio, CUPS or security configuration.
+The theme and icon assets remain user-local. The XFConf XML files, GTK settings file and XFCE autostart entry persist across logout, reboot and Termux:X11 relaunch; the login hook reapplies the selected values if XFCE restores stale settings. The script does not use the upstream GNOME theme-switcher, install GNOME Shell, replace XFCE panels, install Plank or Conky, enable Picom, or alter PRoot isolation, audio, CUPS or security configuration.
 
 ## Expected appearance
 
@@ -47,7 +49,8 @@ If the desktop still looks unchanged after the script:
    ```
 
 3. Confirm that the selected GTK theme directory exists under `~/.local/share/themes` and contains `gtk-3.0` and `xfwm4` subdirectories.
-4. Check the XFCE session log and run `bash scripts/diagnose.sh` from Termux if the desktop fails to start.
+4. Check that `~/.config/autostart/primebook-whitesur.desktop` exists and that `~/.local/bin/primebook-whitesur-session.sh` is executable.
+5. Check the XFCE session log and run `bash scripts/diagnose.sh` from Termux if the desktop fails to start.
 
 Do not run the upstream GTK installer's GNOME Shell stages again merely to refresh XFCE.
 
