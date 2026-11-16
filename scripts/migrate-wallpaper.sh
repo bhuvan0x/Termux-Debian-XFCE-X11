@@ -20,35 +20,85 @@ die() {
 PRIME_HOME="$(getent passwd prime | cut -d: -f6)"
 [ -n "$PRIME_HOME" ] && [ -d "$PRIME_HOME" ] || die "Debian user prime was not found."
 
-SESSION_PID="$(pgrep -u prime -x xfce4-session | head -n 1 || true)"
-[ -n "$SESSION_PID" ] || die "XFCE is not running. Start the desktop, then run this command again."
+# PRoot's isolated process view cannot reliably see the XFCE processes
+# launched by start-desktop.sh. Validate the live X11 and D-Bus endpoints
+# instead of searching /proc or relying on pgrep across PRoot sessions.
+DISPLAY_VALUE=":0.0"
+RUNTIME_DIR="/tmp/runtime-prime"
+[ -d "$RUNTIME_DIR" ] || die "The XFCE runtime directory $RUNTIME_DIR is missing."
 
-DBUS_BUS="$(tr '\0' '\n' < "/proc/$SESSION_PID/environ" | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' | head -n 1)"
-[ -n "$DBUS_BUS" ] || die "Could not locate the active XFCE D-Bus session."
+as_prime_with_bus() {
+  local bus="$1"
+  shift
+  runuser -u prime -- env \
+    "HOME=$PRIME_HOME" "USER=prime" "LOGNAME=prime" \
+    "DISPLAY=$DISPLAY_VALUE" "XDG_RUNTIME_DIR=$RUNTIME_DIR" \
+    "XDG_SESSION_TYPE=x11" "XDG_CURRENT_DESKTOP=XFCE" \
+    "DBUS_SESSION_BUS_ADDRESS=$bus" \
+    "PATH=$PRIME_HOME/.local/bin:/usr/local/bin:/usr/bin:/bin" "$@"
+}
 
-XAUTH="$(tr '\0' '\n' < "/proc/$SESSION_PID/environ" | sed -n 's/^XAUTHORITY=//p' | head -n 1)"
+DBUS_BUS=""
+for bus_socket in /tmp/dbus-*; do
+  [ -S "$bus_socket" ] || continue
+  candidate_bus="unix:path=$bus_socket"
+  if as_prime_with_bus "$candidate_bus" xfconf-query -c xfwm4 -p /general/use_compositing >/dev/null 2>&1; then
+    DBUS_BUS="$candidate_bus"
+    break
+  fi
+done
+[ -n "$DBUS_BUS" ] || die "Could not connect to the active XFCE D-Bus session. Keep the desktop open and retry."
+
 PRIME_ENV=(
   "HOME=$PRIME_HOME"
   "USER=prime"
   "LOGNAME=prime"
-  "DISPLAY=:0"
-  "XDG_RUNTIME_DIR=/tmp/runtime-prime"
+  "DISPLAY=$DISPLAY_VALUE"
+  "XDG_RUNTIME_DIR=$RUNTIME_DIR"
   "XDG_SESSION_TYPE=x11"
   "XDG_CURRENT_DESKTOP=XFCE"
   "DBUS_SESSION_BUS_ADDRESS=$DBUS_BUS"
   "PATH=$PRIME_HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
 )
-[ -z "$XAUTH" ] || PRIME_ENV+=("XAUTHORITY=$XAUTH")
 
 as_prime() {
   runuser -u prime -- env "${PRIME_ENV[@]}" "$@"
 }
 
-[ -d /tmp/runtime-prime ] || die "The XFCE runtime directory /tmp/runtime-prime is missing."
-[ "$(as_prime xfconf-query -c xfwm4 -p /general/use_compositing 2>/dev/null || true)" = true ] ||
-  die "XFCE compositing is disabled. Enable Window Manager Tweaks > Compositor and retry."
-pgrep -u prime -x xfdesktop >/dev/null 2>&1 || die "xfdesktop is not running."
 as_prime xrandr --listmonitors | grep -q 'Monitors:' || die "Termux:X11 has no active X11 monitor."
+ORIGINAL_COMPOSITING="$(as_prime xfconf-query -c xfwm4 -p /general/use_compositing 2>/dev/null)" ||
+  die "Could not read the XFCE compositor setting."
+case "$ORIGINAL_COMPOSITING" in
+  true|false) ;;
+  *) die "Unexpected XFCE compositor setting: $ORIGINAL_COMPOSITING" ;;
+esac
+
+MIGRATION_CONFIRMED=0
+LOWPAPER_STARTED=0
+LOWPAPER="$PRIME_HOME/.local/bin/lowpaper"
+restore_unconfirmed_state() {
+  local result=$?
+  trap - EXIT
+  if [ "$MIGRATION_CONFIRMED" -ne 1 ]; then
+    if [ "$LOWPAPER_STARTED" -eq 1 ]; then
+      as_prime "$LOWPAPER" stop >/dev/null 2>&1 || true
+    fi
+    if [ "$ORIGINAL_COMPOSITING" = false ]; then
+      as_prime xfconf-query -c xfwm4 -p /general/use_compositing --set false >/dev/null 2>&1 || true
+    fi
+  fi
+  exit "$result"
+}
+trap restore_unconfirmed_state EXIT
+
+# lowpaper's XFCE icon overlay needs the compositor. Preserve the user's
+# original setting and restore it automatically if migration is declined/fails.
+if [ "$ORIGINAL_COMPOSITING" = false ]; then
+  as_prime xfconf-query -c xfwm4 -p /general/use_compositing --set true ||
+    die "Could not enable XFCE compositing for lowpaper's icon overlay."
+fi
+[ "$(as_prime xfconf-query -c xfwm4 -p /general/use_compositing)" = true ] ||
+  die "XFCE compositing did not enable successfully."
 
 for command_name in mpv python3 xprop xrandr xkill xwininfo xev xset gcc curl sha256sum ffprobe xfconf-query; do
   command -v "$command_name" >/dev/null 2>&1 || die "Missing dependency: $command_name"
@@ -78,7 +128,6 @@ install -d -m 0700 -o prime -g prime "$BACKUP"
 printf '%s\n' "$WALLPAPER" > "$BACKUP/preserved-wallpaper-path.txt"
 chown prime:prime "$BACKUP/preserved-wallpaper-path.txt"
 
-LOWPAPER="$PRIME_HOME/.local/bin/lowpaper"
 LOWPAPER_CONFIG="$PRIME_HOME/.config/lowpaper"
 if [ -e "$LOWPAPER" ]; then
   cp -a "$LOWPAPER" "$BACKUP/previous-lowpaper"
@@ -139,6 +188,7 @@ chmod 0600 "$LOWPAPER_CONFIG/config"
 echo
 echo "Starting lowpaper with the verified software-rendering path..."
 as_prime "$LOWPAPER" "$WALLPAPER"
+LOWPAPER_STARTED=1
 sleep 4
 STATUS="$(as_prime "$LOWPAPER" status 2>&1 || true)"
 printf '%s\n' "$STATUS"
@@ -178,23 +228,9 @@ move_to_backup() {
   fi
 }
 
-# Stop only the two exact Fresco process names; do not use broad pkill -f patterns.
-for process_name in fresco frescod; do
-  while read -r process_id; do
-    [ -n "$process_id" ] && kill -TERM "$process_id" 2>/dev/null || true
-  done < <(pgrep -u prime -x "$process_name" || true)
-done
-for attempt in $(seq 1 20); do
-  if ! pgrep -u prime -x fresco >/dev/null 2>&1 && ! pgrep -u prime -x frescod >/dev/null 2>&1; then
-    break
-  fi
-  sleep 0.25
-done
-for process_name in fresco frescod; do
-  while read -r process_id; do
-    [ -n "$process_id" ] && kill -KILL "$process_id" 2>/dev/null || true
-  done < <(pgrep -u prime -x "$process_name" || true)
-done
+# Do not use pgrep/kill here: the migration runs in a separate isolated
+# PRoot process view and cannot reliably inspect the desktop's process table.
+# Fresco's binaries and data are archived below after lowpaper is confirmed.
 
 move_to_backup "$PRIME_HOME/.config/fresco" "$BACKUP/fresco-user/config"
 move_to_backup "$PRIME_HOME/.local/state/fresco" "$BACKUP/fresco-user/state"
@@ -228,9 +264,6 @@ if command -v update-desktop-database >/dev/null 2>&1; then
   as_prime update-desktop-database "$PRIME_HOME/.local/share/applications" >/dev/null 2>&1 || true
 fi
 
-if pgrep -u prime -x fresco >/dev/null 2>&1 || pgrep -u prime -x frescod >/dev/null 2>&1; then
-  die "A Fresco process is still running; inspect it manually."
-fi
 [ ! -e /usr/local/bin/fresco ] && [ ! -e /usr/local/bin/frescod ] ||
   die "A Fresco executable remains in /usr/local/bin."
 
