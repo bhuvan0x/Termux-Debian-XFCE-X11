@@ -19,8 +19,10 @@ The script:
 4. Copies the upstream WhiteSur static wallpaper into `~/.local/share/backgrounds`.
 5. Writes GTK, XFWM4, icon, cursor and XFCE wallpaper selections to the `prime` user's persistent XFConf configuration.
 6. Installs `~/.config/autostart/primebook-whitesur.desktop` and `~/.local/bin/primebook-whitesur-session.sh`. XFCE runs this hook at every login, restoring WhiteSur selections on the live session bus after the settings daemon starts.
-7. Writes GTK 3 fallback selections to `~/.config/gtk-3.0/settings.ini` so GTK applications also pick up the appearance early in startup.
-8. Restarts the existing Termux:X11/XFCE workflow using the repository's Stop All and Start All scripts.
+7. Writes GTK 3 fallback selections and Noto Sans typography to `~/.config/gtk-3.0/settings.ini`.
+8. Persists Noto Sans desktop/window-title fonts and refreshes the WhiteSur icon cache.
+9. Integrates the floating bottom-dock profile and app-finder shortcuts into the same XFCE login hook: the existing auto-hidden panel is shortened, icons enlarged, and Super+Space / Super+E launch compact / expanded app finder.
+10. Restarts the existing Termux:X11/XFCE workflow using the repository's Stop All and Start All scripts.
 
 The theme and icon assets remain user-local. The XFConf XML files, GTK settings file and XFCE autostart entry persist across logout, reboot and Termux:X11 relaunch; the login hook reapplies the selected values if XFCE restores stale settings. The script does not use the upstream GNOME theme-switcher, install GNOME Shell, replace XFCE panels, install Plank or Conky, enable Picom, or alter PRoot isolation, audio, CUPS or security configuration.
 
@@ -31,7 +33,9 @@ The theme and icon assets remain user-local. The XFConf XML files, GTK settings 
 - WhiteSur dark icon theme.
 - WhiteSur cursor theme.
 - WhiteSur static wallpaper.
-- Existing XFCE top panel, bottom panel/dock-like panel, panel plugins, launchers and applications retained.
+- Noto Sans desktop typography.
+- Floating, auto-hidden bottom dock profile with larger icons and Spotlight-/Launchpad-style app finder shortcuts.
+- Existing XFCE top panel, bottom panel plugins, launchers and applications retained; no panel items are deleted or reordered.
 
 The icon theme's base/default color is used alongside the blue GTK accent; upstream WhiteSur icons do not provide a separate blue icon variant.
 
