@@ -196,12 +196,15 @@ AUTOSTART_ENTRY
 mkdir -p "$HOME/.config/gtk-3.0"
 GTK_SETTINGS="$HOME/.config/gtk-3.0/settings.ini"
 touch "$GTK_SETTINGS"
-if ! grep -q '^\[Settings\] "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
+if ! grep -q '^\[Settings\]$' "$GTK_SETTINGS"; then
+  echo "[Settings]" >> "$GTK_SETTINGS"
+fi
+for entry in "gtk-theme-name=$GTK_THEME" "gtk-icon-theme-name=$ICON_THEME" "gtk-cursor-theme-name=$CURSOR_THEME"; do
   key="${entry%%=*}"
   if grep -q "^$key=" "$GTK_SETTINGS"; then
     sed -i "s|^$key=.*|$entry|" "$GTK_SETTINGS"
   else
-    printf '%s' "$entry"
+    echo "$entry" >> "$GTK_SETTINGS"
   fi
 done
 
