@@ -6,7 +6,7 @@ proot-distro login --isolated debian -- /bin/bash -lc '
   set -Eeuo pipefail
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
-  apt-get install -y python3 python3-gi gir1.2-gtk-3.0 xfconf
+  apt-get install -y python3 python3-gi gir1.2-gtk-3.0 xfconf mpv python3-xlib libxfixes3
 '
 echo "== Installing Wallpaper Control Centre for prime =="
 proot-distro login --isolated --user prime debian -- /bin/bash -lc '
