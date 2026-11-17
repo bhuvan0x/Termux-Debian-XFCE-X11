@@ -24,7 +24,7 @@ The script:
 9. Integrates the floating bottom-dock profile and app-finder shortcuts into the same XFCE login hook: the existing auto-hidden panel is shortened, icons enlarged, and Super+Space / Super+E launch compact / expanded app finder.
 10. Restarts the existing Termux:X11/XFCE workflow using the repository's Stop All and Start All scripts.
 
-The theme and icon assets remain user-local. The XFConf XML files, GTK settings file and XFCE autostart entry persist across logout, reboot and Termux:X11 relaunch; the login hook reapplies the selected values if XFCE restores stale settings. The script does not use the upstream GNOME theme-switcher, install GNOME Shell, replace XFCE panels, install Plank or Conky, enable Picom, or alter PRoot isolation, audio, CUPS or security configuration.
+The theme and icon assets remain user-local. The XFConf XML files, GTK settings file and XFCE autostart entry persist across logout, reboot and Termux:X11 relaunch; the login hook reapplies the selected theme values if XFCE restores stale settings. Wallpaper persistence is delegated to Wallpaper Control Centre. The script does not use the upstream GNOME theme-switcher, install GNOME Shell, replace XFCE panels, install Plank or Conky, enable Picom, or alter PRoot isolation, audio, CUPS or security configuration.
 
 ## Expected appearance
 
@@ -67,7 +67,8 @@ The repository's `start-all` workflow starts XFCE with application-session resto
 
 - Before XFCE starts, `scripts/start-desktop.sh` removes saved XFCE session snapshots from `~/.cache/sessions`.
 - It sets `xfce4-session /general/SaveOnExit=false` for the `prime` user, so the previous set of running applications and windows is not saved for the next login.
-- XFCE appearance and desktop preferences remain in the user's persistent Xfconf and GTK configuration. This includes panel layout, theme, fonts, cursor, compositor and wallpaper selection.
+- XFCE appearance and desktop preferences remain in the user's persistent Xfconf and GTK configuration. This includes panel layout, theme, fonts, cursor and compositor.
+- Wallpaper selection and restoration are managed separately by [Wallpaper Control Centre](https://github.com/bhuvan0x/WALLPAPER-CONTROL-CENTRE), which stores the selected image and display mode in the `prime` user's home and restores them during XFCE initialization. The WhiteSur hook must not overwrite the manager's selected wallpaper.
 - This is intentionally **not** a full application-session restore. Applications that were open before `stop-all` should not reopen on the next `start-all`.
 
 A live-video wallpaper is different from a static XFCE wallpaper: preserving its selected file/path does not itself restart its playback process. If a live wallpaper backend is used, it needs its own supported XFCE autostart integration; this profile does not claim to restart an arbitrary wallpaper daemon.
