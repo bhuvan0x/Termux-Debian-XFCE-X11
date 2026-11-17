@@ -128,5 +128,24 @@ proot-distro login --isolated --shared-x11 debian -- /bin/bash -lc '
     PULSE_SERVER=tcp:127.0.0.1 \
     XDG_RUNTIME_DIR=/tmp/runtime-prime \
     XDG_SESSION_TYPE=x11 \
-    dbus-launch --exit-with-session startxfce4
+    dbus-launch --exit-with-session /bin/bash -lc '
+      set -Eeuo pipefail
+
+      # Restore the desktop configuration, never the previous app/window set.
+      # XFCE stores saved application sessions under ~/.cache/sessions;
+      # remove those snapshots before xfce4-session can load them.
+      mkdir -p "$HOME/.cache/sessions"
+      rm -f "$HOME"/.cache/sessions/*
+
+      # Also prevent XFCE from creating a new application-session snapshot.
+      # Xfconf is started on this D-Bus session before the session manager.
+      if command -v xfconf-query >/dev/null 2>&1; then
+        xfconf-query --create -c xfce4-session \
+          -p /general/SaveOnExit -t bool -s false
+      else
+        echo "WARNING: xfconf-query is unavailable; saved-session restore is cleared, but SaveOnExit could not be disabled."
+      fi
+
+      exec startxfce4
+    '
 '
