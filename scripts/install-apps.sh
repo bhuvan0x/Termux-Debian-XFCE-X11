@@ -29,7 +29,7 @@ apt-get update
 apt-get install -y \
   firefox-esr \
   gdebi \
-  vlc mpv ffmpeg \
+  vlc vlc-plugin-qt mpv ffmpeg \
   geany \
   ristretto atril xarchiver galculator \
   xfce4-screenshooter xfce4-taskmanager \
@@ -100,7 +100,44 @@ EOF
 }
 
 write_launcher firefox-esr.desktop "Firefox ESR" "Browse the web" "firefox-esr --new-window %u" firefox-esr "Network;WebBrowser;"
-write_launcher vlc.desktop "VLC Media Player" "Play video and audio files" "vlc %U" vlc "AudioVideo;Player;"
+# VLC Qt can fail silently when launched directly from a desktop entry under PRoot.
+# Use a logged wrapper with explicit X11/audio defaults and a fresh VLC instance.
+install -d -m 0755 /usr/local/bin
+cat > /usr/local/bin/primebook-vlc <<'VLC_LAUNCHER'
+#!/bin/bash
+set -u
+LOG_DIR="$HOME/Documents"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/vlc-launch.log"
+
+export DISPLAY="${DISPLAY:-:0}"
+export PULSE_SERVER="${PULSE_SERVER:-tcp:127.0.0.1}"
+if [ -z "${XDG_RUNTIME_DIR:-}" ] && [ -d /tmp/runtime-prime ]; then
+  export XDG_RUNTIME_DIR=/tmp/runtime-prime
+fi
+unset QT_PLUGIN_PATH QT_QPA_PLATFORM_PLUGIN_PATH
+export QT_QPA_PLATFORM=xcb
+
+{
+  printf "\n===== VLC launch: %s =====\n" "$(date -Is)"
+  printf "User: %s\nDisplay: %s\nQt platform: %s\nPulseAudio: %s\n" \
+    "$(id -un)" "$DISPLAY" "$QT_QPA_PLATFORM" "$PULSE_SERVER"
+  printf "Arguments:"
+  printf " %q" "$@"
+  printf "\n"
+} >> "$LOG_FILE"
+
+if [ ! -x /usr/bin/vlc ]; then
+  echo "ERROR: /usr/bin/vlc is missing. Re-run: bash scripts/install-apps.sh" | tee -a "$LOG_FILE" >&2
+  exit 127
+fi
+exec /usr/bin/vlc --no-one-instance --no-video-title-show "$@" >> "$LOG_FILE" 2>&1
+VLC_LAUNCHER
+chmod 0755 /usr/local/bin/primebook-vlc
+chown root:root /usr/local/bin/primebook-vlc
+ln -sfn /usr/local/bin/primebook-vlc /usr/local/bin/vlc
+
+write_launcher vlc.desktop "VLC Media Player" "Play video and audio files" "/usr/local/bin/primebook-vlc %U" vlc "AudioVideo;Player;"
 write_launcher mpv.desktop "MPV Media Player" "Lightweight media player" "mpv --force-window %F" mpv "AudioVideo;Player;"
 write_launcher thunar.desktop "File Manager" "Browse files and folders" "thunar %U" org.xfce.thunar "System;FileManager;"
 write_launcher xfce4-terminal.desktop "Terminal" "Open a Linux terminal" xfce4-terminal utilities-terminal "System;TerminalEmulator;"
