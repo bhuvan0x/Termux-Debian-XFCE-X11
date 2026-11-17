@@ -26,6 +26,25 @@ if command -v proot-distro >/dev/null 2>&1; then
     echo
     dpkg -l xfce4 dbus-x11 cups printer-driver-escpr printer-driver-gutenprint usbutils xinput 2>/dev/null | tail -n +6
     echo
+    echo "== VLC launch diagnostics =="
+    if command -v vlc >/dev/null 2>&1; then
+      printf "VLC command: %s\\n" "$(command -v vlc)"
+      vlc --version 2>&1 | head -n 2 || true
+    else
+      echo "VLC command: missing"
+    fi
+    dpkg-query -W -f="${Status} ${Version}\\n" vlc vlc-plugin-qt 2>/dev/null || true
+    for plugin_dir in /usr/lib/aarch64-linux-gnu/vlc/plugins/gui /usr/lib/aarch64-linux-gnu/vlc/plugins; do
+      [ -d "$plugin_dir" ] && echo "VLC plugin directory: $plugin_dir"
+    done
+    if [ -f /home/prime/Documents/vlc-launch.log ]; then
+      echo "Recent VLC launch log:"
+      tail -n 25 /home/prime/Documents/vlc-launch.log
+    else
+      echo "No VLC launch log yet."
+    fi
+
+    echo
     if command -v lpstat >/dev/null 2>&1; then lpstat -r || true; fi
     if [ -d /dev/bus/usb ]; then echo "/dev/bus/usb: visible"; else echo "/dev/bus/usb: not exposed"; fi
   ' || true
