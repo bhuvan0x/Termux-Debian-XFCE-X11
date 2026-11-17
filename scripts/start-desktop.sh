@@ -127,9 +127,9 @@ proot-distro login --isolated --shared-x11 debian -- /bin/bash -lc '
   install -d -m 0700 -o prime -g prime /home/prime/.cache/sessions
   find /home/prime/.cache/sessions -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
 
-  # Use Debian's verified absolute runuser path; command lookup through
+  # Use Debian verified absolute runuser path; command lookup through
   # login shells has been unreliable in this isolated PRoot environment.
-  # Disable future application-session snapshots without changing Xfconf's
+  # Disable future application-session snapshots without changing the Xfconf
   # persistent desktop appearance settings.
   /usr/sbin/runuser -u prime -- env \
     HOME=/home/prime USER=prime LOGNAME=prime \
