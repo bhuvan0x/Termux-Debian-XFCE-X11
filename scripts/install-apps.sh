@@ -141,6 +141,15 @@ chown root:root /usr/local/bin/primebook-vlc
 ln -sfn /usr/local/bin/primebook-vlc /usr/local/bin/vlc
 
 write_launcher vlc.desktop "VLC Media Player" "Play video and audio files" "/usr/local/bin/primebook-vlc %U" vlc "AudioVideo;Player;"
+# Also install the managed launcher in the application menu. A package-owned
+# /usr/share/applications/vlc.desktop otherwise bypasses this wrapper, and a
+# stale per-user override must be replaced on every installer refresh.
+APP_DIR="$PRIME_HOME/.local/share/applications"
+install -d -m 0755 -o prime -g prime "$APP_DIR"
+install -m 0644 -o prime -g prime "$DESKTOP_DIR/vlc.desktop" "$APP_DIR/vlc.desktop"
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database "$APP_DIR" >/dev/null 2>&1 || true
+fi
 write_launcher mpv.desktop "MPV Media Player" "Lightweight media player" "mpv --force-window %F" mpv "AudioVideo;Player;"
 write_launcher thunar.desktop "File Manager" "Browse files and folders" "thunar %U" org.xfce.thunar "System;FileManager;"
 write_launcher xfce4-terminal.desktop "Terminal" "Open a Linux terminal" xfce4-terminal utilities-terminal "System;TerminalEmulator;"
