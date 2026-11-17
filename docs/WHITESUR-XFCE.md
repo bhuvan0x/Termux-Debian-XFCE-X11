@@ -59,6 +59,19 @@ If the desktop still looks unchanged after the script:
 
 Do not run the upstream GTK installer's GNOME Shell stages again merely to refresh XFCE.
 
+
+
+## Desktop-only restoration (no application session)
+
+The repository's `start-all` workflow starts XFCE with application-session restoration disabled:
+
+- Before XFCE starts, `scripts/start-desktop.sh` removes saved XFCE session snapshots from `~/.cache/sessions`.
+- It sets `xfce4-session /general/SaveOnExit=false` for the `prime` user, so the previous set of running applications and windows is not saved for the next login.
+- XFCE appearance and desktop preferences remain in the user's persistent Xfconf and GTK configuration. This includes panel layout, theme, fonts, cursor, compositor and wallpaper selection.
+- This is intentionally **not** a full application-session restore. Applications that were open before `stop-all` should not reopen on the next `start-all`.
+
+A live-video wallpaper is different from a static XFCE wallpaper: preserving its selected file/path does not itself restart its playback process. If a live wallpaper backend is used, it needs its own supported XFCE autostart integration; this profile does not claim to restart an arbitrary wallpaper daemon.
+
 ## Rollback
 
 The pre-WhiteSur XFCE configuration backup created during setup is stored at:
