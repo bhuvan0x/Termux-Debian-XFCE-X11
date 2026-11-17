@@ -304,7 +304,7 @@ Termux-Debian-X11/
     └── scan-files.sh
 ```
 
-## Performance and compatibility
+## Performance tuning\n\nA reversible live XFCE FAST profile is available for Debian PRoot + Termux:X11. It disables XFCE compositing and GTK animations while preserving the original values for restoration. It does not alter Android kernel settings, services, wallpaper, Fresco, audio or printing. See [docs/PERFORMANCE.md](docs/PERFORMANCE.md).\n\nRun from Termux while XFCE is running:\n\n```bash\nbash scripts/performance.sh status\nbash scripts/performance.sh fast\n# Restore the settings captured before FAST mode:\nbash scripts/performance.sh restore\n```\n\n## Performance and compatibility
 
 - The target is ARM64 Android hardware; Debian package availability depends on the configured Debian release and repositories.
 - XFCE, MPV and lightweight utilities are better suited to mobile hardware than full desktop environments.
