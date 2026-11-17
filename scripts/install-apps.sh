@@ -117,6 +117,9 @@ if [ -z "${XDG_RUNTIME_DIR:-}" ] && [ -d /tmp/runtime-prime ]; then
 fi
 unset QT_PLUGIN_PATH QT_QPA_PLATFORM_PLUGIN_PATH
 export QT_QPA_PLATFORM=xcb
+# Debian ARM64 VLC needs an explicit plugin directory in this PRoot/X11 session.
+# Keep an existing administrator override, otherwise use Debian’s multiarch path.
+export VLC_PLUGIN_PATH="${VLC_PLUGIN_PATH:-/usr/lib/aarch64-linux-gnu/vlc/plugins}"
 
 {
   printf "\n===== VLC launch: %s =====\n" "$(date -Is)"
