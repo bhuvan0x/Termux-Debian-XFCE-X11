@@ -26,6 +26,7 @@ proot-distro login --isolated debian -- /bin/bash -lc '
     dbus procps psmisc iproute2 net-tools \
     file unzip zip p7zip-full \
     build-essential pkg-config python3 python3-pip python3-venv \
+    python3-gi gir1.2-gtk-3.0 \
     openssh-client rsync
   apt-get clean
   rm -rf /var/lib/apt/lists/*
@@ -33,6 +34,7 @@ proot-distro login --isolated debian -- /bin/bash -lc '
 
 bash "$SCRIPT_DIR/install-apps.sh"
 bash "$SCRIPT_DIR/install-printing.sh"
+bash "$SCRIPT_DIR/install-wallpaper-control-centre.sh"
 
 echo "Debian + XFCE + desktop apps + printing support installation complete."
 echo "Open Termux:X11 once, then run: start-all (or bash scripts/start-all.sh)"
