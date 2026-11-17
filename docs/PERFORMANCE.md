@@ -28,6 +28,18 @@ bash scripts/performance.sh restore
 
 The restore action reapplies the values captured before the first FAST run and removes the saved state file. Re-running FAST does not overwrite the original snapshot.
 
+## Termux:X11 host-side performance
+
+The official Termux:X11 project documents a shared-UID Android APK variant:
+`termux-x11-universal-sharedUid-debug.apk`. Android may reduce CPU time for Termux when Termux:X11 is foregrounded and Termux is backgrounded. The shared-UID variant is designed to avoid that particular background-app scheduling penalty.
+
+- This is an Android app installation choice, not a Debian package or PRoot setting.
+- It requires the GitHub-signed Termux app; it is not compatible with F-Droid/Play Store-signed Termux.
+- Install the APK only from the official [Termux:X11 releases](https://github.com/termux/termux-x11/releases), and keep the companion Termux package and Android app from compatible release sources.
+- Do not install it over an incompatible-signature build. If you are not certain which signing source your Termux app uses, keep your current installation.
+
+Also compare the Termux:X11 output resolution at the same workload. A lower output resolution reduces the number of pixels that must be rendered, but makes the desktop less sharp. Change it in the Termux:X11 Android app's display preferences and benchmark before/after; do not combine several display-scaling changes at once.
+
 ## Important PRoot limits
 
 Debian PRoot shares the Android kernel. A Debian process cannot independently tune the host kernel's CPU scheduler, I/O scheduler, `vm.swappiness`, zram, GPU driver, CPU governor, thermal policy or Android memory management. Attempts to write those settings from Debian would be ineffective or inappropriate. Those controls belong to Android/host configuration and are intentionally not included here.
