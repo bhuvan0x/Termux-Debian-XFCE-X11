@@ -132,7 +132,7 @@ Official project: https://github.com/termux/termux-widget
 | GDebi | Local Debian package installer; terminal output is visible and saved to `~/Documents/gdebi-install.log` |
 | OpenCode Desktop | Permanent XFCE launcher with PRoot-compatible Electron flags and log in `~/Downloads/opencode-desktop.log` |
 | ARM64 local package helper | `primebook-install-deb /path/to/package.deb` validates `arm64`/`all` packages and refreshes detected Electron launchers |
-| VLC / MPV | Video and audio |
+| VLC / MPV | Video and audio; VLC's PrimeBook launcher sets the Debian ARM64 plugin path so App Finder launches work under PRoot/X11 |
 | FFmpeg | Media conversion |
 | Geany | Lightweight code editor |
 | Thunar | File manager |
