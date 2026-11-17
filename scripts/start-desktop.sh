@@ -123,19 +123,20 @@ proot-distro login --isolated --shared-x11 debian -- /bin/bash -lc '
   fi
 
   install -d -m 0700 -o prime -g prime /tmp/runtime-prime
-  # Clear saved application snapshots and persist XFCE's no-save policy
-  # before launching the desktop. Appearance settings live in Xfconf and remain.
-  su -s /bin/bash -c '
-    mkdir -p "$HOME/.cache/sessions"
-    rm -f "$HOME"/.cache/sessions/*
-    dbus-launch --exit-with-session xfconf-query --create -c xfce4-session \
-      -p /general/SaveOnExit -t bool -s false
-  ' prime
+  # Clear saved application snapshots; keep persistent Xfconf desktop appearance.
+  install -d -m 0700 -o prime -g prime /home/prime/.cache/sessions
+  find /home/prime/.cache/sessions -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
 
-  su -s /bin/bash -c 'env \
+  # Disable future application-session snapshots in the user's XFCE config.
+  sudo -u prime -H dbus-launch --exit-with-session xfconf-query --create \
+    -c xfce4-session -p /general/SaveOnExit -t bool -s false
+
+  # Start XFCE as the unprivileged desktop user. sudo is installed by
+  # scripts/install-debian.sh; do not rely on Termux's host-side su/runuser.
+  sudo -u prime -H env \
     DISPLAY=:0 \
     PULSE_SERVER=tcp:127.0.0.1 \
     XDG_RUNTIME_DIR=/tmp/runtime-prime \
     XDG_SESSION_TYPE=x11 \
-    dbus-launch --exit-with-session startxfce4' prime
+    dbus-launch --exit-with-session startxfce4
 '
