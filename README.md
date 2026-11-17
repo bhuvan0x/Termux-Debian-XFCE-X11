@@ -408,3 +408,30 @@ Keyboard shortcuts:
 The script detects the live XFCE D-Bus session and stops with an error if it cannot reach it; it does not write settings to a private temporary D-Bus session. It does not delete or reorder panel items.
 
 **XFCE limitation:** the built-in panel does not provide macOS-style animated icon magnification or a true glass floating capsule. This profile uses native XFCE panel capabilities for a lightweight, stable dock. It does not install Plank, GNOME Shell or a compositor.
+
+
+## Wallpaper Control Centre
+
+The desktop uses a separate, local-first wallpaper manager rather than relying on the WhiteSur theme hook to select a background. This separation keeps theme styling and wallpaper choice independent.
+
+Install or update it from Termux:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/install-wallpaper-control-centre.sh
+```
+
+Open **Wallpaper Control Centre** from the XFCE application finder, or run:
+
+```bash
+wallpaper-control-centre
+```
+
+Add images to your personal library, choose Zoom/Fill, Scale/Fit, Stretch, Center, Tile or Span, and select **Set as desktop wallpaper**. The manager stores the selected image and display mode, then restores them during XFCE initialization on each Start All. On first install it adopts the valid wallpaper already selected in XFCE before using the WhiteSur image as a last-resort fallback.
+
+- Library: `~/Pictures/Wallpapers/`
+- Saved selection: `~/.config/wallpaper-control-centre/state.json`
+- Standalone project: [WALLPAPER-CONTROL-CENTRE](https://github.com/bhuvan0x/WALLPAPER-CONTROL-CENTRE)
+
+The manager currently handles static images only. It does not add live-video wallpaper processes or change XFCE application-session restoration.
