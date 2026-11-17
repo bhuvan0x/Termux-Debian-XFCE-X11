@@ -270,14 +270,7 @@ git pull --ff-only
 bash scripts/install-apps.sh
 ```
 
-The installer writes the managed VLC launcher for the `prime` account. If a custom `~/.local/share/applications/vlc.desktop` override was created manually and still bypasses `primebook-vlc`, remove that override so the installer's managed launcher can be used:
-
-```bash
-rm -f ~/.local/share/applications/vlc.desktop
-update-desktop-database ~/.local/share/applications 2>/dev/null || true
-```
-
-Then refresh XFCE's application list (or log out and restart the desktop) and launch VLC from App Finder. Confirm the selected launcher with:
+The installer now writes the managed wrapper-backed launcher to both the desktop and `~/.local/share/applications/vlc.desktop`, replacing a stale manual override automatically. Then refresh XFCE's application list (or log out and restart the desktop) and launch VLC from App Finder. Confirm the selected launcher with:
 
 ```grep '^Exec=' ~/.local/share/applications/vlc.desktop /usr/share/applications/vlc.desktop 2>/dev/null```
 
