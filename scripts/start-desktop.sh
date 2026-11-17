@@ -127,13 +127,23 @@ proot-distro login --isolated --shared-x11 debian -- /bin/bash -lc '
   install -d -m 0700 -o prime -g prime /home/prime/.cache/sessions
   find /home/prime/.cache/sessions -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
 
-  # Disable future application-session snapshots in the user's XFCE config.
-  sudo -u prime -H dbus-launch --exit-with-session xfconf-query --create \
-    -c xfce4-session -p /general/SaveOnExit -t bool -s false
+  # Use Debian's verified absolute runuser path; command lookup through
+  # login shells has been unreliable in this isolated PRoot environment.
+  # Disable future application-session snapshots without changing Xfconf's
+  # persistent desktop appearance settings.
+  /usr/sbin/runuser -u prime -- env \
+    HOME=/home/prime USER=prime LOGNAME=prime \
+    DISPLAY=:0 \
+    PULSE_SERVER=tcp:127.0.0.1 \
+    XDG_RUNTIME_DIR=/tmp/runtime-prime \
+    XDG_SESSION_TYPE=x11 \
+    dbus-launch --exit-with-session xfconf-query --create \
+      -c xfce4-session -p /general/SaveOnExit -t bool -s false
 
-  # Start XFCE as the unprivileged desktop user. sudo is installed by
-  # scripts/install-debian.sh; do not rely on Termux's host-side su/runuser.
-  sudo -u prime -H env \
+  # Run XFCE as the unprivileged desktop user. Keep this foreground process
+  # inside the same shared-X11 PRoot session as the system D-Bus daemon.
+  /usr/sbin/runuser -u prime -- env \
+    HOME=/home/prime USER=prime LOGNAME=prime \
     DISPLAY=:0 \
     PULSE_SERVER=tcp:127.0.0.1 \
     XDG_RUNTIME_DIR=/tmp/runtime-prime \
