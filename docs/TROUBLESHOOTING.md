@@ -251,6 +251,42 @@ This is the desktop credential keyring, not a VS Code activation or license pass
 
 The graphical session must run as the unprivileged Debian account `prime`. Use `start-all`; do not start XFCE as root.
 
+## VLC opens only when launched from a terminal, or App Finder cannot find its plugins
+
+On Debian ARM64 under PRoot/Termux:X11, VLC may start with only its core module when its default plugin search path is not resolved. The Qt interface and video playback work when VLC is launched with the Debian multiarch plugin directory explicitly set:
+
+```bash
+VLC_PLUGIN_PATH=/usr/lib/aarch64-linux-gnu/vlc/plugins \
+  /usr/bin/vlc --ignore-config --no-video-title-show
+```
+
+The repository's `primebook-vlc` wrapper now exports this path by default while preserving an already-defined `VLC_PLUGIN_PATH`. The XFCE VLC launcher calls that wrapper, so App Finder and file-manager launches inherit the setting. The wrapper also keeps the existing X11/Qt/audio defaults and writes diagnostics to `~/Documents/vlc-launch.log`.
+
+Apply the updated launcher from Termux:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/install-apps.sh
+```
+
+The installer writes the managed VLC launcher for the `prime` account. If a custom `~/.local/share/applications/vlc.desktop` override was created manually and still bypasses `primebook-vlc`, remove that override so the installer's managed launcher can be used:
+
+```bash
+rm -f ~/.local/share/applications/vlc.desktop
+update-desktop-database ~/.local/share/applications 2>/dev/null || true
+```
+
+Then refresh XFCE's application list (or log out and restart the desktop) and launch VLC from App Finder. Confirm the selected launcher with:
+
+```grep '^Exec=' ~/.local/share/applications/vlc.desktop /usr/share/applications/vlc.desktop 2>/dev/null```
+
+If VLC still fails, inspect the last launch log:
+
+```bash
+tail -n 80 ~/Documents/vlc-launch.log
+```
+
 ## Desktop shortcuts do not appear
 
 Run `bash scripts/install-apps.sh` and restart XFCE. Launchers are stored in `/home/prime/Desktop`.
