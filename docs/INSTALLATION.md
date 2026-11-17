@@ -79,6 +79,8 @@ bash scripts/install-apps.sh
 bash scripts/install-printing.sh
 ```
 
+The VLC desktop shortcut uses the `primebook-vlc` wrapper. It sets the expected Termux:X11/Qt environment, avoids VLC's single-instance hand-off and records startup diagnostics in `/home/prime/Documents/vlc-launch.log`. If VLC still does not open, run `bash scripts/diagnose.sh` from Termux and inspect the last 25 lines of that log from the Debian `prime` account. Re-run `bash scripts/install-apps.sh` after pulling launcher changes.
+
 The printing installer adds the ARM64 ESC/P-R 1.8.8 package, which includes the exact L3110 Series PPD, and creates **Epson L3110 Series Setup** on the XFCE desktop and in the Applications menu. Debian 13's base 1.7.17 package does not include this model PPD, so the installer temporarily pins only `printer-driver-escpr` from Debian Forky, installs it, and removes the temporary apt source and pin. After `start-all`, open the shortcut to reach CUPS Administration and choose **Add Printer**. The shortcut configures the CUPS workflow; it does not bypass Android/PRoot USB restrictions.
 
 To install a local Debian package and let GDebi resolve its dependencies, use a Debian terminal as `prime`:
