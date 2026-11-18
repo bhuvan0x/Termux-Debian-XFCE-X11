@@ -21,37 +21,37 @@ proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -s <
 set -Eeuo pipefail
 export DISPLAY="${DISPLAY:-:0}"
 
-# Reuse the actual XFCE session bus. A new/private D-Bus session would write
-# settings somewhere the running desktop never reads.
-SESSION_PID="$(pgrep -u "$(id -u)" -x xfce4-session | head -n 1 || true)"
+# Find the live XFCE session without filtering by the PRoot-visible UID.
+# PRoot's UID translation can make pgrep -u miss processes that are visible
+# in /proc. Never trust ~/.dbus/session-bus here: dbus-launch may leave a
+# stale file for a short-lived helper bus rather than the desktop bus.
+SESSION_PID=""
 DBUS_ADDRESS=""
-if [ -n "$SESSION_PID" ] && [ -r "/proc/$SESSION_PID/environ" ]; then
-  DBUS_ADDRESS="$(tr '\0' '\n' < "/proc/$SESSION_PID/environ" | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' | head -n 1)"
-fi
+for candidate_pid in $(pgrep -x xfce4-session 2>/dev/null || true); do
+  [ -r "/proc/$candidate_pid/environ" ] || continue
+  candidate_address="$(tr '\0' '\n' < "/proc/$candidate_pid/environ" | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' | head -n 1)"
+  [ -n "$candidate_address" ] || continue
+  if DBUS_SESSION_BUS_ADDRESS="$candidate_address" \
+      xfconf-query -c xfce4-panel -p /panels >/dev/null 2>&1; then
+    SESSION_PID="$candidate_pid"
+    DBUS_ADDRESS="$candidate_address"
+    break
+  fi
+done
 
 if [ -z "$DBUS_ADDRESS" ]; then
-  for bus_file in "$HOME"/.dbus/session-bus/*; do
-    [ -f "$bus_file" ] || continue
-    candidate="$(sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p' "$bus_file" | head -n 1 | sed 's/^"//; s/"$//')"
-    [ -n "$candidate" ] || continue
-    if DBUS_SESSION_BUS_ADDRESS="$candidate" xfconf-query -c xsettings -p /Net/ThemeName >/dev/null 2>&1; then
-      DBUS_ADDRESS="$candidate"
-      break
-    fi
-  done
-fi
-
-if [ -z "$DBUS_ADDRESS" ]; then
-  echo "ERROR: Could not locate the running XFCE session D-Bus."
+  echo "ERROR: Could not locate the live XFCE session D-Bus."
+  echo "No running xfce4-session process exposed a working panel Xfconf channel."
   echo "Start the desktop with 'start-all', then rerun this script from Termux."
   exit 3
 fi
 export DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS"
 
 if ! xfconf-query -c xsettings -p /Net/ThemeName >/dev/null 2>&1; then
-  echo "ERROR: The discovered D-Bus address does not reach the live XFCE session."
+  echo "ERROR: The live XFCE session bus was found but Xfconf is not responding."
   exit 4
 fi
+echo "Connected to XFCE session PID $SESSION_PID."
 
 set_int() {
   xfconf-query -c "$1" -p "$2" --create -t int -s "$3" >/dev/null
@@ -134,7 +134,7 @@ set_bool xfce4-panel "$DOCK/position-locked" true
 set_string xfce4-panel "$DOCK/position" "p=10;x=0;y=0"
 set_int xfce4-panel "$DOCK/size" 50
 set_int xfce4-panel "$DOCK/icon-size" 34
-set_int xfce4-panel "$DOCK/autohide-behavior" 1
+set_int xfce4-panel "$DOCK/autohide-behavior" 2
 set_int xfce4-panel "$DOCK/background-style" 0
 set_int xfce4-panel "$DOCK/enter-opacity" 100
 set_int xfce4-panel "$DOCK/leave-opacity" 100
