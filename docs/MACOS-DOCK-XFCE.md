@@ -25,7 +25,8 @@ bash scripts/apply-macos-dock.sh
 The script:
 - Connects to the running XFCE session D-Bus (and refuses to continue if it cannot).
 - Detects the existing auto-hidden panel, falling back to the last configured panel.
-- Sets the dock to 52% width and bottom-center position, increases icon size, enables auto-hide and hides task labels.
+- Sets the dock to 52% width and bottom-center position, increases icon size, uses always-auto-hide for a reliable bottom-edge reveal, and hides task labels.
+- Keeps the visible panel at 100% opacity and strengthens the dark-glass surface so the dock no longer looks washed out.
 - Adds transparent expanding separators around the existing app-launcher/task group so the icons sit in the horizontal center without replacing or reordering existing launchers.
 - Applies a liquid-glass-inspired GTK surface: translucent dark fill, rounded corners, a subtle light rim and soft hover treatment.
 - Keeps all existing panel items and their order.
