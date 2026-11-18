@@ -185,7 +185,7 @@ apply_profile() {
     set_value xfce4-panel "$DOCK/position" string "p=10;x=0;y=0"
     set_value xfce4-panel "$DOCK/size" int 50
     set_value xfce4-panel "$DOCK/icon-size" int 34
-    set_value xfce4-panel "$DOCK/autohide-behavior" int 1
+    set_value xfce4-panel "$DOCK/autohide-behavior" int 2
     set_value xfce4-panel "$DOCK/enter-opacity" int 100
     set_value xfce4-panel "$DOCK/leave-opacity" int 100
     while IFS= read -r line; do
@@ -204,7 +204,7 @@ apply_profile() {
   set_value xfce4-keyboard-shortcuts '/commands/custom/<Super>e' string 'xfce4-appfinder --expanded'
 }
 apply_profile
-if pgrep -u "$(id -u)" -x xfce4-panel >/dev/null 2>&1; then
+if pgrep -x xfce4-panel >/dev/null 2>&1; then
   xfce4-panel -r >/dev/null 2>&1 || true
 fi
 echo "[$(date -Is)] Early WhiteSur theme=$GTK_THEME icons=$ICON_THEME cursor=$CURSOR_THEME; dock profile enforced."
