@@ -23,7 +23,7 @@ bash scripts/apply-macos-dock.sh
 ```
 
 The script:
-- Connects to the running XFCE session D-Bus (and refuses to continue if it cannot).
+- Finds the live `xfce4-session` process and reads its actual D-Bus address from `/proc`; it does not trust stale `~/.dbus/session-bus` files or create a private session bus.
 - Detects the existing auto-hidden panel, falling back to the last configured panel.
 - Sets the dock to 52% width and bottom-center position, increases icon size, uses always-auto-hide for a reliable bottom-edge reveal, and hides task labels.
 - Keeps the visible panel at 100% opacity and strengthens the dark-glass surface so the dock no longer looks washed out.
