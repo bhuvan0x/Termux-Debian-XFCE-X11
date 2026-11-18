@@ -304,7 +304,7 @@ Termux-Debian-X11/
     └── scan-files.sh
 ```
 
-## Performance tuning\n\nA reversible live XFCE FAST profile is available for Debian PRoot + Termux:X11. It disables XFCE compositing and GTK animations while preserving the original values for restoration. It does not alter Android kernel settings, services, wallpaper, Fresco, audio or printing. See [docs/PERFORMANCE.md](docs/PERFORMANCE.md).\n\nRun from Termux while XFCE is running:\n\n```bash\nbash scripts/performance.sh status\nbash scripts/performance.sh fast\n# Restore the settings captured before FAST mode:\nbash scripts/performance.sh restore\n```\n\n## Performance and compatibility
+## Performance tuning\n\nA reversible live XFCE FAST profile is available for Debian PRoot + Termux:X11. It disables XFCE compositing and GTK animations while preserving the original values for restoration. It does not alter Android kernel settings, services, wallpaper, audio or printing. See [docs/PERFORMANCE.md](docs/PERFORMANCE.md).\n\nRun from Termux while XFCE is running:\n\n```bash\nbash scripts/performance.sh status\nbash scripts/performance.sh fast\n# Restore the settings captured before FAST mode:\nbash scripts/performance.sh restore\n```\n\n## Performance and compatibility
 
 - The target is ARM64 Android hardware; Debian package availability depends on the configured Debian release and repositories.
 - XFCE, MPV and lightweight utilities are better suited to mobile hardware than full desktop environments.
@@ -313,9 +313,9 @@ Termux-Debian-X11/
 - This is not a VM and does not boot another kernel. systemd, kernel modules, nested containers and some hardware integrations may not work normally.
 - Optional themes and plugins are installed only when available in the Debian repositories.
 
-## Prayag2 Modern Clock — centered transparent XFCE port
+## Modern Gaming Clock — persistent Control Centre
 
-The standalone [Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock) project is a faithful XFCE port of [Prayag2/kde_modernclock](https://github.com/Prayag2/kde_modernclock). It preserves the original fonts, typography, letter spacing and output, with a **transparent frameless window centered on the screen** by default.
+The standalone [Mordern_Gaming_Clock](https://github.com/bhuvan0x/Mordern_Gaming_Clock) project provides a transparent, wallpaper-aware Qt Quick clock for XFCE.
 
 Install or update from Termux:
 
@@ -325,7 +325,11 @@ git pull --ff-only
 bash scripts/install-modernclock.sh
 ```
 
-See [docs/MODERN-CLOCK.md](docs/MODERN-CLOCK.md) for positioning, transparency notes and removal.
+Right-click the clock to open its Control Centre. Configure the IANA time zone, regional locale, 12/24-hour format, date format, weekday/date/time visibility, font sizes and wallpaper-adaptive text colour. Drag the clock with the left mouse button to position it; the exact position is saved. Use the Control Centre to recenter it.
+
+Clock preferences and coordinates are stored in the Debian user's persistent home/configuration, not in temporary session storage. They survive `stop-all`, `start-all` and Debian desktop restarts. The selected time zone changes the clock display only; it does not change Android or Debian's system clock.
+
+See [docs/MODERN-CLOCK.md](docs/MODERN-CLOCK.md) for details and removal.
 
 ## WhiteSur XFCE desktop customization
 
