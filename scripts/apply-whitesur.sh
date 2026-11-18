@@ -134,7 +134,7 @@ apply_profile() {
   DOCK_PANEL=""
   for id in "${PANEL_IDS[@]}"; do
     behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
-    if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
+    if [ "$behavior" = "1" ] || [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
   done
   if [ -z "$DOCK_PANEL" ] && [ "${#PANEL_IDS[@]}" -gt 0 ]; then
     DOCK_PANEL="${PANEL_IDS[$(("${#PANEL_IDS[@]}" - 1))]}"
@@ -185,9 +185,9 @@ apply_profile() {
     set_value xfce4-panel "$DOCK/position" string "p=10;x=0;y=0"
     set_value xfce4-panel "$DOCK/size" int 50
     set_value xfce4-panel "$DOCK/icon-size" int 34
-    set_value xfce4-panel "$DOCK/autohide-behavior" int 2
+    set_value xfce4-panel "$DOCK/autohide-behavior" int 1
     set_value xfce4-panel "$DOCK/enter-opacity" int 100
-    set_value xfce4-panel "$DOCK/leave-opacity" int 92
+    set_value xfce4-panel "$DOCK/leave-opacity" int 100
     while IFS= read -r line; do
       plugin_path="${line%%:*}"
       plugin_type="${line#*: }"
@@ -230,7 +230,7 @@ AUTOSTART_ENTRY
 mkdir -p "$HOME/.config/gtk-3.0"
 cat > "$HOME/.config/gtk-3.0/gtk.css" <<'GLASS_CSS'
 #XfcePanelWindow {
-  background-color: rgba(20, 24, 38, 0.76);
+  background-color: rgba(20, 24, 38, 0.92);
   border: 1px solid rgba(235, 242, 255, 0.28);
   border-radius: 18px;
   background-clip: padding-box;
