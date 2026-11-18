@@ -77,7 +77,7 @@ fi
 DOCK_PANEL=""
 for id in "${PANEL_IDS[@]}"; do
   behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
-  if [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
+  if [ "$behavior" = "1" ] || [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
 done
 if [ -z "$DOCK_PANEL" ]; then
   PANEL_LAST_INDEX=$(("${#PANEL_IDS[@]}" - 1))
@@ -134,10 +134,10 @@ set_bool xfce4-panel "$DOCK/position-locked" true
 set_string xfce4-panel "$DOCK/position" "p=10;x=0;y=0"
 set_int xfce4-panel "$DOCK/size" 50
 set_int xfce4-panel "$DOCK/icon-size" 34
-set_int xfce4-panel "$DOCK/autohide-behavior" 2
+set_int xfce4-panel "$DOCK/autohide-behavior" 1
 set_int xfce4-panel "$DOCK/background-style" 0
 set_int xfce4-panel "$DOCK/enter-opacity" 100
-set_int xfce4-panel "$DOCK/leave-opacity" 92
+set_int xfce4-panel "$DOCK/leave-opacity" 100
 
 # Make the existing tasklist behave like an icon dock; do not add, delete,
 # reorder or replace any panel plugins or launchers.
@@ -169,7 +169,7 @@ set_string xfce4-keyboard-shortcuts '/commands/custom/<Super>e' 'xfce4-appfinder
 mkdir -p "$HOME/.config/gtk-3.0"
 cat > "$HOME/.config/gtk-3.0/gtk.css" <<'GLASS_CSS'
 #XfcePanelWindow {
-  background-color: rgba(20, 24, 38, 0.76);
+  background-color: rgba(20, 24, 38, 0.92);
   border: 1px solid rgba(235, 242, 255, 0.28);
   border-radius: 18px;
   background-clip: padding-box;
@@ -190,7 +190,7 @@ xfce4-panel -r >/dev/null 2>&1 || true
 
 echo
 echo "Applied:"
-echo "  Bottom panel: 52% width, bottom-centered icon group, liquid-glass styling, auto-hide"
+echo "  Bottom panel: 52% width, bottom-centered icon group, stronger dark-glass styling, always auto-hide"
 echo "  Super+Space:  compact Spotlight-style app search"
 echo "  Super+E:      expanded Launchpad-style app grid"
 echo "  Existing panel items and launchers: preserved"
