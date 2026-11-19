@@ -19,7 +19,7 @@ Build a practical Linux desktop on your Android tablet or Chromebook without roo
 - Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
 - A dedicated unprivileged `prime` desktop account for GUI apps.
 - Optional ARM64 ClamAV scanner for on-demand file checks inside Debian (no always-on scanner daemon).
-- Isolated PRoot sessions (PRoot-Distro 5.8.0+): Termux home, shared storage and app paths are not exposed to Debian by default; only the X11 socket is explicitly shared with XFCE.
+- Isolated PRoot sessions (PRoot-Distro 5.8.0+): Termux home and app paths remain isolated; only Android's Downloads directory is explicitly bound into the desktop at `/mnt/android-downloads`, alongside the X11 socket.
 - Security hardening and audit scripts: signed-APT enforcement, short sudo credential caching, CUPS loopback binding, package-file integrity checks, and Termux/PRoot version checks.
 - Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down, including the Android X11 viewer.
 - Short Termux terminal commands: `start-all` and `stop-all`.
@@ -209,16 +209,21 @@ The isolated-session workflow requires PRoot-Distro **5.8.0 or newer**. The scri
 
 Hardening applies signed-APT settings, installs `debsums` for package-file integrity checks, tightens password-authenticated sudo defaults, and configures CUPS to listen on loopback only with printer sharing disabled. The default audit is a quick review; run `bash scripts/security-audit.sh --integrity` to perform the slower full package-file checksum scan. Debian maintenance remains deliberate: run `bash scripts/update-debian.sh` regularly, then review `bash scripts/security-audit.sh`. PRoot does not provide a working systemd timer here, so the project does not claim unattended security updates.
 
-PRoot-Distro's `--isolated` option removes automatic bindings for the Termux home directory, Android shared storage and Termux app paths. The XFCE session uses `--shared-x11` to expose only the X11 socket it needs. This means Android Downloads and Termux files are no longer automatically visible inside Debian. When a transfer is needed, explicitly bind only the required directory for that session; do not re-enable broad shared-home or shared-tmp mounts.
+PRoot-Distro's `--isolated` option removes automatic bindings for the Termux home directory, Android shared storage and Termux app paths. The normal XFCE startup explicitly binds **only** Android's Downloads directory to `/mnt/android-downloads`; the desktop does not receive broad access to all shared storage or the Termux home.
 
-For example, to expose only Android's Downloads folder for one temporary Debian session, run this in Termux:
+Before the first desktop start, run this in Termux and grant Android's requested storage permission:
 
 ```bash
 termux-setup-storage
-proot-distro login --isolated --bind "$HOME/storage/shared/Download:/mnt/android-downloads" debian
 ```
 
-The directory appears inside that session at `/mnt/android-downloads`; it is not mounted into normal desktop sessions.
+Then start the desktop normally:
+
+```bash
+start-all
+```
+
+In XFCE, open Thunar and select **PrimeBook Downloads** in the sidebar, or navigate directly to `/mnt/android-downloads`. Files added there are the same files visible in Android's Downloads app. The bind is active for the desktop session only; it is recreated on every `start-all`.
 
 **What this cannot secure from inside Debian:** PRoot shares the Android kernel and app UID. It is not a VM or a kernel-enforced container. Debian cannot independently enforce a host firewall, AppArmor/SELinux policy, kernel sysctls, kernel audit, systemd service timers, or kernel namespaces. Do not install UFW/Fail2ban and assume they protect the Android device. The Android OS remains the security boundary.
 
