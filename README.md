@@ -1,32 +1,46 @@
 # Termux Debian X11
 
-> A polished, lightweight Debian XFCE workstation for Android — powered by Termux, proot-distro and Termux:X11.
+> **A complete Linux workstation. Inside Android. No root required.**
 
-Build a practical Linux desktop on your Android tablet or Chromebook without rooting the device. This project automates the Debian userspace, XFCE desktop, everyday GUI applications, desktop shortcuts, PrimeBook styling and Termux:Widget controls.
+Build a polished Debian + XFCE desktop on an Android tablet or Chromebook with Termux, Termux:X11 and PRoot-Distro. PrimeBook brings together a carefully integrated desktop, practical applications, Android Downloads access, printer tooling, security checks and one-touch session controls.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Android-Termux-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android Termux">
   <img src="https://img.shields.io/badge/Linux-Debian-A81D33?style=for-the-badge&logo=debian&logoColor=white" alt="Debian">
   <img src="https://img.shields.io/badge/Desktop-XFCE-2284F2?style=for-the-badge&logo=xfce&logoColor=white" alt="XFCE">
   <img src="https://img.shields.io/badge/Architecture-ARM64-555555?style=for-the-badge" alt="ARM64">
+  <img src="https://img.shields.io/badge/Root-Not%20Required-2ea44f?style=for-the-badge" alt="Root not required">
 </p>
 
-## Highlights
+<p align="center">
+  <b>One Android device. A real Debian userspace. A desktop workflow.</b>
+</p>
 
-- Debian userspace through `proot-distro`; no device root required.
-- PrimeBook WhiteSur XFCE desktop profile: WhiteSur Dark/Blue styling, matching dark icons and cursors, wallpaper, Noto Sans typography, and a persistent floating auto-hidden dock with app-finder shortcuts. Existing panel items and Linux services are preserved.
-- KDE Discover software center with Flatpak backend and session-scoped system-D-Bus startup (PackageKit/Flatpak PRoot limitations documented), Firefox ESR, GDebi with a privileged diagnostic launcher, permanent OpenCode desktop launcher, and ARM64 `.deb` installation helper, VLC, MPV, FFmpeg, Geany, file manager, PDF/image viewers, archive tools and system utilities.
-- Optional official Visual Studio Code ARM64 Debian package installer with a PRoot-compatible per-user XFCE launcher.
-- A dedicated unprivileged `prime` desktop account for GUI apps.
-- Optional ARM64 ClamAV scanner for on-demand file checks inside Debian (no always-on scanner daemon).
-- Isolated PRoot sessions (PRoot-Distro 5.8.0+): Termux home and app paths remain isolated; only Android's Downloads directory is explicitly bound into the desktop at `/mnt/android-downloads`, alongside the X11 socket.
-- Security hardening and audit scripts: signed-APT enforcement, short sudo credential caching, CUPS loopback binding, package-file integrity checks, and Termux/PRoot version checks.
-- Exactly two daily controls: Start All and Stop All. Start All launches X11, audio, CUPS and XFCE; Stop All shuts them down, including the Android X11 viewer.
-- Short Termux terminal commands: `start-all` and `stop-all`.
-- Repository-local Git configuration ignores executable-bit-only changes on Android, avoiding recurring pull conflicts.
-- Widget background tasks for Debian updates and desktop app refresh.
-- Epson L3110 support: model-aware ARM64 ESC/P-R 1.8.8 driver with L3110 PPD, CUPS, scanner tools, and a dedicated **Epson L3110 Series Setup** desktop/menu shortcut.
-- Android USB detection/permission diagnostics plus X11 input-device inspection.
+---
+
+## Navigate the project
+
+| Start here | What you'll find |
+|---|---|
+| [Quick installation](#quick-installation) | Set up Termux, Debian and the desktop |
+| [Daily controls](#daily-controls) | Start and stop the complete desktop |
+| [Included applications](#included-applications) | Explore the base app bundle and optional Office suite |
+| [Termux:Widget](#termuxwidget-controls) | Home-screen shortcuts and maintenance tasks |
+| [Security & maintenance](#security-hardening-and-maintenance) | Isolation, hardening, audits and scanning |
+| [Android Downloads](#security-hardening-and-maintenance) | Access the shared Downloads folder safely |
+| [Printing & USB](#epson-printing-and-usb-devices) | Epson L3110, CUPS and device diagnostics |
+| [Performance](#performance-tuning) | Reversible XFCE performance profile |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and diagnostics |
+
+## What makes PrimeBook different?
+
+- **A desktop, not just a terminal:** Debian userspace with XFCE, application launchers, file management and a curated everyday app bundle.
+- **Designed for Android:** isolated PRoot sessions, Termux:X11 integration and explicit access only to Android Downloads.
+- **A consistent desktop identity:** WhiteSur styling, matching icons/cursors, wallpaper controls and an auto-hidden floating dock.
+- **Practical software workflow:** Firefox ESR, VLC, MPV, Geany, GDebi, KDE Discover and ARM64 package helpers.
+- **Optional, not forced:** Visual Studio Code, LibreOffice, ClamAV, printer support and other add-ons are separate workflows.
+- **Security-aware by design:** signed APT, sudo hardening, loopback-only CUPS, integrity checks and explicit PRoot limitations.
+- **Simple daily operation:** Start All / Stop All commands and Termux:Widget controls.
 
 ## Quick installation
 
@@ -145,13 +159,48 @@ Official project: https://github.com/termux/termux-widget
 | Screenshot tool | Desktop captures |
 | PulseAudio Volume Control | Audio settings |
 
-Optional office applications:
+### Optional Office suite
+
+Need desktop document editing and spreadsheets? Install the Office add-on separately:
 
 ```bash
 bash scripts/install-apps.sh --office
 ```
 
-This installs LibreOffice Writer and Calc and uses more storage and RAM.
+**Adds:** LibreOffice Writer (documents) and LibreOffice Calc (spreadsheets).
+
+This is an optional layer. It is not part of the base desktop installation, and it can consume substantial additional storage and memory on Android hardware.
+
+<details>
+<summary><strong>Remove the optional Office suite</strong> · keep the rest of PrimeBook intact</summary>
+
+Run this from **Termux**:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/remove-office.sh
+```
+
+The removal utility:
+
+1. Purges the installed `libreoffice-writer` and `libreoffice-calc` packages.
+2. Removes the two Office desktop shortcuts created by the installer.
+3. Shows a **dry-run preview** of packages APT considers unused.
+4. Asks before running the interactive dependency cleanup.
+
+**Safety boundaries**
+- It does not target Firefox, VLC, MPV, Geany, XFCE utilities, themes, the dock, or other base desktop applications.
+- It does not delete your documents or LibreOffice user-profile/configuration data.
+- Dependency cleanup is optional and must be reviewed. APT may identify unrelated orphaned packages, so inspect its proposed list before confirming.
+
+If you only want to remove Writer and Calc but keep all dependencies for now, answer **N** at the cleanup prompt. You can inspect the cleanup later with:
+
+```bash
+proot-distro login --isolated debian -- apt-get autoremove --purge --dry-run
+```
+
+</details>
 
 ## KDE Discover Software Center
 
