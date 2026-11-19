@@ -94,8 +94,8 @@ proot-distro login --isolated debian -- /bin/bash -lc '
   BOOKMARKS=/home/prime/.config/gtk-3.0/bookmarks
   touch "$BOOKMARKS"
   chown prime:prime "$BOOKMARKS"
-  if ! grep -Fq 'file:///mnt/android-downloads' "$BOOKMARKS"; then
-    printf '%s\n' 'file:///mnt/android-downloads PrimeBook Downloads' >> "$BOOKMARKS"
+  if ! grep -Fq "file:///mnt/android-downloads" "$BOOKMARKS"; then
+    printf "%s\n" "file:///mnt/android-downloads PrimeBook Downloads" >> "$BOOKMARKS"
     chown prime:prime "$BOOKMARKS"
   fi
 '
