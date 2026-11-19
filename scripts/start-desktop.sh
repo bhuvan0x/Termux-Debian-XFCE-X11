@@ -14,6 +14,18 @@ fi
 
 export DISPLAY=:0
 
+# Expose only Android's Downloads directory to the isolated Debian desktop.
+# termux-setup-storage must have been run and Android storage permission granted.
+DOWNLOADS_DIR="$HOME/storage/downloads"
+if [ ! -d "$DOWNLOADS_DIR" ]; then
+  echo "Android Downloads is not available to Termux."
+  echo "Run: termux-setup-storage"
+  echo "Grant the requested Android storage permission, then run start-all again."
+  exit 3
+fi
+DOWNLOADS_DIR="$(realpath "$DOWNLOADS_DIR")"
+echo "Android Downloads will be available in Debian at /mnt/android-downloads"
+
 # Start and configure the Termux-side PulseAudio server through its local
 # Unix socket. Do not export the Debian TCP PULSE_SERVER until this is done:
 # otherwise host-side pactl would try the not-yet-loaded TCP bridge itself.
@@ -77,6 +89,15 @@ proot-distro login --isolated debian -- /bin/bash -lc '
     useradd --create-home --shell /bin/bash prime
   fi
   install -d -m 0700 -o prime -g prime /tmp/runtime-prime
+  install -d -m 0755 /mnt/android-downloads
+  install -d -m 0755 -o prime -g prime /home/prime/.config/gtk-3.0
+  BOOKMARKS=/home/prime/.config/gtk-3.0/bookmarks
+  touch "$BOOKMARKS"
+  chown prime:prime "$BOOKMARKS"
+  if ! grep -Fq 'file:///mnt/android-downloads' "$BOOKMARKS"; then
+    printf '%s\n' 'file:///mnt/android-downloads PrimeBook Downloads' >> "$BOOKMARKS"
+    chown prime:prime "$BOOKMARKS"
+  fi
 '
 
 # Start CUPS if the printing stack has been installed.
@@ -88,7 +109,7 @@ fi
 # XFCE. Starting it in a separate proot-distro login would leave a stale
 # socket when that isolated session exits (the exact GNOME Software failure).
 # The GUI itself still runs as the unprivileged prime user.
-proot-distro login --isolated --shared-x11 debian -- /bin/bash -lc '
+proot-distro login --isolated --shared-x11 --bind "$DOWNLOADS_DIR:/mnt/android-downloads" debian -- /bin/bash -lc '
   set -Eeuo pipefail
   install -d -m 0755 /run/dbus
   rm -f /run/dbus/system_bus_socket
