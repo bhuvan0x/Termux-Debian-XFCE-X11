@@ -217,7 +217,7 @@ bash scripts/plank-dock.sh status
 bash scripts/plank-dock.sh rollback
 ```
 
-The migration saves the original bottom panel auto-hide setting, adds Plank to XFCE autostart, and prevents the WhiteSur login hook from reapplying the old dock layout. The top XFCE panel and desktop remain in place. **This is a device-side pilot:** some X11 setups may let both docks react to the bottom edge. If they overlap or flicker, run the rollback command. See [docs/PLANK-DOCK.md](docs/PLANK-DOCK.md) for details.
+The migration removes the bottom dock panel from XFCE's active panel list while preserving its full configuration, adds Plank to XFCE autostart, and prevents the WhiteSur login hook from reapplying the old dock layout. The top XFCE panel and desktop remain in place. **This is a device-side pilot:** the script will stop if it cannot safely identify the bottom panel or if fewer than two XFCE panels exist. See [docs/PLANK-DOCK.md](docs/PLANK-DOCK.md) for details.
 
 ## KDE Discover Software Center
 
