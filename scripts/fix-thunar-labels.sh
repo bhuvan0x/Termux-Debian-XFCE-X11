@@ -23,21 +23,14 @@ CSS="$HOME/.config/gtk-3.0/gtk.css"
 mkdir -p "$(dirname "$CSS")"
 touch "$CSS"
 
-# Remove the earlier experimental overrides from this troubleshooting session,
-# keeping the pre-existing WhiteSur/PrimeBook panel styling intact.
-TMP="$(mktemp)"
-awk '
-  /^\/\* PrimeBook Thunar folder-name visibility fix \*\// { exit }
-  /^\/\* Strong Thunar icon-view label contrast \*\// { exit }
-  /^\/\* Force readable text throughout GTK file views \*\// { exit }
-  { print }
-' "$CSS" > "$TMP"
-cat "$TMP" > "$CSS"
-rm -f "$TMP"
+# Append a more specific GtkIconView cell-renderer rule. Existing
+# panel/theme CSS and earlier settings are left untouched.
 
 cat >> "$CSS" <<'THUNAR_CSS'
 
 /* BEGIN PrimeBook managed Thunar label-contrast repair */
+iconview.view cell,
+iconview.view cell text,
 ThunarWindow iconview.view cell,
 ThunarWindow iconview.view cell text,
 ThunarWindow iconview.view cell label,
@@ -50,10 +43,13 @@ ThunarWindow treeview.view cell text {
     color: #f5f7ff;
 }
 
+iconview.view cell,
 ThunarWindow iconview.view cell {
     background-color: #252a33;
 }
 
+iconview.view cell:selected,
+iconview.view cell:selected text,
 ThunarWindow iconview.view cell:selected,
 ThunarWindow iconview.view cell:selected text,
 ThunarWindow iconview.view cell:selected label,
@@ -66,14 +62,6 @@ ThunarWindow treeview.view:selected text {
 THUNAR_CSS
 
 chmod 0644 "$CSS"
-
-# Ensure common GTK fonts are installed; this is additive and does not change
-# the selected Noto Sans font or any XFCE appearance settings.
-if command -v apt-get >/dev/null 2>&1; then
-  export DEBIAN_FRONTEND=noninteractive
-  apt-get update
-  apt-get install -y fonts-noto-core fonts-dejavu-core
-fi
 
 echo "Updated: $CSS"
 echo "Restart Thunar or log out of XFCE and run start-all."
