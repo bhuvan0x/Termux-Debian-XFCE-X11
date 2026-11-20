@@ -107,7 +107,7 @@ case "$ACTION" in
       printf 'dock_panel=%s\n' "$DOCK_PANEL"
       printf 'panel_ids=('
       printf '%s ' "${PANEL_IDS[@]}"
-      printf ')\\n'
+      printf ')\n'
     } > "$STATE_FILE"
     chmod 0600 "$STATE_FILE"
     touch "$MARKER"
