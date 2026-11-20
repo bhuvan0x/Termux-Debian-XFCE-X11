@@ -18,7 +18,7 @@ git pull --ff-only
 bash scripts/plank-dock.sh install
 ```
 
-The script installs Debian's `plank` package, saves the current bottom panel ID and its exact auto-hide setting, configures that XFCE panel to auto-hide, creates a Plank XFCE autostart entry, and starts Plank in the current session. It does not delete panel plugins, launchers, panel IDs, or XFCE configuration.
+The script installs Debian's `plank` package, saves the current bottom panel ID and its exact auto-hide setting, removes only that panel ID from XFCE's active panel list, creates a Plank XFCE autostart entry, and starts Plank in the current session. The panel's plugin definitions, launchers, geometry and Xfconf properties remain stored and are restored by rollback.
 
 Plank's preferences are available by **Ctrl + right-click** on the dock. Use Preferences to choose icon size, position, theme and hide behavior. The package's defaults are intentionally retained rather than forcing unverified dconf schema values.
 
@@ -34,10 +34,10 @@ bash scripts/plank-dock.sh status
 bash scripts/plank-dock.sh rollback
 ```
 
-Rollback stops Plank, removes its autostart entry, restores the saved XFCE panel auto-hide value, and refreshes the panel. Plank remains installed so it can be tested again without another download; remove it separately with APT only if you no longer want it.
+Rollback stops Plank, removes its autostart entry, restores the complete saved XFCE active panel-ID list, and refreshes the panel. Plank remains installed so it can be tested again without another download; remove it separately with APT only if you no longer want it.
 
 ## Important compatibility note
 
-XFCE does not provide a supported per-panel disable switch. This migration therefore preserves the original panel and uses XFCE's native always-auto-hide mode instead of deleting the panel. Both Plank and the XFCE panel may react to the bottom screen edge on some X11/compositor combinations. If they overlap, compete for focus, or flicker, roll back and keep the existing XFCE dock. Do not manually delete the saved state or panel configuration.
+This migration deactivates the bottom dock by removing its ID from XFCE's active panel list. It does not delete the panel's saved Xfconf properties or plugin definitions. The script requires at least two panels and a bottom-centered panel it can identify safely; otherwise it stops without changing the layout. Do not manually delete the saved state or panel configuration.
 
 The existing WhiteSur login hook recognizes the Plank marker and will not reapply its old XFCE dock geometry while Plank mode is active. The standalone XFCE dock-tuning script also refuses to overwrite the active Plank setup.
