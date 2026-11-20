@@ -202,6 +202,19 @@ proot-distro login --isolated debian -- apt-get autoremove --purge --dry-run
 
 </details>
 
+## PrimeBook Workstation Suite
+
+Add restore points, diagnostics, controlled maintenance and keyboard-driven window tiling without replacing XFCE:
+
+```bash
+# Run these from the Debian-side repository copy
+bash scripts/primebook-suite.sh health
+bash scripts/primebook-suite.sh backup
+bash scripts/primebook-suite.sh maintenance plan
+```
+
+Install optional productivity dependencies as Debian root with `bash scripts/primebook-suite.sh install-tools`. This adds window tiling support, clipboard history and Thunar thumbnail helpers. See [the workstation suite guide](docs/PRIMEBOOK-WORKSTATION-SUITE.md) for restore scope, commands and PRoot limitations.
+
 ## Optional Plank dock
 
 Prefer a standalone application dock over the built-in XFCE taskbar? Try Plank without replacing XFCE or deleting your existing panel configuration:
