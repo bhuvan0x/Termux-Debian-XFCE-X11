@@ -20,6 +20,15 @@ if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; t
   exit 2
 fi
 
+if [ "$ACTION" = "install" ]; then
+  echo "== Installing Plank in Debian as root =="
+  proot-distro login --isolated debian -- /bin/bash -lc '
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y plank
+  '
+fi
+
 proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -s -- "$ACTION" <<'DEBIAN_SCRIPT'
 set -Eeuo pipefail
 ACTION="$1"
@@ -67,7 +76,7 @@ case "$ACTION" in
       echo "Start the desktop with start-all, then rerun this command."
       exit 3
     fi
-    mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\\1/p' | sort -nu)
+    mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' | sort -nu)
     if [ "${#PANEL_IDS[@]}" -lt 2 ]; then
       echo "ERROR: At least two XFCE panels are required so the top panel can remain active."
       echo "No panel settings were changed."
@@ -92,14 +101,10 @@ case "$ACTION" in
       exit 6
     fi
 
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y plank
-
     # Preserve the complete active panel-ID array. Panel plugins, launchers,
     # geometry and Xfconf properties remain stored while the dock is inactive.
     {
-      printf 'dock_panel=%s\\n' "$DOCK_PANEL"
+      printf 'dock_panel=%s\n' "$DOCK_PANEL"
       printf 'panel_ids=('
       printf '%s ' "${PANEL_IDS[@]}"
       printf ')\\n'
@@ -136,7 +141,7 @@ PLANK_AUTOSTART
     echo "XFCE panel $DOCK_PANEL is removed from the active panel list; its full configuration is preserved."
     echo "Plank log: $HOME/.cache/plank.log"
     echo "Use Ctrl + right-click on Plank to open Preferences."
-    echo "If the two docks compete at the bottom edge, run: bash scripts/plank-dock.sh rollback"
+    echo "The original XFCE dock is preserved for rollback: bash scripts/plank-dock.sh rollback"
     ;;
 
   rollback)
