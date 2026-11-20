@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-# Repair Thunar's GTK3 file-view label contrast for the persistent prime user.
-# Run from Termux; this script does not reset the user's XFCE appearance.
+# Remove the experimental Thunar CSS overrides added during troubleshooting.
+# This restores the original GTK stylesheet content without resetting the
+# selected WhiteSur theme, XFCE panels, dock, fonts, or other preferences.
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 command -v proot-distro >/dev/null 2>&1 || {
-  echo "proot-distro is missing. Run scripts/setup-termux.sh first." >&2
+  echo "proot-distro is missing." >&2
   exit 1
 }
 PD_VERSION="$(dpkg-query -W -f='${Version}' proot-distro 2>/dev/null || true)"
@@ -15,59 +15,36 @@ if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; t
   exit 2
 fi
 
-echo "Applying the Thunar-only GTK3 label contrast repair..."
+echo "Removing only the experimental Thunar CSS overrides..."
 
 proot-distro login --isolated --user prime debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
 set -Eeuo pipefail
 CSS="$HOME/.config/gtk-3.0/gtk.css"
-mkdir -p "$(dirname "$CSS")"
-touch "$CSS"
+if [ ! -f "$CSS" ]; then
+  echo "No GTK stylesheet found; nothing to clean."
+  exit 0
+fi
 
-# Append a more specific GtkIconView cell-renderer rule. Existing
-# panel/theme CSS and earlier settings are left untouched.
+BACKUP="$CSS.before-thunar-css-cleanup-$(date +%Y%m%d-%H%M%S)"
+cp -p "$CSS" "$BACKUP"
 
-cat >> "$CSS" <<'THUNAR_CSS'
+TMP="$(mktemp)"
+awk '
+  /^\/\* PrimeBook Thunar folder-name visibility fix \*\// { skip=1 }
+  /^\/\* Strong Thunar icon-view label contrast \*\// { skip=1 }
+  /^\/\* Force readable text throughout GTK file views \*\// { skip=1 }
+  /^\/\* BEGIN PrimeBook managed Thunar label-contrast repair \*\// { skip=1 }
+  !skip { print }
+' "$CSS" > "$TMP"
 
-/* BEGIN PrimeBook managed Thunar label-contrast repair */
-iconview.view cell,
-iconview.view cell text,
-ThunarWindow iconview.view cell,
-ThunarWindow iconview.view cell text,
-ThunarWindow iconview.view cell label,
-ThunarWindow .view,
-ThunarWindow .view text,
-ThunarWindow .view label,
-ThunarWindow treeview.view,
-ThunarWindow treeview.view cell,
-ThunarWindow treeview.view cell text {
-    color: #f5f7ff;
-}
-
-iconview.view cell,
-ThunarWindow iconview.view cell {
-    background-color: #252a33;
-}
-
-iconview.view cell:selected,
-iconview.view cell:selected text,
-ThunarWindow iconview.view cell:selected,
-ThunarWindow iconview.view cell:selected text,
-ThunarWindow iconview.view cell:selected label,
-ThunarWindow treeview.view:selected,
-ThunarWindow treeview.view:selected text {
-    color: #ffffff;
-    background-color: #1769aa;
-}
-/* END PrimeBook managed Thunar label-contrast repair */
-THUNAR_CSS
-
+cat "$TMP" > "$CSS"
+rm -f "$TMP"
 chmod 0644 "$CSS"
 
-echo "Updated: $CSS"
-echo "Restart Thunar or log out of XFCE and run start-all."
+echo "Removed the experimental Thunar rules."
+echo "Backup: $BACKUP"
+echo "Preserved all stylesheet content preceding those rules."
 DEBIAN_SCRIPT
 
 echo
-echo "Thunar label-contrast repair applied. Restart the desktop with:"
-echo "  stop-all"
-echo "  start-all"
+echo "Now restart Thunar, or run stop-all then start-all."
