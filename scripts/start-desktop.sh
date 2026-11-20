@@ -12,6 +12,23 @@ if [ -z "$PD_VERSION" ] || ! dpkg --compare-versions "$PD_VERSION" ge "5.8.0"; t
   exit 2
 fi
 
+# Refuse to launch a partial XFCE session. A previous apt autoremove may have
+# removed components while leaving desktop launchers and user configuration.
+if ! proot-distro login --isolated debian -- /bin/bash -lc '
+  missing=()
+  for binary in startxfce4 xfwm4 xfdesktop xfce4-panel xfce4-terminal thunar dbus-launch; do
+    command -v "$binary" >/dev/null 2>&1 || missing+=("$binary")
+  done
+  if [ "${#missing[@]}" -gt 0 ]; then
+    printf "Missing Debian desktop components: %s\\n" "${missing[*]}" >&2
+    exit 1
+  fi
+'; then
+  echo "Debian desktop is incomplete. Repair it from Termux with:" >&2
+  echo "  bash \"$SCRIPT_DIR/repair-desktop.sh\"" >&2
+  exit 4
+fi
+
 export DISPLAY=:0
 
 # Expose only Android's Downloads directory to the isolated Debian desktop.
