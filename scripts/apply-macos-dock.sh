@@ -17,6 +17,11 @@ fi
 
 echo "== Configuring the live Debian XFCE session =="
 
+if [ -e "$HOME/.config/primebook/plank-enabled" ]; then
+  echo "Plank mode is active. Run scripts/plank-dock.sh rollback before reapplying the XFCE dock profile." >&2
+  exit 3
+fi
+
 proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
 set -Eeuo pipefail
 export DISPLAY="${DISPLAY:-:0}"
