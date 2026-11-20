@@ -2,9 +2,8 @@
 set -Eeuo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 run_script(){ bash "$ROOT/scripts/$1" "${@:2}"; }
-usage(){ printf '%s\n' 'PrimeBook Workstation Suite' '  primebook-suite.sh health' '  primebook-suite.sh backup [backup|list|restore <archive>]' '  primebook-suite.sh maintenance [plan|apply]  (Debian root)' '  primebook-suite.sh tile {left|right|top|bottom|center|maximize}' '  primebook-suite.sh install-tools  (Debian root)' '  primebook-suite.sh gnome-core {install|theme|launcher|all}'; }
+usage(){ printf '%s\n' 'PrimeBook Workstation Suite' '  primebook-suite.sh health' '  primebook-suite.sh backup [backup|list|restore <archive>]' '  primebook-suite.sh maintenance [plan|apply]  (Debian root)' '  primebook-suite.sh tile {left|right|top|bottom|center|maximize}' '  primebook-suite.sh install-tools  (Debian root)'; }
 case "${1:-}" in
- gnome-core) shift; run_script primebook-gnome-core.sh "${@:-help}" ;;
  health) run_script primebook-health.sh ;;
  backup) shift; run_script primebook-restore.sh "${@:-backup}" ;;
  maintenance) shift; run_script primebook-maintenance.sh "${@:-plan}" ;;
