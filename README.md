@@ -217,7 +217,7 @@ bash scripts/plank-dock.sh status
 bash scripts/plank-dock.sh rollback
 ```
 
-The migration removes the bottom dock panel from XFCE's active panel list while preserving its full configuration, adds Plank to XFCE autostart, and prevents the WhiteSur login hook from reapplying the old dock layout. The top XFCE panel and desktop remain in place. **This is a device-side pilot:** the script will stop if it cannot safely identify the bottom panel or if fewer than two XFCE panels exist. See [docs/PLANK-DOCK.md](docs/PLANK-DOCK.md) for details.
+The migration installs Plank with Debian administrator privileges, removes the bottom dock panel from XFCE's active panel list while preserving its full configuration, adds Plank to XFCE autostart, and prevents the WhiteSur login hook from reapplying the old dock layout. The top XFCE panel and desktop remain in place. **This is a device-side pilot:** the script will stop if it cannot safely identify the bottom panel or if fewer than two XFCE panels exist. See [docs/PLANK-DOCK.md](docs/PLANK-DOCK.md) for details.
 
 ## KDE Discover Software Center
 
