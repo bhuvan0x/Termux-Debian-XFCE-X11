@@ -219,6 +219,23 @@ bash scripts/plank-dock.sh rollback
 
 The migration installs Plank with Debian administrator privileges, removes the bottom dock panel from XFCE's active panel list while preserving its full configuration, adds Plank to XFCE autostart, and prevents the WhiteSur login hook from reapplying the old dock layout. The top XFCE panel and desktop remain in place. **This is a device-side pilot:** the script will stop if it cannot safely identify the bottom panel or if fewer than two XFCE panels exist. See [docs/PLANK-DOCK.md](docs/PLANK-DOCK.md) for details.
 
+## macOS-inspired top menu bar
+
+Prefer a compact menu bar across the top while keeping Plank at the bottom? Apply the reversible XFCE profile:
+
+```bash
+bash scripts/macos-topbar.sh apply
+```
+
+Check its settings or restore the saved panel geometry:
+
+```bash
+bash scripts/macos-topbar.sh status
+bash scripts/macos-topbar.sh rollback
+```
+
+The profile is adapted from the modular panel approach in [mac-kali](https://github.com/notyourbusinessss/mac-kali), but avoids its full panel reset. It preserves the existing XFCE plugin configuration and the inactive original dock panel. It uses the existing expandable separator to keep the application menu left and status controls right. See [docs/MACOS-TOPBAR.md](docs/MACOS-TOPBAR.md).
+
 ## KDE Discover Software Center
 
 Install KDE Discover without installing KDE Plasma or replacing XFCE:
