@@ -17,14 +17,14 @@ fi
 
 echo "== Configuring the live Debian XFCE session =="
 
+proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
+set -Eeuo pipefail
+export DISPLAY="${DISPLAY:-:0}"
+
 if [ -e "$HOME/.config/primebook/plank-enabled" ]; then
   echo "Plank mode is active. Run scripts/plank-dock.sh rollback before reapplying the XFCE dock profile." >&2
   exit 3
 fi
-
-proot-distro login --isolated --shared-x11 --user prime debian -- /bin/bash -s <<'DEBIAN_SCRIPT'
-set -Eeuo pipefail
-export DISPLAY="${DISPLAY:-:0}"
 
 # Find the live XFCE session without filtering by the PRoot-visible UID.
 # PRoot's UID translation can make pgrep -u miss processes that are visible
