@@ -29,7 +29,7 @@ apt-get update
 # Explicitly restore core XFCE components; never rely on metapackage history
 # after an earlier apt autoremove or GNOME package purge.
 apt-get install -y \
-  xfce4-session xfce4-panel xfwm4 xfdesktop xfce4-settings xfce4-appfinder \
+  xfce4-session xfce4-panel xfwm4 xfdesktop4 xfce4-settings xfce4-appfinder \
   xfce4-terminal thunar mousepad plank dbus-x11 \
   firefox-esr \
   gdebi \
