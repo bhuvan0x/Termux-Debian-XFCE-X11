@@ -18,7 +18,7 @@ git pull --ff-only
 bash scripts/plank-dock.sh install
 ```
 
-The script installs Debian's `plank` package, saves the current bottom panel ID and its exact auto-hide setting, removes only that panel ID from XFCE's active panel list, creates a Plank XFCE autostart entry, and starts Plank in the current session. The panel's plugin definitions, launchers, geometry and Xfconf properties remain stored and are restored by rollback.
+The script installs Debian's `plank` package as root, saves the complete active XFCE panel-ID list and the bottom panel ID, removes only that panel ID from XFCE's active panel list, creates a Plank XFCE autostart entry, and starts Plank in the current session. The panel's plugin definitions, launchers, geometry and Xfconf properties remain stored and are restored by rollback.
 
 Plank's preferences are available by **Ctrl + right-click** on the dock. Use Preferences to choose icon size, position, theme and hide behavior. The package's defaults are intentionally retained rather than forcing unverified dconf schema values.
 
