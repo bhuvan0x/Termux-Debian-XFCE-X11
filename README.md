@@ -32,6 +32,16 @@ Build a polished Debian + XFCE desktop on an Android tablet or Chromebook with T
 | [Performance](#performance-tuning) | Reversible XFCE performance profile |\n| [Plank dock](#optional-plank-dock) | Try a standalone dock with rollback |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and diagnostics |
 
+## GNOME-inspired XFCE experience
+
+Keep XFCE as the stable desktop session while adding selected GNOME applications, Adwaita styling and a Rofi application launcher. This does **not** install GNOME Shell or replace the XFCE panel/window manager. See [GNOME Core for XFCE](docs/GNOME-CORE-XFCE.md).
+
+Install from the Debian-side repository copy:
+
+```bash
+sudo bash scripts/primebook-suite.sh gnome-core all
+```
+
 ## What makes PrimeBook different?
 
 - **A desktop, not just a terminal:** Debian userspace with XFCE, application launchers, file management and a curated everyday app bundle.
