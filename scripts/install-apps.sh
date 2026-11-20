@@ -26,9 +26,11 @@ fi
 
 echo "== Installing the lightweight desktop app bundle =="
 apt-get update
+# Explicitly restore core XFCE components; never rely on metapackage history
+# after an earlier apt autoremove or GNOME package purge.
 apt-get install -y \
-  # Core XFCE components are explicit so apt autoremove cannot leave launchers pointing at missing binaries. \
-  xfce4-session xfce4-panel xfwm4 xfdesktop xfce4-terminal thunar mousepad plank dbus-x11 \
+  xfce4-session xfce4-panel xfwm4 xfdesktop xfce4-settings xfce4-appfinder \
+  xfce4-terminal thunar mousepad plank dbus-x11 \
   firefox-esr \
   gdebi \
   vlc vlc-plugin-qt mpv ffmpeg \
