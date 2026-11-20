@@ -130,75 +130,80 @@ apply_profile() {
   # Do not overwrite xfce4-desktop /last-image here: preserve the user's
   # selected static or live wallpaper across Stop All / Start All cycles.
 
-  mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' | sort -nu)
-  DOCK_PANEL=""
-  for id in "${PANEL_IDS[@]}"; do
-    behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
-    if [ "$behavior" = "1" ] || [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
-  done
-  if [ -z "$DOCK_PANEL" ] && [ "${#PANEL_IDS[@]}" -gt 0 ]; then
-    DOCK_PANEL="${PANEL_IDS[$(("${#PANEL_IDS[@]}" - 1))]}"
-  fi
-  if [ -n "$DOCK_PANEL" ]; then
-    # Center the contiguous application-icon group with transparent expanders.
-    # Preserve all existing plugin IDs and their relative order.
-    PANEL_PATH="/panels/panel-$DOCK_PANEL"
-    mapfile -t ORDER < <(xfconf-query -c xfce4-panel -p "$PANEL_PATH/plugin-ids" 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' || true)
-    APP_POS=()
-    for i in "${!ORDER[@]}"; do
-      kind="$(xfconf-query -c xfce4-panel -p "/plugins/plugin-${ORDER[$i]}" 2>/dev/null || true)"
-      case "$kind" in launcher|tasklist|docklike) APP_POS+=("$i");; esac
+  # Plank migration is opt-in. When enabled, leave the saved XFCE panel layout
+  # alone so it can be restored exactly by scripts/plank-dock.sh rollback.
+  if [ ! -e "$HOME/.config/primebook/plank-enabled" ]; then
+    mapfile -t PANEL_IDS < <(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' | sort -nu)
+    DOCK_PANEL=""
+    for id in "${PANEL_IDS[@]}"; do
+      behavior="$(xfconf-query -c xfce4-panel -p "/panels/panel-$id/autohide-behavior" 2>/dev/null || true)"
+      if [ "$behavior" = "1" ] || [ "$behavior" = "2" ]; then DOCK_PANEL="$id"; fi
     done
-    if [ "${#APP_POS[@]}" -gt 0 ]; then
-      FIRST="${APP_POS[0]}"
-      LAST="${APP_POS[$(("${#APP_POS[@]}" - 1))]}"
-      BEFORE="${ORDER[$((FIRST-1))]:-}"
-      AFTER="${ORDER[$((LAST+1))]:-}"
-      BEFORE_EXPAND=false; AFTER_EXPAND=false
-      if [ -n "$BEFORE" ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$BEFORE" 2>/dev/null || true)" = separator ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$BEFORE/expand" 2>/dev/null || true)" = true ]; then BEFORE_EXPAND=true; fi
-      if [ -n "$AFTER" ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$AFTER" 2>/dev/null || true)" = separator ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$AFTER/expand" 2>/dev/null || true)" = true ]; then AFTER_EXPAND=true; fi
-      if [ "$BEFORE_EXPAND" != true ] || [ "$AFTER_EXPAND" != true ]; then
-        mapfile -t ALL_PLUGIN_IDS < <(xfconf-query -c xfce4-panel -l 2>/dev/null | grep -Eo '^/plugins/plugin-[0-9]+$' | grep -Eo '[0-9]+' | sort -nu)
-        MAX_PLUGIN=0
-        for n in "${ALL_PLUGIN_IDS[@]}"; do if [ "$n" -gt "$MAX_PLUGIN" ]; then MAX_PLUGIN="$n"; fi; done
-        NEW_BEFORE=$((MAX_PLUGIN+1)); NEW_AFTER=$((MAX_PLUGIN+2))
-        for n in "$NEW_BEFORE" "$NEW_AFTER"; do
-          xfconf-query -c xfce4-panel -p "/plugins/plugin-$n" --create -t string -s separator
-          xfconf-query -c xfce4-panel -p "/plugins/plugin-$n/expand" --create -t bool -s true
-          xfconf-query -c xfce4-panel -p "/plugins/plugin-$n/style" --create -t uint -s 0
-        done
-        NEW_ORDER=()
-        for i in "${!ORDER[@]}"; do
-          [ "$i" -eq "$FIRST" ] && NEW_ORDER+=("$NEW_BEFORE")
-          NEW_ORDER+=("${ORDER[$i]}")
-          [ "$i" -eq "$LAST" ] && NEW_ORDER+=("$NEW_AFTER")
-        done
-        ARRAY_ARGS=(xfconf-query -c xfce4-panel -p "$PANEL_PATH/plugin-ids" --force-array)
-        for n in "${NEW_ORDER[@]}"; do ARRAY_ARGS+=(-t int -s "$n"); done
-        "${ARRAY_ARGS[@]}"
-      fi
+    if [ -z "$DOCK_PANEL" ] && [ "${#PANEL_IDS[@]}" -gt 0 ]; then
+      DOCK_PANEL="${PANEL_IDS[$(("${#PANEL_IDS[@]}" - 1))]}"
     fi
-    DOCK="/panels/panel-$DOCK_PANEL"
-    set_value xfce4-panel "$DOCK/length" int 52
-    set_value xfce4-panel "$DOCK/length-adjust" bool false
-    set_value xfce4-panel "$DOCK/position-locked" bool true
-    set_value xfce4-panel "$DOCK/position" string "p=10;x=0;y=0"
-    set_value xfce4-panel "$DOCK/size" int 50
-    set_value xfce4-panel "$DOCK/icon-size" int 34
-    set_value xfce4-panel "$DOCK/autohide-behavior" int 2
-    set_value xfce4-panel "$DOCK/enter-opacity" int 100
-    set_value xfce4-panel "$DOCK/leave-opacity" int 100
-    while IFS= read -r line; do
-      plugin_path="${line%%:*}"
-      plugin_type="${line#*: }"
-      [[ "$plugin_path" =~ ^/plugins/plugin-([0-9]+)$ ]] || continue
-      plugin_id="${BASH_REMATCH[1]}"
-      if [ "$plugin_type" = "tasklist" ]; then
-        set_value xfce4-panel "/plugins/plugin-$plugin_id/show-labels" bool false
-        set_value xfce4-panel "/plugins/plugin-$plugin_id/flat-buttons" bool true
-        set_value xfce4-panel "/plugins/plugin-$plugin_id/show-tooltips" bool true
+    if [ -n "$DOCK_PANEL" ]; then
+      # Center the contiguous application-icon group with transparent expanders.
+      # Preserve all existing plugin IDs and their relative order.
+      PANEL_PATH="/panels/panel-$DOCK_PANEL"
+      mapfile -t ORDER < <(xfconf-query -c xfce4-panel -p "$PANEL_PATH/plugin-ids" 2>/dev/null | sed -nE '/^[[:space:]]*[0-9]+[[:space:]]*$/s/^[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' || true)
+      APP_POS=()
+      for i in "${!ORDER[@]}"; do
+        kind="$(xfconf-query -c xfce4-panel -p "/plugins/plugin-${ORDER[$i]}" 2>/dev/null || true)"
+        case "$kind" in launcher|tasklist|docklike) APP_POS+=("$i");; esac
+      done
+      if [ "${#APP_POS[@]}" -gt 0 ]; then
+        FIRST="${APP_POS[0]}"
+        LAST="${APP_POS[$(("${#APP_POS[@]}" - 1))]}"
+        BEFORE="${ORDER[$((FIRST-1))]:-}"
+        AFTER="${ORDER[$((LAST+1))]:-}"
+        BEFORE_EXPAND=false; AFTER_EXPAND=false
+        if [ -n "$BEFORE" ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$BEFORE" 2>/dev/null || true)" = separator ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$BEFORE/expand" 2>/dev/null || true)" = true ]; then BEFORE_EXPAND=true; fi
+        if [ -n "$AFTER" ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$AFTER" 2>/dev/null || true)" = separator ] && [ "$(xfconf-query -c xfce4-panel -p "/plugins/plugin-$AFTER/expand" 2>/dev/null || true)" = true ]; then AFTER_EXPAND=true; fi
+        if [ "$BEFORE_EXPAND" != true ] || [ "$AFTER_EXPAND" != true ]; then
+          mapfile -t ALL_PLUGIN_IDS < <(xfconf-query -c xfce4-panel -l 2>/dev/null | grep -Eo '^/plugins/plugin-[0-9]+$' | grep -Eo '[0-9]+' | sort -nu)
+          MAX_PLUGIN=0
+          for n in "${ALL_PLUGIN_IDS[@]}"; do if [ "$n" -gt "$MAX_PLUGIN" ]; then MAX_PLUGIN="$n"; fi; done
+          NEW_BEFORE=$((MAX_PLUGIN+1)); NEW_AFTER=$((MAX_PLUGIN+2))
+          for n in "$NEW_BEFORE" "$NEW_AFTER"; do
+            xfconf-query -c xfce4-panel -p "/plugins/plugin-$n" --create -t string -s separator
+            xfconf-query -c xfce4-panel -p "/plugins/plugin-$n/expand" --create -t bool -s true
+            xfconf-query -c xfce4-panel -p "/plugins/plugin-$n/style" --create -t uint -s 0
+          done
+          NEW_ORDER=()
+          for i in "${!ORDER[@]}"; do
+            [ "$i" -eq "$FIRST" ] && NEW_ORDER+=("$NEW_BEFORE")
+            NEW_ORDER+=("${ORDER[$i]}")
+            [ "$i" -eq "$LAST" ] && NEW_ORDER+=("$NEW_AFTER")
+          done
+          ARRAY_ARGS=(xfconf-query -c xfce4-panel -p "$PANEL_PATH/plugin-ids" --force-array)
+          for n in "${NEW_ORDER[@]}"; do ARRAY_ARGS+=(-t int -s "$n"); done
+          "${ARRAY_ARGS[@]}"
+        fi
       fi
-    done < <(xfconf-query -c xfce4-panel -lv 2>/dev/null || true)
+      DOCK="/panels/panel-$DOCK_PANEL"
+      set_value xfce4-panel "$DOCK/length" int 52
+      set_value xfce4-panel "$DOCK/length-adjust" bool false
+      set_value xfce4-panel "$DOCK/position-locked" bool true
+      set_value xfce4-panel "$DOCK/position" string "p=10;x=0;y=0"
+      set_value xfce4-panel "$DOCK/size" int 50
+      set_value xfce4-panel "$DOCK/icon-size" int 34
+      set_value xfce4-panel "$DOCK/autohide-behavior" int 2
+      set_value xfce4-panel "$DOCK/enter-opacity" int 100
+      set_value xfce4-panel "$DOCK/leave-opacity" int 100
+      while IFS= read -r line; do
+        plugin_path="${line%%:*}"
+        plugin_type="${line#*: }"
+        [[ "$plugin_path" =~ ^/plugins/plugin-([0-9]+)$ ]] || continue
+        plugin_id="${BASH_REMATCH[1]}"
+        if [ "$plugin_type" = "tasklist" ]; then
+          set_value xfce4-panel "/plugins/plugin-$plugin_id/show-labels" bool false
+          set_value xfce4-panel "/plugins/plugin-$plugin_id/flat-buttons" bool true
+          set_value xfce4-panel "/plugins/plugin-$plugin_id/show-tooltips" bool true
+        fi
+      done < <(xfconf-query -c xfce4-panel -lv 2>/dev/null || true)
+    fi
+  
   fi
   set_value xfce4-keyboard-shortcuts '/commands/custom/<Super>space' string 'xfce4-appfinder --collapsed'
   set_value xfce4-keyboard-shortcuts '/commands/custom/<Super>e' string 'xfce4-appfinder --expanded'
