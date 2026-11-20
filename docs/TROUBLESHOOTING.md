@@ -1,5 +1,28 @@
 # Troubleshooting
 
+## XFCE launches but applications, terminal, panel or dock are missing
+
+A previous package purge or `apt autoremove` can remove XFCE components while leaving user launchers and appearance settings behind. Do not reset the XFCE profile or reinstall Debian.
+
+From Termux, pull the latest workstation branch and run the recovery script:
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only origin feat/primebook-workstation-suite
+bash scripts/repair-desktop.sh
+```
+
+The repair reinstalls the core XFCE session, panel, window manager, desktop, terminal, Thunar, Plank and the repository's desktop application bundle. It restores Plank autostart and preserves the existing `prime` user's Xfconf settings, WhiteSur theme, wallpaper and panel layout. It does not run `apt autoremove`.
+
+Then restart the desktop:
+
+```bash
+stop-all
+start-all
+```
+
+The startup script checks for essential XFCE executables and points to the repair command instead of launching an incomplete session.
+
 ## ClamAV reports that no database is available
 
 Run the optional installer from Termux to install ClamAV and refresh its signatures:
