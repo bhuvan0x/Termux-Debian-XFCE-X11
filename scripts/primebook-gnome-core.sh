@@ -105,14 +105,14 @@ case "$ACTION" in
     install_packages
     if [ "$(id -u)" -eq 0 ]; then
       if id prime >/dev/null 2>&1; then
-        runuser -u prime -- bash "$0" theme
-        runuser -u prime -- bash "$0" launcher
+        runuser -u prime -- env HOME=/home/prime USER=prime LOGNAME=prime bash "$0" launcher
+        echo "Packages and launcher installed. Open an XFCE terminal as prime and run: bash scripts/primebook-suite.sh gnome-core theme"
       else
-        echo "User 'prime' was not found; packages installed, but user appearance was not changed." >&2
+        echo "User 'prime' was not found; packages installed, but launcher was not created." >&2
       fi
     else
-      apply_theme
       create_launcher
+      echo "Packages and launcher installed. Run 'bash scripts/primebook-suite.sh gnome-core theme' inside your active XFCE session to apply Adwaita."
     fi
     ;;
   help|-h|--help)
