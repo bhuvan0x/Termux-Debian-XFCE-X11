@@ -29,7 +29,7 @@ Build a polished Debian + XFCE desktop on an Android tablet or Chromebook with T
 | [Security & maintenance](#security-hardening-and-maintenance) | Isolation, hardening, audits and scanning |
 | [Android Downloads](#security-hardening-and-maintenance) | Access the shared Downloads folder safely |
 | [Printing & USB](#epson-printing-and-usb-devices) | Epson L3110, CUPS and device diagnostics |
-| [Performance](#performance-tuning) | Reversible XFCE performance profile |
+| [Performance](#performance-tuning) | Reversible XFCE performance profile |\n| [Plank dock](#optional-plank-dock) | Try a standalone dock with rollback |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and diagnostics |
 
 ## What makes PrimeBook different?
@@ -201,6 +201,23 @@ proot-distro login --isolated debian -- apt-get autoremove --purge --dry-run
 ```
 
 </details>
+
+## Optional Plank dock
+
+Prefer a standalone application dock over the built-in XFCE taskbar? Try Plank without replacing XFCE or deleting your existing panel configuration:
+
+```bash
+bash scripts/plank-dock.sh install
+```
+
+Check the migration or restore the original XFCE dock at any time:
+
+```bash
+bash scripts/plank-dock.sh status
+bash scripts/plank-dock.sh rollback
+```
+
+The migration saves the original bottom panel auto-hide setting, adds Plank to XFCE autostart, and prevents the WhiteSur login hook from reapplying the old dock layout. The top XFCE panel and desktop remain in place. **This is a device-side pilot:** some X11 setups may let both docks react to the bottom edge. If they overlap or flicker, run the rollback command. See [docs/PLANK-DOCK.md](docs/PLANK-DOCK.md) for details.
 
 ## KDE Discover Software Center
 
