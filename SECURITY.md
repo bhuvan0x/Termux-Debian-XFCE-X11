@@ -1,23 +1,29 @@
-# Security policy
+# Security Policy
 
-## Supported setup
+PrimeBook / Termux Debian X11 is a desktop setup for Termux, Debian, PRoot-Distro and Termux:X11.
 
-Security fixes and hardening guidance apply to the current `main` branch. The workstation runs Debian userspace under Termux PRoot on Android; it is not a conventional Linux VM or a separate kernel.
+## Supported versions
+
+Security fixes are generally made against the latest code on the default branch. Older commits and local forks may not receive updates.
 
 ## Reporting a vulnerability
 
-Please do not publish credentials, personal data, exploitable proof-of-concept details, or an unpatched vulnerability in a public issue. Use GitHub's private vulnerability reporting feature for this repository when it is available. Otherwise, contact the repository maintainer privately through GitHub and include:
+Please **do not publish exploitable vulnerability details in a public issue**.
 
-- A concise description of the affected script or component.
-- The affected commit or package version.
-- Reproduction steps using a test device and non-sensitive sample data.
-- The impact and any suggested mitigation.
+1. Open this repository's **Security** tab.
+2. If private vulnerability reporting is enabled, use **Report a vulnerability**.
+3. If that option is unavailable, contact the maintainer through GitHub [@bhuvan0x](https://github.com/bhuvan0x) and request a private channel before sharing technical details.
 
-Do not include passwords, access tokens, SSH private keys, or complete personal backups in a report.
+Include a description and impact, affected files/versions, device and Termux package versions, reproduction steps, and a suggested mitigation where possible. Do not include passwords, tokens, SSH keys, personal data, or full backups.
 
-## Security assumptions
+Please allow reasonable time for investigation and a fix before public disclosure. Do not access, modify, or expose another person's data while testing.
 
-- Android is the host security boundary; PRoot does not provide kernel-level isolation.
-- Scripts must not embed passwords, API keys, SSH private keys, GitHub tokens, or other secrets.
-- Changes to startup, bind mounts, sudoers, CUPS, or package sources must preserve the documented local-only service model.
-- A clean script audit is not proof that an Android device or Debian rootfs is free of compromise.
+## Security boundaries
+
+- PRoot is not a virtual machine or a kernel-isolated container. It shares the Android kernel and app UID.
+- This project does not provide a host firewall, kernel hardening, SELinux policy, or a guarantee of isolation from Android.
+- Electron compatibility launchers using `--no-sandbox` weaken Chromium's normal renderer isolation. Use only trusted applications.
+- Package sources, upstream binaries, themes, plugins and optional add-ons retain their own security and licensing policies.
+- A successful project audit is not a guarantee that a device or installation is secure.
+
+For security-sensitive use, review scripts before execution, keep Android and Termux updated, and maintain backups.
