@@ -1,6 +1,6 @@
 # WhiteSur XFCE desktop profile
 
-This project applies a WhiteSur Dark / Blue appearance to the existing Debian XFCE desktop running through Termux:X11. It does **not** replace XFCE with GNOME.
+This project applies a WhiteSur Dark / Blue appearance to the existing Debian XFCE desktop running through Termux:X11. XFCE remains the sole desktop environment.
 
 ## Apply the profile
 
@@ -24,7 +24,7 @@ The script:
 9. Integrates the floating bottom-dock profile and app-finder shortcuts into the same XFCE login hook: the existing auto-hidden panel is shortened, icons enlarged, and Super+Space / Super+E launch compact / expanded app finder.
 10. Restarts the existing Termux:X11/XFCE workflow using the repository's Stop All and Start All scripts.
 
-The theme and icon assets remain user-local. The XFConf XML files, GTK settings file and XFCE autostart entry persist across logout, reboot and Termux:X11 relaunch; the login hook reapplies the selected theme values if XFCE restores stale settings. Wallpaper persistence is delegated to Wallpaper Control Centre. The script does not use the upstream GNOME theme-switcher, install GNOME Shell, replace XFCE panels, install Plank or Conky, enable Picom, or alter PRoot isolation, audio, CUPS or security configuration.
+The theme and icon assets remain user-local. The XFConf XML files, GTK settings file and XFCE autostart entry persist across logout, reboot and Termux:X11 relaunch; the login hook reapplies the selected theme values if XFCE restores stale settings. Wallpaper persistence is delegated to Wallpaper Control Centre. The script does not replace XFCE panels, install Plank or Conky, enable Picom, or alter PRoot isolation, audio, CUPS or security configuration.
 
 ## Expected appearance
 
@@ -57,7 +57,7 @@ If the desktop still looks unchanged after the script:
 5. Read `~/.cache/primebook-whitesur-session.log` to confirm the early login hook ran. It should report `Early WhiteSur`. If the theme still reverts, capture the four XFConf values and this log before changing anything else.\n6. Confirm the obsolete `~/.config/autostart/primebook-xfce-tune.desktop` is absent; that older helper forced Arc-Dark/Papirus-Dark after login.
 6. Check the XFCE session log and run `bash scripts/diagnose.sh` from Termux if the desktop fails to start.
 
-Do not run the upstream GTK installer's GNOME Shell stages again merely to refresh XFCE.
+Do not rerun upstream desktop-shell integration stages merely to refresh XFCE.
 
 
 
@@ -91,7 +91,7 @@ Restart the desktop with `start-all`. This restores the backed-up XFCE/GTK confi
 
 ## Scope boundaries
 
-- No GNOME desktop or GNOME Shell extensions.
+- XFCE remains the only desktop environment; no alternate shell or extension layer is installed.
 - No Plank, Conky or Picom installation.
 - No system-wide theme installation.
 - No changes to Termux:X11 startup, PRoot isolation/bindings, PulseAudio, CUPS or security hardening.
