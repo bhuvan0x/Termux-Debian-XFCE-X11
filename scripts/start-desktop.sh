@@ -107,7 +107,7 @@ fi
 
 # Keep the system D-Bus daemon alive in the same root PRoot session as
 # XFCE. Starting it in a separate proot-distro login would leave a stale
-# socket when that isolated session exits (the exact GNOME Software failure).
+# socket when that isolated session exits (the earlier software-store system-bus failure).
 # The GUI itself still runs as the unprivileged prime user.
 proot-distro login --isolated --shared-x11 --bind "$DOWNLOADS_DIR:/mnt/android-downloads" debian -- /bin/bash -lc '
   set -Eeuo pipefail
