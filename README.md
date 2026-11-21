@@ -1,5 +1,17 @@
 # Termux Debian X11
 
+<p align="center">
+  <img src="primebook-logo.svg" alt="PrimeBook — Termux Debian X11" width="760">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge" alt="MIT License"></a>
+  <a href="SECURITY.md"><img src="https://img.shields.io/badge/Security-Policy-blue?style=for-the-badge" alt="Security Policy"></a>
+</p>
+
+**Read this README in:** [English](README.md) · [हिन्दी](README.hi.md) · [日本語](README.ja.md) · [Русский](README.ru.md) · [Español](README.es.md) · [Français](README.fr.md)
+
+
 > **A complete Linux workstation. Inside Android. No root required.**
 
 Build a polished Debian + XFCE desktop on an Android tablet or Chromebook with Termux, Termux:X11 and PRoot-Distro. PrimeBook brings together a carefully integrated desktop, practical applications, Android Downloads access, printer tooling, security checks and one-touch session controls.
@@ -286,6 +298,37 @@ Run it from Termux. It downloads the official `linux-deb-arm64` package, verifie
 These options are a PRoot compatibility workaround. `--no-sandbox` weakens Chromium's normal renderer isolation; use this only in the trusted local PRoot desktop, not as a general Linux desktop recommendation. The launcher override is stored under `/home/prime/.local/share/applications` and does not modify the package-owned desktop files. The VS Code keyring prompt is separate from installation; credential storage may require a desktop keyring service.
 
 Do not install an `amd64` VS Code package on this ARM64 Debian environment. GDebi is included for local `.deb` installation and dependency resolution, but it cannot convert an `amd64` package into an ARM64 package. Check a package before installing it with `dpkg-deb -f package.deb Architecture`.
+
+
+## Complete uninstall
+
+Need to remove the complete PrimeBook Debian workstation? Run this from Termux:
+
+```bash
+uninstall-primebook
+```
+
+The uninstaller stops the desktop, removes the Debian PRoot distribution and its contents, and deletes the Termux commands and Widget shortcuts created by this project. It intentionally keeps Termux, Android add-on apps, shared Termux packages and files in Android shared storage.
+
+**This permanently deletes all files inside the Debian distribution. Back up anything important first.** The script asks you to type `REMOVE-DEBIAN` before continuing.
+
+To also delete the cloned repository after the Debian environment is removed:
+
+```bash
+bash scripts/uninstall.sh --remove-repo
+```
+
+For a non-interactive run, use `bash scripts/uninstall.sh --yes` (and optionally `--remove-repo`). Read the script before using unattended removal.
+
+## Open source, license and collaboration
+
+PrimeBook is released under the **MIT License**. You are welcome to use it, fork it, modify it, improve it, and redistribute your changes while preserving the copyright and license notice. See [LICENSE](LICENSE).
+
+Have an improvement? Open an Issue or submit a Pull Request. If you would like to collaborate or build something together, reach out to the maintainer on GitHub: **[@bhuvan0x](https://github.com/bhuvan0x)**. Contributions, constructive feedback, and independent forks are welcome.
+
+Security reports should be handled privately; please read [SECURITY.md](SECURITY.md) before reporting a vulnerability.
+
+> **Repository visibility:** this GitHub repository is currently private. The MIT license is included, but public access requires the owner to change the repository visibility to Public in GitHub Settings. Do not assume the source is publicly accessible until that change is made.
 
 ## Security hardening and maintenance
 
