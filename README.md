@@ -482,6 +482,34 @@ bash scripts/check-usb.sh
 bash scripts/check-epson-l3110.sh
 ```
 
+## Complete workstation removal
+
+To remove the **entire PrimeBook Debian environment** from Termux, first update the repository and then run the uninstaller from Termux (not from inside Debian):
+
+```bash
+cd ~/Termux-Debian-X11
+git pull --ff-only
+bash scripts/uninstall.sh
+```
+
+Read the summary and type `REMOVE-DEBIAN` when prompted. The uninstaller stops the PrimeBook desktop services, removes the Debian PRoot-Distro container (including its installed applications, settings and files), removes the PrimeBook-created `start-all`, `stop-all` and `uninstall-primebook` commands, and removes only the known PrimeBook Termux:Widget shortcuts/tasks.
+
+**Preserved:** Termux itself, shared Termux packages, Ubuntu and other PRoot-Distro containers, the Termux:X11 / Termux:API / Termux:Widget Android add-ons, Android shared-storage files, and this repository clone.
+
+After removal, if you also want to delete the repository clone, run:
+
+```bash
+rm -rf ~/Termux-Debian-X11
+```
+
+Alternatively, pass `--remove-repo` to the uninstaller to remove the clone as its final step:
+
+```bash
+bash scripts/uninstall.sh --remove-repo
+```
+
+This operation is destructive to the Debian filesystem. Back up anything you need from Debian before confirming. It does not uninstall Termux packages globally because those may be shared with other Termux workflows.
+
 ## Disclaimer
 
 Unofficial community setup. Debian, Termux, Termux:X11 and Termux:Widget are maintained by their respective projects. Review scripts before running them. No root access is required on Android; Debian root is provided by PRoot.
