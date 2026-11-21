@@ -32,7 +32,7 @@ if command -v git >/dev/null 2>&1 && [ -d "$REPO_DIR/.git" ]; then
 fi
 
 # Provide short terminal commands as well as the two Termux:Widget buttons.
-for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh"; do
+for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh" "uninstall-primebook:scripts/uninstall.sh"; do
   name="${spec%%:*}"
   script="${spec#*:}"
   cat > "$PREFIX/bin/$name" <<EOF
