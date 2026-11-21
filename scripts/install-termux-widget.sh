@@ -16,7 +16,7 @@ if command -v git >/dev/null 2>&1 && [ -d "$REPO_DIR/.git" ]; then
 fi
 
 # Install short terminal commands from any working directory.
-for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh"; do
+for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh" "uninstall-primebook:scripts/uninstall.sh"; do
   name="${spec%%:*}"
   script="${spec#*:}"
   cat > "$PREFIX/bin/$name" <<EOF
@@ -96,7 +96,7 @@ EOF
   chmod 700 "$TASKS_DIR/$name"
 done
 
-echo "Created terminal commands: start-all and stop-all."
+echo "Created terminal commands: start-all, stop-all and uninstall-primebook."
 echo "Created exactly two daily Widget controls: Start All and Stop All."
 echo "Install Termux:Widget from the same signing source as Termux:"
 echo "https://github.com/termux/termux-widget"
