@@ -91,7 +91,7 @@ fi
 
 echo
 echo "== Removing project-generated Termux commands =="
-for command_name in start-all stop-all; do
+for command_name in start-all stop-all uninstall-primebook; do
   command_path="$PREFIX/bin/$command_name"
   if [ -f "$command_path" ] && grep -Fq "$REPO_DIR" "$command_path"; then
     rm -f -- "$command_path"
