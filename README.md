@@ -322,7 +322,7 @@ For a non-interactive run, use `bash scripts/uninstall.sh --yes` (and optionally
 
 ## Open source, license and collaboration
 
-PrimeBook is released under the **MIT License**. You are welcome to use it, fork it, modify it, improve it, and redistribute your changes while preserving the copyright and license notice. See [LICENSE](LICENSE).
+PrimeBook is released under the **MIT License**. You are welcome to use it, fork it, modify it, improve it, and redistribute your changes while preserving the copyright and license notice. See [LICENSE](LICENSE). The project mark and its design notes are in [LOGO.md](LOGO.md).
 
 Have an improvement? Open an Issue or submit a Pull Request. If you would like to collaborate or build something together, reach out to the maintainer on GitHub: **[@bhuvan0x](https://github.com/bhuvan0x)**. Contributions, constructive feedback, and independent forks are welcome.
 
