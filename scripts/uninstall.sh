@@ -64,7 +64,7 @@ fi
 
 echo
 echo "== Removing Debian container =="
-if proot-distro list 2>/dev/null | awk '$1 == "*" && $2 == "debian" { found=1 } END { exit !found }'; then
+if proot-distro list 2>/dev/null | grep -Eq '^[[:space:]]*\\*?[[:space:]]*debian([[:space:]]|$)'; then
   proot-distro remove debian
   echo "Debian container removed."
 else
