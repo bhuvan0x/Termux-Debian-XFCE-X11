@@ -12,7 +12,7 @@ git pull --ff-only
 bash scripts/refresh-primebook.sh
 ```
 
-The refresh installs Discover and its Flatpak backend, removes the previous GNOME Software frontend, applies the WhiteSur profile, and restarts the existing XFCE desktop. To install Discover without refreshing the desktop, run:
+The refresh installs Discover and its Flatpak backend, removes any legacy software-store frontend, applies the WhiteSur profile, and restarts the existing XFCE desktop. To install Discover without refreshing the desktop, run:
 
 ```bash
 bash scripts/install-discover.sh
@@ -32,7 +32,7 @@ It does not add Debian testing/unstable repositories, install KDE Plasma, or rep
 
 ## PRoot service handling
 
-A normal PackageKit system service expects a system D-Bus. The existing desktop previously started only a per-user D-Bus session, which is why GNOME Software reported that it could not connect to the system bus.
+A normal PackageKit system service expects a system D-Bus. The existing desktop previously started only a per-user D-Bus session, which is why the software store could not connect to the system bus.
 
 The updated `start-desktop.sh` starts a temporary system D-Bus inside the same isolated root PRoot session that runs XFCE, verifies that the bus responds, and then drops privileges to the unprivileged `prime` account to start the desktop. The bus is tied to the desktop session and is terminated when that session exits. It does not start systemd, expose Termux home/storage, or change PRoot isolation.
 
