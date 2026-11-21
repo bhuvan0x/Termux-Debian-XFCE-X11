@@ -35,7 +35,7 @@ Build a polished Debian + XFCE desktop on an Android tablet or Chromebook with T
 | Start here | What you'll find |
 |---|---|
 | [Quick installation](#quick-installation) | Set up Termux, Debian and the desktop |
-| [Daily controls](#daily-controls) | Start and stop the complete desktop |
+| [Daily controls](#daily-controls) | Start and stop the complete desktop |\n| [Complete uninstall](#complete-uninstall) | Remove the Debian workstation safely |\n| [Contributing](CONTRIBUTING.md) | Improve the project and collaborate |
 | [Included applications](#included-applications) | Explore the base app bundle and optional Office suite |
 | [Termux:Widget](#termuxwidget-controls) | Home-screen shortcuts and maintenance tasks |
 | [Security & maintenance](#security-hardening-and-maintenance) | Isolation, hardening, audits and scanning |
@@ -326,7 +326,7 @@ PrimeBook is released under the **MIT License**. You are welcome to use it, fork
 
 Have an improvement? Open an Issue or submit a Pull Request. If you would like to collaborate or build something together, reach out to the maintainer on GitHub: **[@bhuvan0x](https://github.com/bhuvan0x)**. Contributions, constructive feedback, and independent forks are welcome.
 
-Security reports should be handled privately; please read [SECURITY.md](SECURITY.md) before reporting a vulnerability.
+Security reports should be handled privately; please read [SECURITY.md](SECURITY.md) before reporting a vulnerability. The security policy explains responsible disclosure and project security boundaries; it is **not a second software license**. The [MIT License](LICENSE) is the project's software license. See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 
 > **Repository visibility:** this GitHub repository is currently private. The MIT license is included, but public access requires the owner to change the repository visibility to Public in GitHub Settings. Do not assume the source is publicly accessible until that change is made.
 
