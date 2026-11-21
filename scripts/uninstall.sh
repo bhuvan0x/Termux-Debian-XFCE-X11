@@ -124,7 +124,7 @@ if [ "$REMOVE_REPO" -eq 1 ]; then
   echo
   echo "== Removing repository clone =="
   case "$REPO_DIR" in
-    "$HOME"/*/Termux-Debian-X11)
+    "$HOME/Termux-Debian-X11"|"$HOME"/*/Termux-Debian-X11)
       rm -rf -- "$REPO_DIR"
       echo "Repository clone removed."
       ;;
