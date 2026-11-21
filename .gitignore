@@ -1,6 +1,41 @@
-# Local runtime state
+# Local runtime state and diagnostics
 *.log
 *.pid
 *.sock
+*.tmp
+*-diagnostic.txt
+diagnostic-*.txt
+
+# Credentials and secret material (keep example templates explicitly)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.p7b
+*.p7c
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+.ssh/
+.netrc
+.npmrc
+.pypirc
+.git-credentials
+credentials.json
+secrets.json
+
+# Local backups, editor files and OS metadata
+*.bak
+*.backup
+*.old
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
