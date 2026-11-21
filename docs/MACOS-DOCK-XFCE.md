@@ -50,4 +50,4 @@ XFCE's built-in panel does not implement macOS Dock's animated icon magnificatio
 
 ## Scope
 
-The script does not replace XFCE, install GNOME Shell or Plank, alter the top panel, delete/reorder launchers, restart Termux:X11, or change audio, CUPS, PRoot isolation or security settings.
+The script does not replace XFCE, install Plank, alter the top panel, delete/reorder launchers, restart Termux:X11, or change audio, CUPS, PRoot isolation or security settings.
