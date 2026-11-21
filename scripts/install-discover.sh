@@ -25,7 +25,7 @@ else
   echo "WARNING: Flathub could not be configured. Discover and APT support remain installed."
 fi
 
-# Install Discover before removing the previous GNOME storefront. Shared
+# Install Discover before removing any legacy software-store frontend. Shared
 # PackageKit and Flatpak dependencies are intentionally retained.
 if dpkg-query -W -f='${Status}' gnome-software 2>/dev/null | grep -q 'install ok installed'; then
   apt-get purge -y gnome-software gnome-software-plugin-deb gnome-software-plugin-flatpak || true
