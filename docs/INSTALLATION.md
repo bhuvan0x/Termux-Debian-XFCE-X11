@@ -240,7 +240,7 @@ It downloads Microsoft's official stable ARM64 Debian package, checks that the p
 
 The launcher uses `--no-sandbox --disable-gpu` because Chromium/Electron sandboxing and GPU acceleration can fail under PRoot/Termux:X11. The `--no-sandbox` flag weakens renderer isolation; this workaround is intended only for this trusted local PRoot desktop. Do not download or install an `amd64` package on ARM64.
 
-The VS Code keyring prompt is separate from installation. You can cancel it and use the editor, but secure credential storage and sign-in may need GNOME Keyring setup later.
+The VS Code keyring prompt is separate from installation. You can cancel it and use the editor, but secure credential storage and sign-in may need a desktop keyring service configured later.
 
 ## 9. Update
 
