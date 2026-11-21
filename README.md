@@ -257,7 +257,7 @@ Install KDE Discover without installing KDE Plasma or replacing XFCE:
 bash scripts/install-discover.sh
 ```
 
-The installer uses Debian 13 ARM64 packages, adds Discover's Flatpak backend and a per-user Flathub remote, and replaces the previous GNOME Software launcher. It does not add testing/unstable repositories or relax Flatpak sandboxing.
+The installer uses Debian 13 ARM64 packages, adds Discover's Flatpak backend and a per-user Flathub remote, and uses KDE Discover as the software storefront. It does not add testing/unstable repositories or relax Flatpak sandboxing.
 
 The desktop startup now launches a temporary system D-Bus inside the same isolated root PRoot session as XFCE, verifies the bus, and runs the graphical desktop as the unprivileged `prime` user. The bus exits with the desktop; no systemd service or broad Android storage bind is added.
 
@@ -283,7 +283,7 @@ Run it from Termux. It downloads the official `linux-deb-arm64` package, verifie
 --no-sandbox --disable-gpu
 ```
 
-These options are a PRoot compatibility workaround. `--no-sandbox` weakens Chromium's normal renderer isolation; use this only in the trusted local PRoot desktop, not as a general Linux desktop recommendation. The launcher override is stored under `/home/prime/.local/share/applications` and does not modify the package-owned desktop files. The VS Code keyring prompt is separate from installation; credential storage may need GNOME Keyring configuration later.
+These options are a PRoot compatibility workaround. `--no-sandbox` weakens Chromium's normal renderer isolation; use this only in the trusted local PRoot desktop, not as a general Linux desktop recommendation. The launcher override is stored under `/home/prime/.local/share/applications` and does not modify the package-owned desktop files. The VS Code keyring prompt is separate from installation; credential storage may require a desktop keyring service.
 
 Do not install an `amd64` VS Code package on this ARM64 Debian environment. GDebi is included for local `.deb` installation and dependency resolution, but it cannot convert an `amd64` package into an ARM64 package. Check a package before installing it with `dpkg-deb -f package.deb Architecture`.
 
@@ -458,7 +458,7 @@ One command applies the whole profile:
 bash scripts/apply-whitesur.sh
 ```
 
-Run it from Termux after `git pull --ff-only`. The installer restarts the existing desktop once during setup. No GNOME desktop, GNOME Shell extensions, Plank, Conky or Picom is installed. Audio, printer, PRoot isolation and security configuration are left untouched.
+Run it from Termux after `git pull --ff-only`. The installer restarts the existing desktop once during setup. No alternate desktop environment, Plank, Conky or Picom is installed. Audio, printer, PRoot isolation and security configuration are left untouched.
 
 For details, troubleshooting and rollback, see [docs/WHITESUR-XFCE.md](docs/WHITESUR-XFCE.md).
  
@@ -512,7 +512,7 @@ Keyboard shortcuts:
 
 The script detects the live XFCE D-Bus session and stops with an error if it cannot reach it; it does not write settings to a private temporary D-Bus session. It does not delete or reorder panel items.
 
-**XFCE limitation:** the built-in panel does not provide macOS-style animated icon magnification or a true glass floating capsule. This profile uses native XFCE panel capabilities for a lightweight, stable dock. It does not install Plank, GNOME Shell or a compositor.
+**XFCE limitation:** the built-in panel does not provide macOS-style animated icon magnification or a true glass floating capsule. This profile uses native XFCE panel capabilities for a lightweight, stable dock. It does not install Plank or a compositor.
 
 
 ## Wallpaper Control Centre
