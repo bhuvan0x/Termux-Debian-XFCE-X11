@@ -16,7 +16,7 @@ if command -v git >/dev/null 2>&1 && [ -d "$REPO_DIR/.git" ]; then
 fi
 
 # Install short terminal commands from any working directory.
-for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh"; do
+for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh" "uninstall-primebook:scripts/uninstall.sh"; do
   name="${spec%%:*}"
   script="${spec#*:}"
   cat > "$PREFIX/bin/$name" <<EOF
