@@ -31,21 +31,27 @@ if command -v git >/dev/null 2>&1 && [ -d "$REPO_DIR/.git" ]; then
   echo "Configured repository-local Git core.filemode=false."
 fi
 
-# Provide short terminal commands as well as the two Termux:Widget buttons.
+# Install wrappers without overwriting unrelated commands in Termux.
+printf -v REPO_Q '%q' "$REPO_DIR"
 for spec in "start-all:scripts/start-all.sh" "stop-all:scripts/stop-all.sh" "uninstall-primebook:scripts/uninstall.sh"; do
   name="${spec%%:*}"
   script="${spec#*:}"
-  cat > "$PREFIX/bin/$name" <<EOF
+  target="$PREFIX/bin/$name"
+  if [ -e "$target" ] && ! grep -Fq -- "$REPO_DIR" "$target"; then
+    echo "Refusing to overwrite existing non-PrimeBook command: $target" >&2
+    exit 3
+  fi
+  cat > "$target" <<EOF
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
-REPO_DIR=$REPO_DIR
+REPO_DIR=$REPO_Q
 if [ ! -f "\$REPO_DIR/$script" ]; then
   echo "Missing workstation script: \$REPO_DIR/$script" >&2
   exit 1
 fi
 exec bash "\$REPO_DIR/$script"
 EOF
-  chmod 700 "$PREFIX/bin/$name"
+  chmod 700 "$target"
 done
 hash -r 2>/dev/null || true
 
