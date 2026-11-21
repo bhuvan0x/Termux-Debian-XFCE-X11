@@ -245,7 +245,7 @@ The installer writes only to prime's home directory and leaves package-owned lau
 
 ## VS Code asks for a keyring password
 
-This is the desktop credential keyring, not a VS Code activation or license password. You can cancel the prompt and use the editor; secure credential storage and sign-in may not work until GNOME Keyring is configured. Do not enter your Android lock-screen password unless it is also the keyring password you intentionally created.
+This is the desktop credential keyring, not a VS Code activation or license password. You can cancel the prompt and use the editor; secure credential storage and sign-in may not work until a desktop keyring service is configured. Do not enter your Android lock-screen password unless it is also the keyring password you intentionally created.
 
 ## Firefox or VLC refuses to start as root
 
